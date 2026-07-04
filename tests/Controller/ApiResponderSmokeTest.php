@@ -32,12 +32,18 @@ namespace {
     if ($badRequest->getStatus() !== Http::STATUS_BAD_REQUEST || $badRequest->getData()['message'] !== 'Ungueltig') {
         throw new \RuntimeException('InvalidArgumentException should become HTTP 400.');
     }
+    if ($logged !== []) {
+        throw new \RuntimeException('Client errors should not be logged as server errors.');
+    }
 
     $forbidden = $responder->respond(static function (): array {
         throw new \DomainException('Verboten');
     }, $logger, 'authorize');
     if ($forbidden->getStatus() !== Http::STATUS_FORBIDDEN || $forbidden->getData()['message'] !== 'Verboten') {
         throw new \RuntimeException('DomainException should become HTTP 403.');
+    }
+    if ($logged !== []) {
+        throw new \RuntimeException('Forbidden errors should not be logged as server errors.');
     }
 
     $serverError = $responder->respond(static function (): array {
@@ -48,6 +54,11 @@ namespace {
     }
     if ($logged !== [['store', \RuntimeException::class, ['id' => 7]]]) {
         throw new \RuntimeException('Unexpected logged error context.');
+    }
+
+    $directError = $responder->error('Direkte Meldung', Http::STATUS_BAD_REQUEST);
+    if ($directError->getData() !== ['ok' => false, 'message' => 'Direkte Meldung'] || $directError->getStatus() !== Http::STATUS_BAD_REQUEST) {
+        throw new \RuntimeException('Direct error responses should keep the shared API shape.');
     }
 
     echo 'ApiResponder smoke tests passed' . PHP_EOL;

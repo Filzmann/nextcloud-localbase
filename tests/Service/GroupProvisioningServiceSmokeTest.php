@@ -23,6 +23,7 @@ namespace {
 
     $groupManager = new class(['existing']) implements IGroupManager {
         public array $groups = [];
+        public array $createdCalls = [];
 
         public function __construct(array $groups) {
             foreach ($groups as $group) {
@@ -35,6 +36,7 @@ namespace {
         }
 
         public function createGroup($gid): object {
+            $this->createdCalls[] = $gid;
             $this->groups[$gid] = true;
 
             return new \stdClass();
@@ -52,6 +54,48 @@ namespace {
         [],
         $service->ensureGroups(['existing', 'first', 'second']),
         'Group provisioning should be idempotent.'
+    );
+    $checkSame(
+        ['first', 'second'],
+        $groupManager->createdCalls,
+        'Existing groups should not be created again.'
+    );
+
+    $failingGroupManager = new class implements IGroupManager {
+        public function groupExists($gid): bool {
+            return false;
+        }
+
+        public function createGroup($gid): ?object {
+            return null;
+        }
+    };
+    try {
+        (new GroupProvisioningService($failingGroupManager))->ensureGroups(['missing']);
+        throw new \RuntimeException('Failed group creation should throw.');
+    } catch (\RuntimeException $e) {
+        if (!str_contains($e->getMessage(), 'missing')) {
+            throw new \RuntimeException('Failed group creation should mention the group name.');
+        }
+    }
+
+    $eventualGroupManager = new class implements IGroupManager {
+        private bool $created = false;
+
+        public function groupExists($gid): bool {
+            return $this->created;
+        }
+
+        public function createGroup($gid): ?object {
+            $this->created = true;
+
+            return null;
+        }
+    };
+    $checkSame(
+        [],
+        (new GroupProvisioningService($eventualGroupManager))->ensureGroups(['eventual']),
+        'Null create result should be accepted when the group exists afterwards.'
     );
 
     echo 'GroupProvisioningService smoke tests passed' . PHP_EOL;
