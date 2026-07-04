@@ -35,6 +35,29 @@ async function run() {
     assert.strictEqual(seen.options.headers['X-Test'], '1');
     assert.strictEqual(client.encode('a b'), 'a%20b');
 
+    const defaultSeen = {};
+    global.OC = {
+        requestToken: 'default-token',
+        generateUrl(path) {
+            return `/oc${path}`;
+        }
+    };
+    global.window.fetch = async (url, options) => {
+        defaultSeen.url = url;
+        defaultSeen.options = options;
+
+        return {
+            ok: true,
+            status: 200,
+            text: async () => JSON.stringify({ defaultClient: true })
+        };
+    };
+
+    const defaultClient = new ApiClient({ appId: 'demo' });
+    assert.deepStrictEqual(await defaultClient.request('/api/default'), { defaultClient: true });
+    assert.strictEqual(defaultSeen.url, '/oc/apps/demo/api/default');
+    assert.strictEqual(defaultSeen.options.headers.requesttoken, 'default-token');
+
     const failingClient = new ApiClient({
         appId: 'demo',
         generateUrl: (path) => path,
