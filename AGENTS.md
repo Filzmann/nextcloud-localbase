@@ -14,6 +14,7 @@ LocalBase enthaelt nur app-uebergreifende, fachlich neutrale Basisbausteine, die
 
 Aktuell enthalten:
 
+- PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
@@ -47,9 +48,11 @@ Aktuell enthalten:
 Wichtige lokale Pruefungen:
 
     php -l lib/AppInfo/Application.php
+    php -l lib/Controller/ApiResponder.php
     php -l lib/Model/ModelApiTrait.php
     php -l lib/Service/AppLogger.php
     php -l lib/Service/GroupProvisioningService.php
+    php tests/Controller/ApiResponderSmokeTest.php
     php tests/Service/AppLoggerSmokeTest.php
     php tests/Service/GroupProvisioningServiceSmokeTest.php
     node --check js/api/api-client.js
