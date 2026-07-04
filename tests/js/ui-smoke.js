@@ -28,6 +28,10 @@ assert.strictEqual(
     'API kaputt'
 );
 assert.strictEqual(
+    window.LocalBase.ui.errorMessage({ data: { message: '   ' }, message: 'HTTP 400' }, 'Fallback'),
+    'HTTP 400'
+);
+assert.strictEqual(
     window.LocalBase.ui.errorMessage('', 'Fallback'),
     'Fallback'
 );
@@ -69,5 +73,21 @@ typedNotice.clear();
 assert.strictEqual(noticeElement.textContent, '');
 assert.strictEqual(noticeElement.hidden, true);
 assert.strictEqual(noticeElement.className, 'notice');
+
+const directElement = { textContent: '', hidden: true };
+const directNotice = new window.LocalBase.ui.Notice(directElement);
+directNotice.show('Direkt');
+assert.strictEqual(directElement.textContent, 'Direkt');
+assert.strictEqual(directElement.hidden, false);
+directNotice.clear();
+assert.strictEqual(directElement.textContent, '');
+assert.strictEqual(directElement.hidden, true);
+
+const missingNotice = new window.LocalBase.ui.Notice('missing-notice', {
+    baseClass: 'notice',
+    typeClassPrefix: 'notice-'
+});
+assert.doesNotThrow(() => missingNotice.error(new Error('Kaputt'), 'Fallback'));
+assert.doesNotThrow(() => missingNotice.clear());
 
 console.log('LocalBase UI smoke test passed.');
