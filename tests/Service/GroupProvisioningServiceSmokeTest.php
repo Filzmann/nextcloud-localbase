@@ -7,19 +7,12 @@ namespace {
         eval('namespace OCP; interface IGroupManager { public function groupExists($gid); public function createGroup($gid); }');
     }
 
+    require __DIR__ . '/../helpers.php';
     require __DIR__ . '/../../lib/Service/GroupProvisioningService.php';
 
     use OCA\LocalBase\Service\GroupProvisioningService;
     use OCP\IGroupManager;
-
-    $checkSame = static function ($expected, $actual, string $message): void {
-        if ($expected !== $actual) {
-            fwrite(STDERR, $message . PHP_EOL);
-            fwrite(STDERR, 'Expected: ' . var_export($expected, true) . PHP_EOL);
-            fwrite(STDERR, 'Actual:   ' . var_export($actual, true) . PHP_EOL);
-            exit(1);
-        }
-    };
+    use function OCA\LocalBase\Tests\assertSameValue;
 
     $groupManager = new class(['existing']) implements IGroupManager {
         public array $groups = [];
@@ -45,17 +38,17 @@ namespace {
 
     $service = new GroupProvisioningService($groupManager);
 
-    $checkSame(
+    assertSameValue(
         ['first', 'second'],
         $service->ensureGroups(['existing', 'first', 'second']),
         'Only missing groups should be created.'
     );
-    $checkSame(
+    assertSameValue(
         [],
         $service->ensureGroups(['existing', 'first', 'second']),
         'Group provisioning should be idempotent.'
     );
-    $checkSame(
+    assertSameValue(
         ['first', 'second'],
         $groupManager->createdCalls,
         'Existing groups should not be created again.'
@@ -92,7 +85,7 @@ namespace {
             return null;
         }
     };
-    $checkSame(
+    assertSameValue(
         [],
         (new GroupProvisioningService($eventualGroupManager))->ensureGroups(['eventual']),
         'Null create result should be accepted when the group exists afterwards.'
