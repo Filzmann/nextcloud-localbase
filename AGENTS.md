@@ -18,6 +18,7 @@ Aktuell enthalten:
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
+- JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.
 - JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc` und `window.LocalBase.ui.Notice`.
 
 ## Git- und Arbeitsregeln
@@ -50,8 +51,10 @@ Wichtige lokale Pruefungen:
     php tests/Service/GroupProvisioningServiceSmokeTest.php
     node --check js/api/api-client.js
     node --check js/models/model.js
+    node --check js/repositories/repository.js
     node --check js/ui/ui.js
     node tests/js/api-client-smoke.js
+    node tests/js/repository-smoke.js
     node tests/js/ui-smoke.js
 
 ## DDEV
