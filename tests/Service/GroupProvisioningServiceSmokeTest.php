@@ -13,6 +13,7 @@ namespace {
     use OCA\LocalBase\Service\GroupProvisioningService;
     use OCP\IGroupManager;
     use function OCA\LocalBase\Tests\assertSameValue;
+    use function OCA\LocalBase\Tests\assertThrows;
 
     $groupManager = new class(['existing']) implements IGroupManager {
         public array $groups = [];
@@ -53,6 +54,11 @@ namespace {
         $groupManager->createdCalls,
         'Existing groups should not be created again.'
     );
+    assertSameValue(
+        [],
+        $service->ensureGroups(['second', 'second']),
+        'Duplicate group names should not trigger additional creations after the first run.'
+    );
 
     $failingGroupManager = new class implements IGroupManager {
         public function groupExists($gid): bool {
@@ -63,13 +69,13 @@ namespace {
             return null;
         }
     };
-    try {
-        (new GroupProvisioningService($failingGroupManager))->ensureGroups(['missing']);
-        throw new \RuntimeException('Failed group creation should throw.');
-    } catch (\RuntimeException $e) {
-        if (!str_contains($e->getMessage(), 'missing')) {
-            throw new \RuntimeException('Failed group creation should mention the group name.');
-        }
+    $failedCreation = assertThrows(
+        static fn() => (new GroupProvisioningService($failingGroupManager))->ensureGroups(['missing']),
+        \RuntimeException::class,
+        'Failed group creation should throw.'
+    );
+    if (!str_contains($failedCreation->getMessage(), 'missing')) {
+        throw new \RuntimeException('Failed group creation should mention the group name.');
     }
 
     $eventualGroupManager = new class implements IGroupManager {
