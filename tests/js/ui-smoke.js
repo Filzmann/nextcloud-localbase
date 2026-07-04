@@ -19,6 +19,22 @@ assert.strictEqual(
     window.LocalBase.ui.esc('<strong title="x">Tom & Jerry\'s</strong>'),
     '&lt;strong title=&quot;x&quot;&gt;Tom &amp; Jerry&#039;s&lt;/strong&gt;'
 );
+assert.strictEqual(
+    window.LocalBase.ui.errorMessage(new Error('Kaputt'), 'Fallback'),
+    'Kaputt'
+);
+assert.strictEqual(
+    window.LocalBase.ui.errorMessage({ data: { message: 'API kaputt' }, message: 'HTTP 400' }, 'Fallback'),
+    'API kaputt'
+);
+assert.strictEqual(
+    window.LocalBase.ui.errorMessage('', 'Fallback'),
+    'Fallback'
+);
+assert.strictEqual(
+    window.LocalBase.ui.errorMessage(null, 'Fallback'),
+    'Fallback'
+);
 
 const noticeElement = { textContent: '', hidden: true, className: 'notice' };
 elements.set('notice', noticeElement);

@@ -21,7 +21,7 @@ Aktuell enthalten:
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
 - JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.
-- JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc` und `window.LocalBase.ui.Notice`.
+- JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc`, `window.LocalBase.ui.errorMessage` und `window.LocalBase.ui.Notice`.
 
 ## Git- und Arbeitsregeln
 

@@ -13,6 +13,34 @@
         }[char]));
     }
 
+    function textOrNull(value) {
+        const text = String(value || '').trim();
+
+        return text === '' ? null : text;
+    }
+
+    function errorMessage(error, fallback = 'Die Aktion konnte nicht ausgefuehrt werden.') {
+        if (typeof error === 'string') {
+            return textOrNull(error) || fallback;
+        }
+
+        if (error && error.data) {
+            const dataMessage = textOrNull(error.data.message);
+            if (dataMessage) {
+                return dataMessage;
+            }
+        }
+
+        if (error) {
+            const message = textOrNull(error.message);
+            if (message) {
+                return message;
+            }
+        }
+
+        return fallback;
+    }
+
     class Notice {
         constructor(target, options = {}) {
             this.target = target;
@@ -50,5 +78,6 @@
     window.LocalBase.ui = window.LocalBase.ui || {};
     window.LocalBase.ui.Notice = Notice;
     window.LocalBase.ui.byId = byId;
+    window.LocalBase.ui.errorMessage = errorMessage;
     window.LocalBase.ui.esc = esc;
 })();
