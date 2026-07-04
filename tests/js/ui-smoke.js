@@ -20,4 +20,22 @@ assert.strictEqual(
     '&lt;strong title=&quot;x&quot;&gt;Tom &amp; Jerry&#039;s&lt;/strong&gt;'
 );
 
+const noticeElement = { textContent: '', hidden: true, className: 'notice' };
+elements.set('notice', noticeElement);
+
+const typedNotice = new window.LocalBase.ui.Notice('notice', {
+    baseClass: 'notice',
+    typeClassPrefix: 'notice-'
+});
+
+typedNotice.show('Gespeichert', 'success');
+assert.strictEqual(noticeElement.textContent, 'Gespeichert');
+assert.strictEqual(noticeElement.hidden, false);
+assert.strictEqual(noticeElement.className, 'notice notice-success');
+
+typedNotice.clear();
+assert.strictEqual(noticeElement.textContent, '');
+assert.strictEqual(noticeElement.hidden, true);
+assert.strictEqual(noticeElement.className, 'notice');
+
 console.log('LocalBase UI smoke test passed.');

@@ -18,7 +18,7 @@ Aktuell enthalten:
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
-- JavaScript-UI-Primitives `window.LocalBase.ui.byId` und `window.LocalBase.ui.esc`.
+- JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc` und `window.LocalBase.ui.Notice`.
 
 ## Git- und Arbeitsregeln
 
