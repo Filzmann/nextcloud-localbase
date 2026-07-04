@@ -15,6 +15,7 @@ LocalBase enthaelt nur app-uebergreifende, fachlich neutrale Basisbausteine, die
 Aktuell enthalten:
 
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
+- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
 - JavaScript-UI-Primitives `window.LocalBase.ui.byId` und `window.LocalBase.ui.esc`.
@@ -45,6 +46,8 @@ Wichtige lokale Pruefungen:
 
     php -l lib/AppInfo/Application.php
     php -l lib/Model/ModelApiTrait.php
+    php -l lib/Service/GroupProvisioningService.php
+    php tests/Service/GroupProvisioningServiceSmokeTest.php
     node --check js/api/api-client.js
     node --check js/models/model.js
     node --check js/ui/ui.js
