@@ -16,6 +16,7 @@ Aktuell enthalten:
 
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
+- JavaScript-API-Client `window.LocalBase.api.ApiClient`.
 
 ## Git- und Arbeitsregeln
 
@@ -33,6 +34,19 @@ Aktuell enthalten:
 - Modelle/DTOs werden in PHP und JavaScript einheitlich angefasst: `get(...)`, `get_all([...])`, `toArray()` und `save()`.
 - Nicht persistierbare DTOs duerfen `save()` bewusst mit klarer Fehlermeldung blockieren.
 - Neue `fromApi`-/`toApi`-Kompatibilitaetsaliase werden nicht eingefuehrt.
+- Gemeinsame API-Helfer kapseln `fetch`, `OC.generateUrl`, JSON-Parsing, CSRF-Token und Fehlerobjekte; App-spezifische Module bleiben nur duenne Adapter.
+- Gemeinsame UI-Helfer oder Komponenten werden nur aufgenommen, wenn mindestens zwei Apps dieselbe Semantik, dieselben Zustaende, dieselben Events und dieselben Accessibility-Anforderungen teilen.
+- LocalBase darf kleine UI-Primitives wie Escaping, Notices, Button-Helfer oder Formatierer bereitstellen; fachliche Komponenten und app-spezifisches Markup bleiben in den App-Repos.
+
+## Tests
+
+Wichtige lokale Pruefungen:
+
+    php -l lib/AppInfo/Application.php
+    php -l lib/Model/ModelApiTrait.php
+    node --check js/api/api-client.js
+    node --check js/models/model.js
+    node tests/js/api-client-smoke.js
 
 ## DDEV
 
