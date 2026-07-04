@@ -26,6 +26,12 @@ namespace {
         throw new \RuntimeException('Successful responses should wrap callback data.');
     }
 
+    $explicitResponse = new \OCP\AppFramework\Http\DataResponse(['direct' => true], 202);
+    $preservedResponse = $responder->respond(static fn(): \OCP\AppFramework\Http\DataResponse => $explicitResponse, $logger, 'direct');
+    if ($preservedResponse !== $explicitResponse || $preservedResponse->getStatus() !== 202) {
+        throw new \RuntimeException('Explicit DataResponse callback results should be preserved.');
+    }
+
     $badRequest = $responder->respond(static function (): array {
         throw new \InvalidArgumentException('Ungueltig');
     }, $logger, 'validate');

@@ -17,7 +17,9 @@ class ApiResponder {
         string $serverErrorMessage = 'Die Aktion konnte nicht ausgefuehrt werden. Details stehen im Nextcloud-Log.'
     ): DataResponse {
         try {
-            return new DataResponse($callback());
+            $response = $callback();
+
+            return $response instanceof DataResponse ? $response : new DataResponse($response);
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), Http::STATUS_BAD_REQUEST);
         } catch (\DomainException $e) {
