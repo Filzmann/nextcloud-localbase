@@ -36,5 +36,6 @@ assert.deepStrictEqual(functionRepository.post('/api/function', { value: 1 }), {
     path: '/api/function',
     options: { method: 'POST', body: '{"value":1}' }
 });
+assert.strictEqual(functionRepository.encode('A B'), 'A%20B');
 
 console.log('LocalBase repository smoke test passed.');

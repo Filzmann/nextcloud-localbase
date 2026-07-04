@@ -53,6 +53,54 @@ async function run() {
             && error.status === 422
             && error.data.message === 'Nicht gut'
     );
+
+    const emptyResponseClient = new ApiClient({
+        basePath: '/custom/base',
+        generateUrl: (path) => path,
+        requestToken: () => 'token-456',
+        fetcher: async (url) => {
+            assert.strictEqual(url, '/custom/base/api/empty');
+
+            return {
+                ok: true,
+                status: 204,
+                text: async () => ''
+            };
+        }
+    });
+    assert.deepStrictEqual(await emptyResponseClient.request('/api/empty'), {});
+
+    const rawResponseClient = new ApiClient({
+        appId: 'demo',
+        generateUrl: (path) => path,
+        requestToken: () => 'token-789',
+        fetcher: async () => ({
+            ok: true,
+            status: 200,
+            text: async () => '<html>Not JSON</html>'
+        })
+    });
+    assert.deepStrictEqual(
+        await rawResponseClient.request('/api/raw'),
+        { raw: '<html>Not JSON</html>' }
+    );
+
+    const defaultErrorClient = new ApiClient({
+        appId: 'demo',
+        generateUrl: (path) => path,
+        requestToken: () => 'token-999',
+        fetcher: async () => ({
+            ok: false,
+            status: 500,
+            text: async () => ''
+        })
+    });
+    await assert.rejects(
+        () => defaultErrorClient.request('/api/fail-empty'),
+        (error) => error.message === 'HTTP 500'
+            && error.status === 500
+            && Object.keys(error.data).length === 0
+    );
 }
 
 run()
