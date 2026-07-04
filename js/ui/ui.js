@@ -69,6 +69,22 @@
             }
         }
 
+        info(message) {
+            this.show(message, 'info');
+        }
+
+        success(message) {
+            this.show(message, 'success');
+        }
+
+        warning(message) {
+            this.show(message, 'warning');
+        }
+
+        error(error, fallback = 'Die Aktion konnte nicht ausgefuehrt werden.') {
+            this.show(errorMessage(error, fallback), 'error');
+        }
+
         clear() {
             this.show('');
         }

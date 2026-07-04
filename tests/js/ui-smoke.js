@@ -49,6 +49,22 @@ assert.strictEqual(noticeElement.textContent, 'Gespeichert');
 assert.strictEqual(noticeElement.hidden, false);
 assert.strictEqual(noticeElement.className, 'notice notice-success');
 
+typedNotice.info('Bereit');
+assert.strictEqual(noticeElement.textContent, 'Bereit');
+assert.strictEqual(noticeElement.className, 'notice notice-info');
+
+typedNotice.success('Erledigt');
+assert.strictEqual(noticeElement.textContent, 'Erledigt');
+assert.strictEqual(noticeElement.className, 'notice notice-success');
+
+typedNotice.warning('Achtung');
+assert.strictEqual(noticeElement.textContent, 'Achtung');
+assert.strictEqual(noticeElement.className, 'notice notice-warning');
+
+typedNotice.error({ data: { message: 'API kaputt' }, message: 'HTTP 500' }, 'Fallback');
+assert.strictEqual(noticeElement.textContent, 'API kaputt');
+assert.strictEqual(noticeElement.className, 'notice notice-error');
+
 typedNotice.clear();
 assert.strictEqual(noticeElement.textContent, '');
 assert.strictEqual(noticeElement.hidden, true);
