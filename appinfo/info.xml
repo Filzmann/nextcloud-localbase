@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>localbase</id>
+    <name>Lokale Nextcloud-Basis</name>
+    <summary>Gemeinsame lokale Basisbausteine fuer eigene Nextcloud-Apps.</summary>
+    <description>Stellt kleine, fachlich neutrale PHP- und JavaScript-Basisbausteine fuer eigene lokale Nextcloud-Apps bereit.</description>
+    <version>0.1.0</version>
+    <licence>agpl</licence>
+    <author>Simon / ChatGPT-Prototyp</author>
+    <namespace>LocalBase</namespace>
+    <category>tools</category>
+    <bugs>https://example.invalid</bugs>
+    <dependencies>
+        <nextcloud min-version="29" max-version="35"/>
+    </dependencies>
+</info>
