@@ -45,7 +45,21 @@ Aktuell enthalten:
 
 ## Tests
 
+LocalBase ist Multiplikator-Code. Oeffentliche Vertraege muessen bei Aenderungen durch passende Tests abgesichert werden, bevor darauf aufbauende Apps weiter refaktoriert werden.
+
+- Vor groesseren Refactorings zuerst Charakterisierungstests fuer das bestehende gewuenschte Verhalten schreiben oder aktualisieren.
+- Bei Aenderungen an PHP-Bausteinen `php tests/run.php` ausfuehren.
+- Bei Aenderungen an JavaScript-Bausteinen `node tests/run-js.mjs` ausfuehren.
+- Bei Aenderungen an Controller-/DI-nahen Klassen zusaetzlich einen gezielten DDEV-DI-Check ausfuehren.
+- Nach LocalBase-Aenderungen die betroffenen App-Contract-/Smoke-Tests laufen lassen.
+- PHPUnit/Vitest/Jest erst einfuehren, wenn die einfachen Testlaeufer, Assertion-Helfer, Mocks oder Fixtures selbst spuerbar dupliziert werden.
+
 Wichtige lokale Pruefungen:
+
+    php tests/run.php
+    node tests/run-js.mjs
+
+Einzelne Checks, die durch die Testlaeufer gebuendelt werden:
 
     php -l lib/AppInfo/Application.php
     php -l lib/Controller/ApiResponder.php
