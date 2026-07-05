@@ -19,6 +19,7 @@ assert.strictEqual(classList.toString(), 'two three');
 const input = new FakeElement('input');
 input.addEventListener('change', () => 'changed');
 input.setAttribute('aria-label', 'Name');
+input.setAttribute('data-top-id', '7');
 input.focus();
 input.select();
 input.queryResults.set('.single', new FakeElement('single'));
@@ -26,16 +27,23 @@ input.queryAllResults.set('.many', [new FakeElement('many')]);
 
 assert.strictEqual(input.listeners.change(), 'changed');
 assert.strictEqual(input.getAttribute('aria-label'), 'Name');
+assert.strictEqual(input.getAttribute('data-top-id'), '7');
+assert.strictEqual(input.dataset.topId, '7');
+assert.strictEqual(input.matches('[data-top-id]'), true);
+assert.strictEqual(input.matches('[data-missing]'), false);
 assert.strictEqual(input.getAttribute('missing'), null);
 assert.strictEqual(input.focused, true);
 assert.strictEqual(input.selected, true);
 assert.strictEqual(input.querySelector('.single').id, 'single');
 assert.strictEqual(input.querySelectorAll('.many').length, 1);
 
-const actionButton = new FakeButton({ action: 'save' });
+const actionButton = new FakeButton({ action: 'save', topId: '9' });
 const viewButton = new FakeButton({ view: 'list' });
 assert.strictEqual(actionButton.closest('button[data-action]'), actionButton);
+assert.strictEqual(actionButton.closest('button[data-action="save"]'), actionButton);
+assert.strictEqual(actionButton.closest('button[data-action="delete"]'), null);
 assert.strictEqual(actionButton.closest('button[data-view]'), null);
+assert.strictEqual(actionButton.getAttribute('data-top-id'), '9');
 assert.strictEqual(viewButton.closest('button[data-view]'), viewButton);
 
 const elements = createElementMap(['root', 'notice']);

@@ -32,9 +32,21 @@ class FakeClassList {
     }
 }
 
+function datasetKeyToAttributeName(key) {
+    return `data-${key.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`)}`;
+}
+
+function attributeNameToDatasetKey(name) {
+    return name.slice(5).replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+}
+
 class FakeElement {
-    constructor(id = '') {
-        this.id = id;
+    constructor(idOrAttributes = '') {
+        const attributes = typeof idOrAttributes === 'object' && idOrAttributes !== null
+            ? idOrAttributes
+            : {};
+
+        this.id = typeof idOrAttributes === 'string' ? idOrAttributes : '';
         this.value = '';
         this.checked = false;
         this.hidden = false;
@@ -51,6 +63,10 @@ class FakeElement {
         this.selected = false;
         this.queryResults = new Map();
         this.queryAllResults = new Map();
+
+        for (const [name, value] of Object.entries(attributes)) {
+            this.setAttribute(name, value);
+        }
     }
 
     addEventListener(type, listener) {
@@ -58,7 +74,12 @@ class FakeElement {
     }
 
     setAttribute(name, value) {
-        this.attributes[name] = String(value);
+        const stringValue = String(value);
+        this.attributes[name] = stringValue;
+
+        if (name.startsWith('data-')) {
+            this.dataset[attributeNameToDatasetKey(name)] = stringValue;
+        }
     }
 
     getAttribute(name) {
@@ -79,6 +100,16 @@ class FakeElement {
         return null;
     }
 
+    matches(selector) {
+        const presenceMatch = selector.match(/^\[([a-zA-Z0-9-]+)\]$/);
+
+        if (presenceMatch) {
+            return this.getAttribute(presenceMatch[1]) !== null;
+        }
+
+        return false;
+    }
+
     querySelector(selector) {
         return this.queryResults.get(selector) || null;
     }
@@ -91,11 +122,19 @@ class FakeElement {
 class FakeButton extends FakeElement {
     constructor(dataset = {}, id = '') {
         super(id);
-        this.dataset = { ...dataset };
+
+        for (const [key, value] of Object.entries(dataset)) {
+            this.setAttribute(datasetKeyToAttributeName(key), value);
+        }
     }
 
     closest(selector) {
         if (selector === 'button[data-action]' && this.dataset.action) {
+            return this;
+        }
+
+        const exactActionMatch = selector.match(/^button\[data-action="([^"]+)"\]$/);
+        if (exactActionMatch && this.dataset.action === exactActionMatch[1]) {
             return this;
         }
 
