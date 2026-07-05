@@ -4,26 +4,15 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Tests;
 
-function assertSameValue(mixed $expected, mixed $actual, string $message): void {
-    if ($expected === $actual) {
-        return;
-    }
+require_once __DIR__ . '/Support/assertions.php';
 
-    throw new \RuntimeException(
-        $message . ' Expected ' . var_export($expected, true) . ', got ' . var_export($actual, true)
-    );
+use function OCA\LocalBase\Tests\Support\assertSameValue as supportAssertSameValue;
+use function OCA\LocalBase\Tests\Support\assertThrows as supportAssertThrows;
+
+function assertSameValue(mixed $expected, mixed $actual, string $message): void {
+    supportAssertSameValue($expected, $actual, $message);
 }
 
 function assertThrows(callable $callback, string $exceptionClass, string $message): \Throwable {
-    try {
-        $callback();
-    } catch (\Throwable $exception) {
-        if ($exception instanceof $exceptionClass) {
-            return $exception;
-        }
-
-        throw new \RuntimeException($message . ' Threw ' . get_class($exception) . ' instead.');
-    }
-
-    throw new \RuntimeException($message . ' No exception was thrown.');
+    return supportAssertThrows($callback, $exceptionClass, $message);
 }

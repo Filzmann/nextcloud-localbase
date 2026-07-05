@@ -55,8 +55,13 @@ foreach ($lintFiles as $file) {
 $testFiles = array_merge(
     collect_php_files($root, ['tests/Controller']),
     collect_php_files($root, ['tests/Model']),
-    collect_php_files($root, ['tests/Service'])
+    collect_php_files($root, ['tests/Service']),
+    collect_php_files($root, ['tests/Support'])
 );
+$testFiles = array_values(array_filter(
+    $testFiles,
+    static fn(string $file): bool => str_ends_with($file, 'Test.php')
+));
 
 foreach ($testFiles as $file) {
     run_test_command($root, ['php', relative_test_path($root, $file)]);
