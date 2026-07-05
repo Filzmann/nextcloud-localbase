@@ -22,6 +22,7 @@ Aktuell enthalten:
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
 - JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.
 - JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc`, `window.LocalBase.ui.errorMessage` und `window.LocalBase.ui.Notice`.
+- Test-Helper fuer app-uebergreifend gleiche, dependency-arme Fakes, Fixtures und Assertions.
 
 ## Git- und Arbeitsregeln
 
@@ -47,7 +48,10 @@ Aktuell enthalten:
 
 LocalBase ist Multiplikator-Code. Oeffentliche Vertraege muessen bei Aenderungen durch passende Tests abgesichert werden, bevor darauf aufbauende Apps weiter refaktoriert werden.
 
+- Tests sind Teil der Architekturarbeit und kein optionaler Nachtrag. Neue oeffentliche LocalBase-Vertraege bekommen eigene Tests, bevor Apps darauf migriert werden.
 - Vor groesseren Refactorings zuerst Charakterisierungstests fuer das bestehende gewuenschte Verhalten schreiben oder aktualisieren.
+- Gemeinsame Test-Helper gehoeren zu den LocalBase-Testvertraegen: Sie bleiben test-only, fachlich neutral, dependency-arm und werden in LocalBase selbst getestet.
+- Apps sollen gemeinsame Test-Helper nutzen, wenn dadurch echte Setup-Duplizierung verschwindet, ohne dass die Lesbarkeit des einzelnen Tests leidet.
 - Bei Aenderungen an PHP-Bausteinen `php tests/run.php` ausfuehren.
 - Bei Aenderungen an JavaScript-Bausteinen `node tests/run-js.mjs` ausfuehren.
 - Bei Aenderungen an Controller-/DI-nahen Klassen zusaetzlich einen gezielten DDEV-DI-Check ausfuehren.

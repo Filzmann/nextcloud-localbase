@@ -49,6 +49,7 @@ for (const file of collectJsFiles('js')) {
 
 for (const file of [
     'tests/js/api-client-smoke.js',
+    'tests/js/fake-dom-smoke.js',
     'tests/js/model-smoke.js',
     'tests/js/repository-smoke.js',
     'tests/js/ui-smoke.js',
