@@ -5,7 +5,7 @@
     <name>Lokale Nextcloud-Basis</name>
     <summary>Gemeinsame lokale Basisbausteine fuer eigene Nextcloud-Apps.</summary>
     <description>Stellt kleine, fachlich neutrale PHP- und JavaScript-Basisbausteine fuer eigene lokale Nextcloud-Apps bereit.</description>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <licence>agpl</licence>
     <author>Simon / ChatGPT-Prototyp</author>
     <namespace>LocalBase</namespace>
