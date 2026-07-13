@@ -2,69 +2,14 @@
 
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
+require_once __DIR__ . '/Support/PhpTestRunner.php';
 
-function collect_php_files(string $root, array $directories): array {
-    $files = [];
+use OCA\LocalBase\Tests\Support\PhpTestRunner;
 
-    foreach ($directories as $directory) {
-        $path = $root . '/' . $directory;
-        if (!is_dir($path)) {
-            continue;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)
-        );
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $files[] = $file->getPathname();
-            }
-        }
-    }
-
-    sort($files);
-
-    return $files;
-}
-
-function relative_test_path(string $root, string $path): string {
-    return str_replace($root . '/', '', $path);
-}
-
-function run_test_command(string $root, array $command): void {
-    $display = implode(' ', array_map('escapeshellarg', $command));
-    echo '> ' . $display . PHP_EOL;
-
-    $previousDirectory = getcwd();
-    chdir($root);
-    passthru($display, $exitCode);
-    chdir($previousDirectory);
-
-    if ($exitCode !== 0) {
-        exit($exitCode);
-    }
-}
-
-$lintFiles = collect_php_files($root, ['appinfo', 'lib', 'tests']);
-foreach ($lintFiles as $file) {
-    run_test_command($root, ['php', '-l', relative_test_path($root, $file)]);
-}
-
-$testFiles = array_merge(
-    collect_php_files($root, ['tests/Controller']),
-    collect_php_files($root, ['tests/Model']),
-    collect_php_files($root, ['tests/Service']),
-    collect_php_files($root, ['tests/Support'])
+PhpTestRunner::run(
+    root: dirname(__DIR__),
+    lintDirectories: ['appinfo', 'lib', 'tests'],
+    testDirectories: ['tests/Controller', 'tests/Model', 'tests/Service', 'tests/Support'],
+    testSuffixes: ['Test.php'],
+    successMessage: 'LocalBase PHP tests passed',
 );
-$testFiles = array_values(array_filter(
-    $testFiles,
-    static fn(string $file): bool => str_ends_with($file, 'Test.php')
-));
-
-foreach ($testFiles as $file) {
-    run_test_command($root, ['php', relative_test_path($root, $file)]);
-}
-
-echo 'LocalBase PHP tests passed' . PHP_EOL;

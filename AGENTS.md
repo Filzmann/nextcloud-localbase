@@ -20,8 +20,9 @@ Aktuell enthalten:
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - Neutraler Kalendervertrag `AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
+- `AdSuiteAdminSettingsService` speichert organisationsweite Peer-Freigaben semantisch nach Rollen und stellt sie AD Kalender, AD Urlaub und der administrativen OrgSuite-Oberfläche gemeinsam bereit.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
-- Die Definition wird zentral in der LocalBase-App-Konfiguration gespeichert und ausschließlich über die administrative Organisationsansicht im Einstellungs-Tab des AD Kalenders bearbeitet.
+- Die Definition und organisationsweite Freigaben werden zentral in der LocalBase-App-Konfiguration gespeichert und ausschließlich im Nextcloud-Adminbereich der OrgSuite bearbeitet.
 - Organisationsansichten für den Urlaubsplan sind dynamisch konfigurierbare Rollen-/Bereichsschnitte. Büro Nordost, West und Süd bleiben eigenständige Ansichten, auch wenn eine Leitung mehrere Bereiche führt.
 - Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
@@ -30,6 +31,7 @@ Aktuell enthalten:
 - JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.
 - JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc`, `window.LocalBase.ui.errorMessage` und `window.LocalBase.ui.Notice`.
 - Test-Helper fuer app-uebergreifend gleiche, dependency-arme Fakes, Fixtures und Assertions.
+- Test-only PHP-Runner `PhpTestRunner`, der Lint- und Smoke-Tests deterministisch sammelt und jeden Test isoliert in einem eigenen PHP-Prozess ausführt.
 
 ## Git- und Arbeitsregeln
 
