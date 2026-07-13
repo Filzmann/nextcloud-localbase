@@ -10,7 +10,7 @@ Nextcloud-App-ID:
 
 ## Zweck
 
-LocalBase enthaelt nur app-uebergreifende, fachlich neutrale Basisbausteine, die in mindestens zwei eigenen Apps semantisch identisch gebraucht werden.
+LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eigenen Apps semantisch identisch gebraucht werden. Der ausdrücklich gemeinsame AD-Organisationsvertrag ist fachlich nicht neutral, gehört aber bewusst hierher, weil Kalender, Urlaub und Assistenzplanung exakt dieselben Gruppen-, Bereichs- und Hierarchieregeln verwenden müssen.
 
 Aktuell enthalten:
 
@@ -19,7 +19,10 @@ Aktuell enthalten:
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - Neutraler Kalendervertrag `AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
-- `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die identische AD-Hierarchie, Buerobereichsgrenzen und freigeschaltete Peer-Rechte fuer Kalender und Urlaubsplanung ab.
+- `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
+- Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
+- Die Definition wird zentral in der LocalBase-App-Konfiguration gespeichert und ausschließlich über die administrative Organisationsansicht im Einstellungs-Tab des AD Kalenders bearbeitet.
+- Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.

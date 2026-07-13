@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 
 /**
- * Zweck: Transportiert eine app-uebergreifend gelesene Abwesenheit ohne Persistenz- oder Rechtewissen.
+ * Zweck: Transportiert eine app-übergreifend gelesene Abwesenheit ohne Persistenz- oder Rechtewissen.
  * Vertrag: Zeitraeume sind halboffen [Beginn, Ende); nur planned und approved sind zulaessig.
  */
 final class AbsenceInterval {
@@ -22,8 +22,8 @@ final class AbsenceInterval {
         private string $status,
         private string $label = 'Urlaub',
     ) {
-        if ($employeeUid === '' || $start >= $end) throw new InvalidArgumentException('Ungueltiger Abwesenheitszeitraum.');
-        if (!in_array($status, [self::STATUS_PLANNED, self::STATUS_APPROVED], true)) throw new InvalidArgumentException('Ungueltiger Abwesenheitsstatus.');
+        if ($employeeUid === '' || $start >= $end) throw new InvalidArgumentException('Ungültiger Abwesenheitszeitraum.');
+        if (!in_array($status, [self::STATUS_PLANNED, self::STATUS_APPROVED], true)) throw new InvalidArgumentException('Ungültiger Abwesenheitsstatus.');
     }
 
     public function employeeUid(): string { return $this->employeeUid; }

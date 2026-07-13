@@ -22,7 +22,7 @@ final class AbsenceQueryEvent extends Event {
     /** @param list<string> $employeeUids */
     public function __construct(private DateTimeImmutable $start, private DateTimeImmutable $end, array $employeeUids) {
         parent::__construct();
-        if ($start >= $end) throw new InvalidArgumentException('Ungueltiger Abfragezeitraum.');
+        if ($start >= $end) throw new InvalidArgumentException('Ungültiger Abfragezeitraum.');
         $this->employees = array_fill_keys(array_values(array_unique(array_filter(array_map('strval', $employeeUids)))), true);
     }
 
