@@ -62,11 +62,12 @@ final class AdOrganizationDefinition {
                 'deputy_bl' => ['office', 'eb'],
             ],
             'organizationTeams' => [
-                ['id' => 'office-now', 'label' => 'Büro Nordost und West', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['northeast', 'west'], 'sortOrder' => 10],
-                ['id' => 'office-south', 'label' => 'Büro Süd', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 20],
-                ['id' => 'eb', 'label' => 'Einsatzbegleitungen', 'roles' => ['eb'], 'areas' => [], 'sortOrder' => 30],
-                ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['pfk'], 'areas' => [], 'sortOrder' => 40],
-                ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 50],
+                ['id' => 'office-northeast', 'label' => 'Büro Nordost', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['northeast'], 'sortOrder' => 10],
+                ['id' => 'office-west', 'label' => 'Büro West', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['west'], 'sortOrder' => 20],
+                ['id' => 'office-south', 'label' => 'Büro Süd', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 30],
+                ['id' => 'eb', 'label' => 'Einsatzbegleitungen', 'roles' => ['eb'], 'areas' => [], 'sortOrder' => 40],
+                ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['pfk'], 'areas' => [], 'sortOrder' => 50],
+                ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
             ],
         ]);
     }

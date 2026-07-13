@@ -13,6 +13,10 @@ use OCA\LocalBase\Organization\AdOrganizationPermissionPolicy;
 $definition = AdOrganizationDefinition::defaults();
 if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
+$organizationTeams = array_column($definition->organizationTeams(), null, 'id');
+if (($organizationTeams['office-northeast']['areas'] ?? []) !== ['northeast']) throw new RuntimeException('Urlaubsansicht Büro Nordost fehlt.');
+if (($organizationTeams['office-west']['areas'] ?? []) !== ['west']) throw new RuntimeException('Urlaubsansicht Büro West fehlt.');
+if (isset($organizationTeams['office-now'])) throw new RuntimeException('Büros Nordost und West werden noch unzulässig zusammengefasst.');
 if ($definition->normalizeTeamCode(' TeamA ') !== 'TeamA') throw new RuntimeException('Unicode-Teamkürzel wird nicht normalisiert.');
 try {
     $definition->normalizeTeamCode('TeamA-Urlaub');

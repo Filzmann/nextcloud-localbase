@@ -22,6 +22,7 @@ Aktuell enthalten:
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
 - Die Definition wird zentral in der LocalBase-App-Konfiguration gespeichert und ausschließlich über die administrative Organisationsansicht im Einstellungs-Tab des AD Kalenders bearbeitet.
+- Organisationsansichten für den Urlaubsplan sind dynamisch konfigurierbare Rollen-/Bereichsschnitte. Büro Nordost, West und Süd bleiben eigenständige Ansichten, auch wenn eine Leitung mehrere Bereiche führt.
 - Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
