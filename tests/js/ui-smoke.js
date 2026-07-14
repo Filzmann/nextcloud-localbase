@@ -39,6 +39,10 @@ assert.strictEqual(
     window.LocalBase.ui.errorMessage(null, 'Fallback'),
     'Fallback'
 );
+assert.strictEqual(
+    window.LocalBase.ui.errorMessage(null),
+    'Die Aktion konnte nicht ausgeführt werden.'
+);
 
 const noticeElement = { textContent: '', hidden: true, className: 'notice' };
 elements.set('notice', noticeElement);
@@ -68,6 +72,9 @@ assert.strictEqual(noticeElement.className, 'notice notice-warning');
 typedNotice.error({ data: { message: 'API kaputt' }, message: 'HTTP 500' }, 'Fallback');
 assert.strictEqual(noticeElement.textContent, 'API kaputt');
 assert.strictEqual(noticeElement.className, 'notice notice-error');
+
+typedNotice.error(null);
+assert.strictEqual(noticeElement.textContent, 'Die Aktion konnte nicht ausgeführt werden.');
 
 typedNotice.clear();
 assert.strictEqual(noticeElement.textContent, '');

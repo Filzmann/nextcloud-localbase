@@ -62,6 +62,13 @@ namespace {
         throw new \RuntimeException('Unexpected logged error context.');
     }
 
+    $defaultServerError = $responder->respond(static function (): array {
+        throw new \RuntimeException('Intern');
+    }, $logger, 'store_default');
+    if ($defaultServerError->getData()['message'] !== 'Die Aktion konnte nicht ausgeführt werden. Details stehen im Nextcloud-Log.') {
+        throw new \RuntimeException('Der gemeinsame Standardfehler muss echte Umlaute verwenden.');
+    }
+
     $directError = $responder->error('Direkte Meldung', Http::STATUS_BAD_REQUEST);
     if ($directError->getData() !== ['ok' => false, 'message' => 'Direkte Meldung'] || $directError->getStatus() !== Http::STATUS_BAD_REQUEST) {
         throw new \RuntimeException('Direct error responses should keep the shared API shape.');

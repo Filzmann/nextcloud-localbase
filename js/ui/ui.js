@@ -19,7 +19,7 @@
         return text === '' ? null : text;
     }
 
-    function errorMessage(error, fallback = 'Die Aktion konnte nicht ausgefuehrt werden.') {
+    function errorMessage(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
         if (typeof error === 'string') {
             return textOrNull(error) || fallback;
         }
@@ -81,7 +81,7 @@
             this.show(message, 'warning');
         }
 
-        error(error, fallback = 'Die Aktion konnte nicht ausgefuehrt werden.') {
+        error(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
             this.show(errorMessage(error, fallback), 'error');
         }
 

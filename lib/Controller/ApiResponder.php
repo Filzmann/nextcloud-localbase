@@ -14,7 +14,7 @@ class ApiResponder {
         callable $logError,
         string $action,
         array $context = [],
-        string $serverErrorMessage = 'Die Aktion konnte nicht ausgefuehrt werden. Details stehen im Nextcloud-Log.'
+        string $serverErrorMessage = 'Die Aktion konnte nicht ausgeführt werden. Details stehen im Nextcloud-Log.'
     ): DataResponse {
         try {
             $response = $callback();
