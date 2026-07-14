@@ -38,6 +38,7 @@ final class PhpTestRunner {
             if (!is_dir($path)) continue;
             $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS));
             foreach ($iterator as $file) {
+                if (str_contains(str_replace('\\', '/', $file->getPathname()), '/vendor/')) continue;
                 if ($file->isFile() && $accept($file->getPathname())) $files[] = $file->getPathname();
             }
         }
@@ -55,6 +56,7 @@ final class PhpTestRunner {
     }
 
     private static function execute(string $root, array $command): void {
+        $command = self::withOptionalCoverage($root, $command);
         $display = implode(' ', array_map('escapeshellarg', $command));
         echo '> ' . $display . PHP_EOL;
         $previousDirectory = getcwd();
@@ -65,5 +67,37 @@ final class PhpTestRunner {
             if ($previousDirectory !== false) chdir($previousDirectory);
         }
         if ($exitCode !== 0) exit($exitCode);
+    }
+
+    /**
+     * Zweck: Misst einzelne isolierte Testprozesse, ohne den normalen schnellen Testlauf mit einer Abhängigkeit zu belasten.
+     * Vertrag: Lint-Prozesse bleiben unverändert; Coverage wird nur bei vollständig gesetzter Testumgebung aktiviert.
+     *
+     * @param list<string> $command
+     * @return list<string>
+     */
+    public static function withOptionalCoverage(string $root, array $command): array {
+        $tool = trim((string)getenv('PHP_COVERAGE_COMMAND'));
+        $outputDirectory = trim((string)getenv('PHP_COVERAGE_OUTPUT_DIR'));
+        if ($tool === '' || $outputDirectory === '' || ($command[0] ?? '') !== PHP_BINARY || ($command[1] ?? '') === '-l') {
+            return $command;
+        }
+        if (!is_file($tool) || !is_executable($tool)) throw new \RuntimeException("Coverage-Werkzeug ist nicht ausführbar: {$tool}");
+        if (!is_dir($outputDirectory) && !mkdir($outputDirectory, 0775, true) && !is_dir($outputDirectory)) {
+            throw new \RuntimeException("Coverage-Ausgabe konnte nicht angelegt werden: {$outputDirectory}");
+        }
+
+        $script = (string)($command[1] ?? 'test');
+        $report = rtrim($outputDirectory, '/') . '/' . hash('sha256', $root . '/' . $script) . '.xml';
+        return [
+            $tool,
+            'execute',
+            '--clover',
+            $report,
+            '--include',
+            $root . '/lib',
+            '--add-uncovered',
+            $script,
+        ];
     }
 }

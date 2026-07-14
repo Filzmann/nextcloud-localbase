@@ -1,0 +1,11 @@
+{
+    "name": "ad-suite/coverage-tools",
+    "description": "Nur lokal verwendete Coverage-Werkzeuge für die AD-Suite.",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpcov": "^11.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
