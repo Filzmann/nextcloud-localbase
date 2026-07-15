@@ -10,9 +10,11 @@ for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachr
     if (!editorSource.includes(contract)) throw new Error(`Organisationseditor-Vertrag fehlt: ${contract}`);
 }
 for (const contract of ['class HierarchyBoard', 'draggable="true"', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
-for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval']) {
+for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
 }
+const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
+for (const contract of ['orgs-directory-status', 'orgs-directory-groups', 'Verzeichnis- und LDAP-Kompatibilität']) if (!template.includes(contract)) throw new Error(`Verzeichnisdiagnose-Markup fehlt: ${contract}`);
 for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-card.is-drag-over']) {
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }

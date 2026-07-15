@@ -43,12 +43,19 @@ namespace OCA\LocalBase\Organization {
     }
 }
 
+namespace OCA\LocalBase\Service {
+    class OrganizationDirectoryStatusService {
+        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]]]; }
+    }
+}
+
 namespace {
     require_once __DIR__ . '/../../lib/Controller/AdSuiteAdminApiController.php';
 
     use OCA\LocalBase\Organization\AdOrganizationSettingsService;
     use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
     use OCA\LocalBase\Controller\AdSuiteAdminApiController;
+    use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
     use OCP\IGroupManager;
     use OCP\IRequest;
     use OCP\IUser;
@@ -62,12 +69,13 @@ namespace {
     $organization = new AdOrganizationSettingsService();
     $settings = new AdSuiteAdminSettingsService();
     $logger = new class implements LoggerInterface { public array $errors = []; public function error(string $message, array $context = []): void { $this->errors[] = [$message, $context]; } };
-    $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $logger);
+    $directory = new OrganizationDirectoryStatusService();
+    $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $directory, $logger);
     if ($controller->settings()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen lesen.');
     if ($controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
     $data = $controller->settings()->getData();
-    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions'])) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
+    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
     if ($controller->saveOrganization(['roles' => ['pfk']])->getData()['organization']['roles'][0] !== 'pfk') throw new RuntimeException('Organisation wird nicht gespeichert.');
     $organization->invalid = true;
     if ($controller->saveOrganization([])->getStatus() !== 400) throw new RuntimeException('Validierungsfehler erhält keinen Status 400.');

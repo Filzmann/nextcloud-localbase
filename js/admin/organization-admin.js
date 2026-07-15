@@ -32,12 +32,42 @@
         return Object.fromEntries([...document.getElementById(containerId).querySelectorAll('input[type="checkbox"]')].map(input => [input.name, input.checked]));
     }
 
+    function renderDirectoryStatus(directory) {
+        const status = document.getElementById('orgs-directory-status');
+        const groups = document.getElementById('orgs-directory-groups');
+        const summary = directory?.compatible
+            ? 'Alle konfigurierten Gruppen sind über Nextcloud erreichbar.'
+            : 'Mindestens eine konfigurierte Gruppe fehlt in Nextcloud.';
+        const demo = directory?.demoWritable
+            ? ' Organisations-Demo-Packs dürfen Mitgliedschaften vorbereiten.'
+            : ' Read-only Gruppen bleiben produktiv nutzbar, können aber nicht durch Demo-Packs verändert werden.';
+        status.textContent = summary + demo;
+        groups.replaceChildren(...(directory?.groups || []).map(item => {
+            const row = document.createElement('tr');
+            const values = [
+                item.kind === 'role' ? 'Rolle' : 'Bereich',
+                item.label,
+                item.groupId,
+                item.exists ? (item.backendNames || []).join(', ') || 'Nextcloud' : '–',
+                !item.exists ? 'Fehlt' : item.membershipWritable ? 'Vorhanden, beschreibbar' : 'Vorhanden, read-only',
+            ];
+            values.forEach((value, index) => {
+                const cell = document.createElement(index === 1 ? 'th' : 'td');
+                if (index === 1) cell.scope = 'row';
+                cell.textContent = value;
+                row.append(cell);
+            });
+            return row;
+        }));
+    }
+
     async function load() {
         try {
             const data = await client.request('/api/ad-suite/admin/settings');
             editor.set(data.organization);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
             renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
+            renderDirectoryStatus(data.directory);
             notice.clear();
         } catch (error) {
             notice.error(error);

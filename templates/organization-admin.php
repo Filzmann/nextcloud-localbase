@@ -11,6 +11,19 @@
     <p>Organisationsweite Einstellungen sind ausschließlich im Nextcloud-Adminbereich änderbar. Bei einer Einzelinstallation erscheinen sie unter der Fachapp, ab zwei AD-Produkten in der OrgSuite.</p>
     <div id="orgs-admin-notice" class="orgs-notice" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
+    <section class="orgs-panel" aria-labelledby="orgs-directory-heading">
+        <h3 id="orgs-directory-heading">Verzeichnis- und LDAP-Kompatibilität</h3>
+        <p>Die Fachapps verwenden ausschließlich die von Nextcloud bereitgestellten Konten und Gruppen. Read-only LDAP-Gruppen sind für produktive Rechte zulässig; nur Demo-Packs dürfen deren Mitgliedschaften nicht verändern.</p>
+        <p id="orgs-directory-status" role="status" aria-live="polite">Verzeichnisstatus wird geprüft.</p>
+        <div class="orgs-table-wrap">
+            <table class="orgs-table">
+                <caption>Konfigurierte Organisationsgruppen und Nextcloud-Backends</caption>
+                <thead><tr><th>Typ</th><th>Bezeichnung</th><th>Gruppen-ID</th><th>Backend</th><th>Status</th></tr></thead>
+                <tbody id="orgs-directory-groups"></tbody>
+            </table>
+        </div>
+    </section>
+
     <section class="orgs-panel" aria-labelledby="orgs-organization-heading">
         <h3 id="orgs-organization-heading">AD-Organisation</h3>
         <p>Diese Konfiguration steuert Gruppen, sichtbare Namen, Bereiche, Hierarchie und Urlaubsansichten in den AD-Fachapps.</p>

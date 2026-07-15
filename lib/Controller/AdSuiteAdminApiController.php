@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use OCA\LocalBase\AppInfo\Application;
 use OCA\LocalBase\Organization\AdOrganizationSettingsService;
 use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
+use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -28,6 +29,7 @@ final class AdSuiteAdminApiController extends Controller {
         private IGroupManager $groups,
         private AdOrganizationSettingsService $organization,
         private AdSuiteAdminSettingsService $adminSettings,
+        private OrganizationDirectoryStatusService $directoryStatus,
         private LoggerInterface $logger,
     ) {
         parent::__construct(Application::APP_ID, $request);
@@ -41,6 +43,7 @@ final class AdSuiteAdminApiController extends Controller {
             'calendarPeerOptions' => $this->adminSettings->calendarPeerOptions(),
             'vacationPeerApproval' => $this->adminSettings->vacationPeerApproval(),
             'vacationPeerOptions' => $this->adminSettings->vacationPeerOptions(),
+            'directory' => $this->directoryStatus->status(),
         ]);
     }
 
