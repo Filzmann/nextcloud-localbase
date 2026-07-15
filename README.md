@@ -16,4 +16,4 @@ Das Releasearchiv nach `custom_apps/` entpacken und als HTTP-Benutzer aktivieren
 sudo -u www-data php occ app:enable localbase
 ```
 
-Die vollständige Suite-Installationsreihenfolge und Prüfschritte stehen in der gemeinsamen Staging-Release-Dokumentation des Parent-Workspaces.
+Die vollständige Suite-Installationsreihenfolge und Prüfschritte stehen im öffentlichen [AD-Suite-Projekt](https://github.com/Filzmann/ad-suite).

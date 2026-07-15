@@ -17,7 +17,7 @@ $organizationTeams = array_column($definition->organizationTeams(), null, 'id');
 if (($organizationTeams['office-northeast']['areas'] ?? []) !== ['northeast']) throw new RuntimeException('Urlaubsansicht Büro Nordost fehlt.');
 if (($organizationTeams['office-west']['areas'] ?? []) !== ['west']) throw new RuntimeException('Urlaubsansicht Büro West fehlt.');
 if (isset($organizationTeams['office-now'])) throw new RuntimeException('Büros Nordost und West werden noch unzulässig zusammengefasst.');
-if ($definition->normalizeTeamCode(' TeamA ') !== 'TeamA') throw new RuntimeException('Unicode-Teamkürzel wird nicht normalisiert.');
+if ($definition->normalizeTeamCode(' TämA ') !== 'TämA') throw new RuntimeException('Unicode-Teamkürzel wird nicht normalisiert.');
 try {
     $definition->normalizeTeamCode('TeamA-Urlaub');
     throw new RuntimeException('Suffix-Gruppe wurde als Assistenzteam akzeptiert.');
