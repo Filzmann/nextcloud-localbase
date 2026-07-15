@@ -22,10 +22,13 @@ Aktuell enthalten:
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
 - `AdSuiteAdminSettingsService` speichert app-übergreifend verwendete Peer-Freigaben semantisch nach Rollen und stellt sie AD Kalender, AD Urlaub und der administrativen OrgSuite-Oberfläche gemeinsam bereit.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
-- Die gemeinsame Organisationsdefinition und app-übergreifende Freigaben werden zentral in der LocalBase-App-Konfiguration gespeichert und im Nextcloud-Adminbereich der OrgSuite bearbeitet. Rein app-spezifische Admin-Einstellungen verbleiben bei der jeweiligen Fachapp.
+- Die gemeinsame Organisationsdefinition und app-übergreifende Freigaben werden zentral in der LocalBase-App-Konfiguration gespeichert. Bei einer Einzelinstallation erscheinen sie im Adminabschnitt des Fachprodukts, ab zwei Produkten im Adminabschnitt der OrgSuite. Rein app-spezifische Admin-Einstellungen verbleiben bei der jeweiligen Fachapp.
 - Organisationsansichten für den Urlaubsplan sind dynamisch konfigurierbare Rollen-/Bereichsschnitte. Büro Nordost, West und Süd bleiben eigenständige Ansichten, auch wenn eine Leitung mehrere Bereiche führt.
 - Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
+- `IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten. Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert niemals Berechtigungen.
+- `StandaloneAppNavigationService` registriert Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die dynamischen Settings-Adapter platzieren die gemeinsame Organisationsverwaltung bei einer Einzelinstallation unter deren Fachprodukt.
+- Organisationseditor, Admin-API und Persistenz des gemeinsamen AD-Vertrags liegen vollständig in LocalBase. OrgSuite bindet diese Oberfläche ab zwei Produkten nur als Adminadapter ein.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
 - JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.

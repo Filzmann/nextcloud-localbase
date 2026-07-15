@@ -10,6 +10,7 @@ runJavaScriptSuite({
         'tests/js/api-client-smoke.js',
         'tests/js/fake-dom-smoke.js',
         'tests/js/model-smoke.js',
+        'tests/js/organization-admin-smoke.mjs',
         'tests/js/repository-smoke.js',
         'tests/js/ui-smoke.js',
     ],

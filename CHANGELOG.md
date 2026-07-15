@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0-rc.1
+
+- Optionale Capability-Verträge für eigenständig installierbare AD-Fachprodukte ergänzt.
+- Organisationseditor und geschützte Admin-API vollständig nach LocalBase verschoben.
+- Dynamische Adminplatzierung und Einzelprodukt-Navigation ohne aktive OrgSuite ergänzt.
+
 ## 0.6.3-rc.1
 
 - Öffentliche Projekt-, Quellcode- und Fehlerkanäle ergänzt.
