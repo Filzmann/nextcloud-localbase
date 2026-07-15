@@ -1,0 +1,126 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.3', '8.5']
+    steps:
+      - name: LocalBase auschecken
+        uses: actions/checkout@v7
+        with:
+          path: localbase
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          tools: none
+      - name: PHP-Tests
+        working-directory: localbase
+        run: php tests/run.php
+
+  javascript:
+    name: JavaScript
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: LocalBase auschecken
+        uses: actions/checkout@v7
+        with:
+          path: localbase
+      - name: Node.js einrichten
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: JavaScript-Tests
+        working-directory: localbase
+        run: node tests/run-js.mjs
+
+  consumer-contracts:
+    name: Verbraucher-Verträge
+    needs: [php, javascript]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: LocalBase auschecken
+        uses: actions/checkout@v7
+        with:
+          path: localbase
+      - name: OrgSuite auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-orgsuite
+          path: orgsuite
+      - name: AD Kalender auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-adcalendar
+          path: adcalendar
+      - name: Assistenzplanung auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-adplaner
+          path: adplaner
+      - name: AD Urlaub auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-adurlaub
+          path: adurlaub
+      - name: AD Raumplaner auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-adroom
+          path: adroom
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Node.js einrichten
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: OrgSuite-Vertrag
+        working-directory: orgsuite
+        run: |
+          php tests/run.php
+          node tests/run-js.mjs
+      - name: AD-Kalender-Vertrag
+        working-directory: adcalendar
+        run: |
+          php tests/run.php
+          node tests/run-js.mjs
+      - name: Assistenzplanungs-Vertrag
+        working-directory: adplaner
+        run: |
+          php tests/run.php
+          node tests/run-js.mjs
+      - name: AD-Urlaubs-Vertrag
+        working-directory: adurlaub
+        run: |
+          php tests/run.php
+          node tests/run-js.mjs
+      - name: AD-Raumplaner-Vertrag
+        working-directory: adroom
+        run: |
+          php tests/run.php
+          node tests/run-js.mjs
