@@ -1,0 +1,44 @@
+/* Gemeinsamer Organisationseditor für Einzelapp und OrgSuite. */
+.orgs-admin { width: 100%; max-width: none; box-sizing: border-box; }
+.orgs-admin [hidden] { display: none !important; }
+.orgs-admin > p { max-width: 70rem; }
+.orgs-panel { width: 100%; max-width: none; box-sizing: border-box; margin: 18px 0; padding: 14px; border: 1px solid var(--color-border); border-radius: var(--border-radius-large); background: var(--color-main-background); }
+.orgs-panel > p { max-width: 80rem; }
+.orgs-notice { max-width: 70rem; margin: 10px 0; padding: 8px 12px; border-radius: var(--border-radius); background: var(--color-background-dark); }
+.orgs-notice--error { border-inline-start: 4px solid var(--color-error); }
+.orgs-notice--success { border-inline-start: 4px solid var(--color-success); }
+.orgs-general { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--border-radius); }
+.orgs-general label,.orgs-hierarchy-toolbar label { display: grid; gap: 4px; }
+.orgs-table-wrap { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
+.orgs-table { width: max-content; min-width: 100%; max-width: none; margin: 10px 0; border-collapse: collapse; }
+.orgs-table th,.orgs-table td { padding: 5px; border: 1px solid var(--color-border); vertical-align: middle; }
+.orgs-table input:not([type="checkbox"]) { min-width: 120px; width: 100%; }
+.orgs-table input[type="number"] { min-width: 72px; width: 82px; }
+.orgs-hierarchy { min-width: 0; margin: 16px 0; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--border-radius-large); }
+.orgs-hierarchy > p { margin: 4px 0 10px; color: var(--color-text-maxcontrast); }
+.orgs-hierarchy-toolbar { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.orgs-hierarchy-toolbar label { min-width: 13rem; }
+.orgs-feedback { min-height: 1.4em; color: var(--color-main-text) !important; }
+.orgs-organigram { display: grid; gap: 18px; min-width: min-content; padding: 8px; overflow-x: auto; border-radius: var(--border-radius); background: var(--color-background-dark); }
+.orgs-organigram-level { position: relative; min-width: max-content; }
+.orgs-organigram-level + .orgs-organigram-level::before { content: "↓"; position: absolute; inset-inline-start: 50%; top: -20px; color: var(--color-text-maxcontrast); font-weight: 700; }
+.orgs-level-label { display: block; margin-bottom: 5px; color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 600; }
+.orgs-level-nodes { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 8px; min-width: max-content; }
+.orgs-card { min-width: 15rem; max-width: 22rem; padding: 8px; border: 2px solid var(--color-border); border-radius: var(--border-radius-large); background: var(--color-main-background); transition: border-color .12s ease, box-shadow .12s ease; }
+.orgs-card.is-drag-over { border-color: var(--color-primary-element); box-shadow: 0 0 0 3px var(--color-primary-element-light); }
+.orgs-card header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.orgs-card code { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
+.orgs-drag-role { min-height: 30px !important; margin: 0 !important; padding: 4px 8px !important; font-weight: 700; cursor: grab; }
+.orgs-drag-role.is-dragging { opacity: .55; cursor: grabbing; }
+.orgs-edges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.orgs-edge { display: inline-flex; align-items: center; gap: 3px; padding-inline-start: 7px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-background-hover); font-size: var(--font-size-small); }
+.orgs-edge button { min-width: 24px !important; min-height: 24px !important; height: 24px; margin: 0 !important; padding: 0 6px !important; border-radius: 50%; }
+.orgs-empty { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
+.orgs-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 6px 12px; margin: 8px 0 14px; }
+.orgs-checkbox-grid label { display: flex; align-items: center; min-height: 32px; }
+.orgs-panel form > button[type="submit"] { margin-top: 10px; }
+@media (max-width: 700px) {
+    .orgs-panel { padding: 10px; }
+    .orgs-general,.orgs-hierarchy-toolbar { display: grid; }
+    .orgs-hierarchy-toolbar label { min-width: 0; }
+}
