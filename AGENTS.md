@@ -36,12 +36,11 @@ Aktuell enthalten:
 - Test-Helper fuer app-uebergreifend gleiche, dependency-arme Fakes, Fixtures und Assertions.
 - Test-only PHP-Runner `PhpTestRunner`, der Lint- und Smoke-Tests deterministisch sammelt und jeden Test isoliert in einem eigenen PHP-Prozess ausführt.
 
-## Git- und Arbeitsregeln
+## Repository und gemeinsamer Arbeitsablauf
 
 - Dieses Verzeichnis ist ein eigenstaendiges Git-Repository fuer die Hilfsapp `localbase`.
-- Keine Commits, kein Push und kein Deployment ohne ausdrueckliche Freigabe durch Simon.
-- Vor Commits immer `git status --short`, `git diff --stat` und `git diff --name-only` zeigen.
-- Nicht `git add .` verwenden; Dateien gezielt stagen.
+- Diese Datei und lokal referenzierte Skills bilden bei einem direkten Start in diesem Repository die vollständige Repository-Steuerung.
+- Fuer den allgemeinen Git-/Sandboxrahmen gilt der lokal mitgefuehrte Skill `work-in-nextcloud-app`. Oeffentliche LocalBase- oder Cross-App-Vertraege unterliegen dessen Stop-Regel und brauchen einen ausdrücklich beauftragten, aus jedem betroffenen Repository geprüften Cross-App-Lauf.
 - Aenderungen muessen app-uebergreifend neutral bleiben.
 - Keine Fachlogik aus BRTop, BRStunden oder AdPlaner hierher verschieben.
 
