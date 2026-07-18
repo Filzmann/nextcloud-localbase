@@ -8,6 +8,8 @@ Nextcloud-App-ID:
 
     localbase
 
+Die priorisierte Produktplanung und offene Entscheidungen stehen in `ROADMAP.md`; verbindliche Fach-, Sicherheits- und Architekturregeln bleiben in dieser Datei.
+
 ## Zweck
 
 LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eigenen Apps semantisch identisch gebraucht werden. Der ausdrücklich gemeinsame AD-Organisationsvertrag ist fachlich nicht neutral, gehört aber bewusst hierher, weil Kalender, Urlaub und Assistenzplanung exakt dieselben Gruppen-, Bereichs- und Hierarchieregeln verwenden müssen.
