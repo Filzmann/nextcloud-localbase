@@ -14,6 +14,14 @@ $definition = AdOrganizationDefinition::defaults();
 if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
 $roles = $definition->roles();
+if (!(
+    $roles['bl']['sortOrder'] < $roles['deputy_bl']['sortOrder']
+    && $roles['deputy_bl']['sortOrder'] < $roles['eb']['sortOrder']
+    && $roles['eb']['sortOrder'] < $roles['office']['sortOrder']
+    && $roles['office']['sortOrder'] < $roles['pfk']['sortOrder']
+)) {
+    throw new RuntimeException('Die Standardreihenfolge BL, StvBL, EB, Buero, PFK fehlt.');
+}
 foreach (['gf_as', 'pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'] as $key) {
     if (($roles[$key]['singleOccupant'] ?? null) !== true) throw new RuntimeException("Einzelposition {$key} fehlt in der Standarddefinition.");
 }

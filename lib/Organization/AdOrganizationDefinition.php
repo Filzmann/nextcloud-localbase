@@ -45,8 +45,8 @@ final class AdOrganizationDefinition {
                 'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
                 'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
-                'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 220, areaScoped: true, peerEnabled: true),
-                'eb' => self::role('ad-EB', 'Einsatzbegleitung', 230, areaScoped: true, peerEnabled: true),
+                'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true),
+                'eb' => self::role('ad-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true),
                 'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true),
             ],
             'areas' => [
