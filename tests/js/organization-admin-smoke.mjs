@@ -23,6 +23,7 @@ for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.
 if (!/\.orgs-level-nodes\s*\{[^}]*justify-content:\s*space-evenly/.test(css)) throw new Error('Wenige Organigrammkarten nutzen die verfügbare Ebenenbreite nicht gleichmäßig.');
 if (!/\.orgs-level-nodes\s*\{[^}]*flex-wrap:\s*nowrap/.test(css)) throw new Error('Karten derselben Hierarchieebene werden nicht stabil nebeneinander angeordnet.');
 if (!/\.orgs-card\s*\{[^}]*width:\s*fit-content[^}]*min-width:\s*11rem[^}]*max-width:\s*15rem/.test(css)) throw new Error('Kurze Organigrammkarten nutzen weiterhin unnötig die volle Standardbreite.');
+if (!/\.orgs-dashboard-widget\[data-widget-id="hierarchy"\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/.test(css)) throw new Error('Der Organigramm-Block nutzt nicht verbindlich die volle verfügbare Breite.');
 
 const context = { window: { LocalBase: { ui: { esc: value => String(value ?? '') } } }, JSON, Set, Math, Object, Element: class {} };
 runInNewContext(hierarchySource, context);
