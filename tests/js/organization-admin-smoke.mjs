@@ -6,17 +6,17 @@ const hierarchySource = readFileSync(new URL('../../js/components/hierarchy-boar
 const adminSource = readFileSync(new URL('../../js/admin/organization-admin.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../../css/organization-admin.css', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachrollen und Nextcloud-Gruppen', 'data-organization-teams', 'this.hierarchyBoard.get()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
+for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachrollen und Nextcloud-Gruppen', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
     if (!editorSource.includes(contract)) throw new Error(`Organisationseditor-Vertrag fehlt: ${contract}`);
 }
-for (const contract of ['class HierarchyBoard', 'draggable="true"', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
+for (const contract of ['class HierarchyBoard', 'draggable="true"', 'data-position-node', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
 if (hierarchySource.includes('Keine direkt unterstellte Rolle') || hierarchySource.includes('class="orgs-edges"')) throw new Error('Unterstellte Rollen stehen weiterhin textlastig innerhalb der Diagrammknoten.');
 for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
 }
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 for (const contract of ['orgs-directory-status', 'orgs-directory-groups', 'Verzeichnis- und LDAP-Kompatibilität']) if (!template.includes(contract)) throw new Error(`Verzeichnisdiagnose-Markup fehlt: ${contract}`);
-for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-card.is-drag-over', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-column-help', '.orgs-card-person', 'background-image:']) {
+for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-column-help', '.orgs-card-person', 'background-image:']) {
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }
 
@@ -34,17 +34,21 @@ board.roles = {
 };
 board.areas = { west: { label: 'West', sortOrder: 10 }, south: { label: 'Süd', sortOrder: 20 } };
 board.hierarchy = { gf: ['bl'], bl: ['office'] };
+board.diagramOrder = ['bl::south', 'bl::west'];
 board.positions = [
     { roleKey: 'gf', areaKey: null, displayNames: ['Gina Führung'] },
     { roleKey: 'bl', areaKey: 'west', displayNames: ['Berta West'] },
     { roleKey: 'bl', areaKey: 'south', displayNames: [] },
 ];
 const diagramNodes = board.diagramNodes(['gf', 'bl', 'office']);
-if (diagramNodes.map(node => node.id).join(',') !== 'gf,bl::west,bl::south,office::west,office::south') throw new Error('Bereichsrollen werden nicht in geordnete Bereichsknoten aufgefächert.');
+if (diagramNodes.filter(node => node.roleKey === 'bl').map(node => node.id).join(',') !== 'bl::south,bl::west') throw new Error('Visuelle Links-rechts-Ordnung wird nicht unabhängig von der Bereichsreihenfolge angewendet.');
 if (board.diagramEdges(diagramNodes).length !== 4) throw new Error('Hierarchiepfeile werden nicht passend je Bereich aufgefächert.');
 if (board.positionText('bl', 'west') !== 'Berta West' || board.positionText('bl', 'south') !== 'Nicht besetzt') throw new Error('Besetzung von Einzelpositionen wird im Organigramm nicht verständlich dargestellt.');
 const occupiedCard = board.card(diagramNodes.find(node => node.id === 'bl::west'));
 if (!occupiedCard.includes('orgs-card-person') || !occupiedCard.includes('Berta West') || !occupiedCard.includes('Bereich West')) throw new Error('Bereich und zugeordnete Person fehlen in der Diagrammkarte.');
+board.diagramOrder = diagramNodes.map(node => node.id);
+board.applyDiagramOrderMove('bl::west', 'bl::south', true);
+if (board.diagramOrder.indexOf('bl::west') > board.diagramOrder.indexOf('bl::south')) throw new Error('Horizontales Drag-and-drop verschiebt einen Diagrammknoten nicht nach links.');
 
 const editor = Object.create(context.window.LocalBase.components.OrganizationEditor.prototype);
 editor.definition = { roles: { first: { sortOrder: 20 }, second: { sortOrder: 10 } }, areas: { west: { sortOrder: 20 }, east: { sortOrder: 10 } } };

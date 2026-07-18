@@ -12,6 +12,7 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 
 - Rollen und Bereiche lassen sich im Adminbereich per Drag-and-drop oder gleichwertig per Tastatur sortieren. Drag-and-drop im Organigramm darf außerdem direkte Hierarchiebeziehungen ändern; die serverseitige Zyklusprüfung bleibt verbindlich.
 - Das Organigramm verwendet kompakte Diagrammknoten, Positionierung sowie gerichtete Pfeile. Bereichsrollen werden je Bürobereich aufgefächert; Verbindungen zwischen zwei Bereichsrollen gelten jeweils innerhalb desselben Bereichs.
+- Karten derselben Hierarchieebene lassen sich per Drag-and-drop sowie über zugängliche Links-/Rechts-Schaltflächen global anordnen. Diese Diagrammordnung ist eine rein visuelle Organisationsdarstellung und bleibt technisch von der fachlichen Rollen-/Bereichsreihenfolge getrennt.
 - Rollen können ausdrücklich als Einzelposition markiert werden. Organisationsweite Einzelpositionen sowie bereichsbezogene BL-/StvBL-Positionen zeigen ihre Nextcloud-Gruppenbesetzung im Diagramm; fehlende und mehrfache Besetzungen werden sichtbar diagnostiziert.
 - Die Gruppenoptionen im Organisationseditor enthalten sichtbare Erklärungen ihrer fachlichen Wirkung.
 
@@ -32,4 +33,3 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 - Bedarf und Vertrag für manuelle Knotenpositionierung, Zoom und eine Druckansicht.
 - Verhalten und responsive Anordnung bei Organisationen, die deutlich größer als die aktuelle AD-Struktur sind.
 - Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.
-- Welche Teile der Reihenfolge und Diagrammanordnung fachliche Organisationsdaten sind und welche lediglich persönliche oder globale Darstellungspräferenzen darstellen.

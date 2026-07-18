@@ -49,13 +49,13 @@
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Fachrollen und Nextcloud-Gruppen</caption><thead><tr><th scope="col">Rolle</th><th scope="col">Gruppen-ID</th><th scope="col">Anzeigename</th>${this.columnHeader('Kalender', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.')}${this.columnHeader('Bereich', 'Mitglieder werden zusätzlich über Bürobereiche zugeordnet.')}${this.columnHeader('Leitung je Bereich', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.')}${this.columnHeader('Peer-fähig', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.')}${this.columnHeader('Leitungsblock', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.')}${this.columnHeader('Einzelposition', 'Genau eine Person; bei Bereichsrollen je Bereich.')}<th scope="col">Reihenfolge</th></tr></thead><tbody data-sort-list="roles">${roles.map(([key, role]) => this.roleRow(key, role)).join('')}</tbody></table></div>
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Bürobereiche</caption><thead><tr><th>Bereich</th><th>Gruppen-ID</th><th>Anzeigename</th><th>Reihenfolge</th></tr></thead><tbody data-sort-list="areas">${areas.map(([key, area]) => this.areaRow(key, area)).join('')}</tbody></table></div>
                 <fieldset class="orgs-hierarchy"><legend>Direkte Hierarchie</legend>
-                    <p>Ziehe eine unterstellte Rolle auf die Karte ihrer Leitung. Für die Tastatur steht dieselbe Zuordnung über die Auswahlfelder bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
+                    <p>Ziehe eine unterstellte Rolle am Rollengriff auf die Karte ihrer Leitung. Der separate waagerechte Positionsgriff ordnet Karten derselben Ebene rein visuell von links nach rechts; dafür stehen zusätzlich Pfeiltasten bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
                     <div class="orgs-hierarchy-toolbar" aria-label="Hierarchieverbindung per Tastatur anlegen"><label>Leitung <select data-hierarchy-manager>${this.roleOptions(roles)}</select></label><label>Unterstellte Rolle <select data-hierarchy-target>${this.roleOptions(roles)}</select></label><button type="button" data-action="add-edge">Zuordnen</button></div>
                     <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p><div class="orgs-organigram" data-hierarchy-board></div>
                 </fieldset>
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Teamansichten im Urlaubsplaner</caption><thead><tr><th>ID</th><th>Anzeigename</th><th>Rollen</th><th>Bereiche</th><th>Reihenfolge</th><th>Aktion</th></tr></thead><tbody data-organization-teams>${(data.organizationTeams || []).map(team => this.teamRow(team)).join('')}</tbody></table></div>
                 <button type="button" data-action="add-team">Urlaubsansicht hinzufügen</button>`;
-            this.hierarchyBoard.set(data.roles, data.hierarchy || {}, data.areas, this.positions);
+            this.hierarchyBoard.set(data.roles, data.hierarchy || {}, data.areas, this.positions, data.diagramOrder || []);
             this.updateSortControls('roles');
             this.updateSortControls('areas');
         }
@@ -91,6 +91,7 @@
                 area.sortOrder = Number(row.querySelector('[data-field="sortOrder"]').value);
             });
             data.hierarchy = this.hierarchyBoard.get();
+            data.diagramOrder = this.hierarchyBoard.getDiagramOrder().filter(nodeId => this.isValidDiagramNode(nodeId, data.roles, data.areas));
             data.organizationTeams = [...this.container.querySelectorAll('[data-organization-team]')].map(row => ({ id: row.querySelector('[data-field="id"]').value.trim(), label: row.querySelector('[data-field="label"]').value.trim(), roles: this.list(row.querySelector('[data-field="roles"]').value), areas: this.list(row.querySelector('[data-field="areas"]').value), sortOrder: Number(row.querySelector('[data-field="sortOrder"]').value) }));
             return data;
         }
@@ -151,7 +152,7 @@
             this.applyOrder(kind, rows.map(row => row.dataset.sortKey));
             rows.forEach(row => { row.querySelector('[data-field="sortOrder"]').value = this.definition[kind][row.dataset.sortKey].sortOrder; });
             this.updateSortControls(kind);
-            if (kind === 'roles' || kind === 'areas') this.hierarchyBoard.set(this.definition.roles, this.hierarchyBoard.get(), this.definition.areas, this.positions);
+            if (kind === 'roles' || kind === 'areas') this.hierarchyBoard.set(this.definition.roles, this.hierarchyBoard.get(), this.definition.areas, this.positions, this.hierarchyBoard.getDiagramOrder());
         }
 
         applyOrder(kind, orderedKeys) {
@@ -176,6 +177,12 @@
         clearSort() {
             this.sortDrag = null;
             this.container.querySelectorAll('.is-sorting,.is-sort-over').forEach(element => element.classList.remove('is-sorting', 'is-sort-over'));
+        }
+
+        isValidDiagramNode(nodeId, roles, areas) {
+            const [roleKey, areaKey = null, extra = null] = String(nodeId).split('::');
+            if (extra !== null || !roles[roleKey]) return false;
+            return areaKey === null ? !roles[roleKey].areaScoped : Boolean(roles[roleKey].areaScoped && areas[areaKey]);
         }
 
         addTeam() {

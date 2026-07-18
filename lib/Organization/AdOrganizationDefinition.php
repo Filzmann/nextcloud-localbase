@@ -63,6 +63,7 @@ final class AdOrganizationDefinition {
                 'bl' => ['deputy_bl', 'office', 'eb'],
                 'deputy_bl' => ['office', 'eb'],
             ],
+            'diagramOrder' => [],
             'organizationTeams' => [
                 ['id' => 'office-northeast', 'label' => 'Büro Nordost', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['northeast'], 'sortOrder' => 10],
                 ['id' => 'office-west', 'label' => 'Büro West', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['west'], 'sortOrder' => 20],
@@ -83,6 +84,7 @@ final class AdOrganizationDefinition {
     public function roles(): array { return $this->data['roles']; }
     public function areas(): array { return $this->data['areas']; }
     public function hierarchy(): array { return $this->data['hierarchy']; }
+    public function diagramOrder(): array { return $this->data['diagramOrder']; }
     public function organizationTeams(): array { return $this->data['organizationTeams']; }
     public function teamGroupPrefix(): string { return $this->data['teamGroupPrefix']; }
     public function teamLabelPrefix(): string { return $this->data['teamLabelPrefix']; }
@@ -212,6 +214,27 @@ final class AdOrganizationDefinition {
             $areas[(string)$key] = ['groupId' => $groupId, 'label' => self::text($area['label'] ?? '', "Anzeigename des Bereichs {$key}", 120), 'sortOrder' => (int)($area['sortOrder'] ?? 0)];
         }
 
+        // Spiegelvertrag: js/components/hierarchy-board.js erzeugt dieselben Rollen- bzw. Rolle::Bereich-Knoten-IDs.
+        $knownDiagramNodes = [];
+        foreach ($roles as $roleKey => $role) {
+            if (!$role['areaScoped']) {
+                $knownDiagramNodes[$roleKey] = true;
+                continue;
+            }
+            foreach (array_keys($areas) as $areaKey) $knownDiagramNodes[$roleKey . '::' . $areaKey] = true;
+        }
+        $rawDiagramOrder = $data['diagramOrder'] ?? [];
+        if (!is_array($rawDiagramOrder)) throw new InvalidArgumentException('Die visuelle Diagrammordnung ist ungültig.');
+        $diagramOrder = [];
+        $seenDiagramNodes = [];
+        foreach ($rawDiagramOrder as $nodeId) {
+            $nodeId = (string)$nodeId;
+            if (!isset($knownDiagramNodes[$nodeId])) throw new InvalidArgumentException("Diagrammknoten {$nodeId} ist ungültig.");
+            if (isset($seenDiagramNodes[$nodeId])) throw new InvalidArgumentException("Diagrammknoten {$nodeId} ist mehrfach angeordnet.");
+            $seenDiagramNodes[$nodeId] = true;
+            $diagramOrder[] = $nodeId;
+        }
+
         $hierarchy = [];
         foreach ($data['hierarchy'] as $manager => $targets) {
             if (!isset($roles[$manager]) || !is_array($targets)) throw new InvalidArgumentException("Hierarchieeintrag {$manager} ist ungültig.");
@@ -247,6 +270,7 @@ final class AdOrganizationDefinition {
             'roles' => $roles,
             'areas' => $areas,
             'hierarchy' => $hierarchy,
+            'diagramOrder' => $diagramOrder,
             'organizationTeams' => $teams,
         ];
     }

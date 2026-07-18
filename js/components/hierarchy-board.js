@@ -15,25 +15,30 @@
             this.areas = {};
             this.positions = [];
             this.hierarchy = {};
+            this.diagramOrder = [];
             this.draggedRole = '';
+            this.draggedNode = null;
             this.connectionFrame = null;
             container.addEventListener('click', event => this.onClick(event));
             container.addEventListener('dragstart', event => this.startDrag(event));
             container.addEventListener('dragover', event => this.overTarget(event));
-            container.addEventListener('dragleave', event => event.target instanceof Element && event.target.closest('[data-manager-key]')?.classList.remove('is-drag-over'));
+            container.addEventListener('dragleave', event => this.leaveTarget(event));
             container.addEventListener('drop', event => this.dropRole(event));
             container.addEventListener('dragend', () => this.clearDrag());
             window.addEventListener?.('resize', () => this.scheduleConnections());
         }
 
-        set(roles, hierarchy, areas = {}, positions = []) {
-            this.roles = clone(roles); this.hierarchy = clone(hierarchy); this.areas = clone(areas); this.positions = clone(positions); this.render();
+        set(roles, hierarchy, areas = {}, positions = [], diagramOrder = []) {
+            this.roles = clone(roles); this.hierarchy = clone(hierarchy); this.areas = clone(areas); this.positions = clone(positions); this.diagramOrder = clone(diagramOrder); this.render();
         }
         get() { return clone(this.hierarchy); }
+        getDiagramOrder() { return this.diagramNodes(this.sortedRoleKeys()).map(node => node.id); }
 
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
             if (!button) return;
+            if (button.dataset.action === 'move-node-left') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, -1);
+            if (button.dataset.action === 'move-node-right') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, 1);
             if (button.dataset.action === 'remove-edge') this.removeEdge(button.dataset.managerKey, button.dataset.targetKey);
             if (button.dataset.action === 'add-edge') this.addEdge(
                 this.container.querySelector('[data-hierarchy-manager]').value,
@@ -46,13 +51,13 @@
             const roleMap = Object.fromEntries(roles);
             const connections = this.connections(roleMap);
             const nodes = this.diagramNodes(roles.map(([key]) => key));
-            const nodesByRole = this.nodesByRole(nodes);
+            const roleLevels = this.levels(roles.map(([key]) => key));
             this.container.querySelector('[data-hierarchy-board]').innerHTML = `
                 <div class="orgs-diagram" data-hierarchy-diagram>
                     <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
-                    <div class="orgs-diagram-levels">${this.levels(roles.map(([key]) => key)).map((level, index) => `
+                    <div class="orgs-diagram-levels">${roleLevels.map((level, index) => `
                         <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes">
-                            ${level.flatMap(key => nodesByRole.get(key) || []).map(node => this.card(node)).join('')}
+                            ${this.levelNodes(level, nodes).map((node, nodeIndex, levelNodes) => this.card(node, index, nodeIndex, levelNodes.length)).join('')}
                         </div></section>`).join('')}
                     </div>
                 </div>
@@ -61,7 +66,7 @@
             this.scheduleConnections();
         }
 
-        card(node) {
+        card(node, levelIndex = 0, nodeIndex = 0, nodeCount = 1) {
             const role = this.roles[node.roleKey];
             const area = node.areaKey ? this.areas[node.areaKey] : null;
             const person = this.positionText(node.roleKey, node.areaKey);
@@ -69,16 +74,35 @@
             const personClass = (position?.displayNames || []).length === 0 ? ' orgs-card-person--vacant' : (position?.displayNames || []).length > 1 ? ' orgs-card-person--multiple' : '';
             const areaLabel = area ? `<span class="orgs-card-area">Bereich ${esc(area.label)}</span>` : '';
             const personMarkup = role.singleOccupant ? `<span class="orgs-card-person${personClass}">${esc(person)}</span>` : '';
-            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}"><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(role.label)}${area ? `, Bereich ${esc(area.label)}` : ''} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
+            const label = `${role.label}${area ? `, Bereich ${area.label}` : ''}`;
+            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}" data-diagram-level="${levelIndex}"><div class="orgs-card-position"><button type="button" data-action="move-node-left" aria-label="${esc(label)} nach links verschieben" ${nodeIndex === 0 ? 'disabled' : ''}>←</button><button type="button" class="orgs-position-handle" draggable="true" data-position-node="${esc(node.id)}" aria-label="${esc(label)} waagerecht per Drag-and-drop anordnen"><span aria-hidden="true">↔</span></button><button type="button" data-action="move-node-right" aria-label="${esc(label)} nach rechts verschieben" ${nodeIndex === nodeCount - 1 ? 'disabled' : ''}>→</button></div><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
         }
 
         diagramNodes(roleKeys) {
+            // Spiegelvertrag: lib/Organization/AdOrganizationDefinition.php validiert genau diese Rollen- bzw. Rolle::Bereich-Knoten-IDs.
             const areas = Object.entries(this.areas).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
-            return roleKeys.flatMap(roleKey => {
+            return this.orderDiagramNodes(roleKeys.flatMap(roleKey => {
                 const role = this.roles[roleKey];
                 if (!role?.areaScoped || !areas.length) return [{ id: roleKey, roleKey, areaKey: null }];
                 return areas.map(([areaKey]) => ({ id: `${roleKey}::${areaKey}`, roleKey, areaKey }));
+            }));
+        }
+
+        sortedRoleKeys() { return Object.entries(this.roles).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder)).map(([key]) => key); }
+
+        orderDiagramNodes(nodes) {
+            const configured = new Map(this.diagramOrder.map((id, index) => [id, index]));
+            const fallback = new Map(nodes.map((node, index) => [node.id, index]));
+            return [...nodes].sort((a, b) => {
+                const aOrder = configured.has(a.id) ? configured.get(a.id) : configured.size + fallback.get(a.id);
+                const bOrder = configured.has(b.id) ? configured.get(b.id) : configured.size + fallback.get(b.id);
+                return aOrder - bOrder;
             });
+        }
+
+        levelNodes(roleKeys, nodes) {
+            const roles = new Set(roleKeys);
+            return this.orderDiagramNodes(nodes.filter(node => roles.has(node.roleKey)));
         }
 
         diagramEdges(nodes) {
@@ -196,6 +220,13 @@
         }
 
         startDrag(event) {
+            const positionSource = event.target instanceof Element ? event.target.closest('[data-position-node]') : null;
+            if (positionSource && event.dataTransfer) {
+                const card = positionSource.closest('[data-diagram-node]');
+                this.draggedNode = { id: positionSource.dataset.positionNode, level: card?.dataset.diagramLevel || '' };
+                event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', `position:${this.draggedNode.id}`); positionSource.classList.add('is-position-dragging');
+                return;
+            }
             const source = event.target instanceof Element ? event.target.closest('[data-drag-role]') : null;
             if (!source || !event.dataTransfer) return;
             this.draggedRole = source.dataset.dragRole;
@@ -204,6 +235,15 @@
 
         overTarget(event) {
             const target = event.target instanceof Element ? event.target.closest('[data-manager-key]') : null;
+            if (this.draggedNode) {
+                if (!target || target.dataset.diagramLevel !== this.draggedNode.level || target.dataset.diagramNode === this.draggedNode.id) return;
+                event.preventDefault();
+                this.container.querySelectorAll('.is-position-before,.is-position-after').forEach(element => element.classList.remove('is-position-before', 'is-position-after'));
+                const bounds = target.getBoundingClientRect();
+                target.classList.add(event.clientX < bounds.left + bounds.width / 2 ? 'is-position-before' : 'is-position-after');
+                if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+                return;
+            }
             if (!target || !this.draggedRole || target.dataset.managerKey === this.draggedRole) return;
             event.preventDefault(); target.classList.add('is-drag-over');
             if (event.dataTransfer) event.dataTransfer.dropEffect = 'link';
@@ -212,6 +252,15 @@
         dropRole(event) {
             const target = event.target instanceof Element ? event.target.closest('[data-manager-key]') : null;
             if (!target) return;
+            if (this.draggedNode) {
+                if (target.dataset.diagramLevel !== this.draggedNode.level || target.dataset.diagramNode === this.draggedNode.id) return this.clearDrag();
+                event.preventDefault();
+                const sourceId = this.draggedNode.id;
+                const before = target.classList.contains('is-position-before');
+                this.applyDiagramOrderMove(sourceId, target.dataset.diagramNode, before);
+                this.clearDrag();
+                return this.render('Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.');
+            }
             event.preventDefault();
             const role = event.dataTransfer?.getData('text/plain') || this.draggedRole;
             this.clearDrag(); this.addEdge(target.dataset.managerKey, role);
@@ -219,7 +268,33 @@
 
         clearDrag() {
             this.draggedRole = '';
-            this.container.querySelectorAll('.is-dragging,.is-drag-over').forEach(element => element.classList.remove('is-dragging', 'is-drag-over'));
+            this.draggedNode = null;
+            this.container.querySelectorAll('.is-dragging,.is-drag-over,.is-position-dragging,.is-position-before,.is-position-after').forEach(element => element.classList.remove('is-dragging', 'is-drag-over', 'is-position-dragging', 'is-position-before', 'is-position-after'));
+        }
+
+        leaveTarget(event) {
+            const target = event.target instanceof Element ? event.target.closest('[data-manager-key]') : null;
+            target?.classList.remove('is-drag-over', 'is-position-before', 'is-position-after');
+        }
+
+        applyDiagramOrderMove(sourceId, targetId, before) {
+            const order = this.getDiagramOrder().filter(id => id !== sourceId);
+            const targetIndex = order.indexOf(targetId);
+            if (targetIndex < 0) return;
+            order.splice(targetIndex + (before ? 0 : 1), 0, sourceId);
+            this.diagramOrder = order;
+        }
+
+        moveDiagramNode(nodeId, offset) {
+            if (!nodeId) return;
+            const card = [...this.container.querySelectorAll('[data-diagram-node]')].find(item => item.dataset.diagramNode === nodeId);
+            if (!card) return;
+            const levelCards = [...this.container.querySelectorAll(`[data-diagram-level="${card.dataset.diagramLevel}"]`)];
+            const index = levelCards.indexOf(card);
+            const target = levelCards[index + offset];
+            if (!target) return;
+            this.applyDiagramOrderMove(nodeId, target.dataset.diagramNode, offset < 0);
+            this.render('Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.');
         }
     }
 

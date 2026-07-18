@@ -11,6 +11,7 @@ use OCA\LocalBase\Organization\AdOrganizationHierarchy;
 use OCA\LocalBase\Organization\AdOrganizationPermissionPolicy;
 
 $definition = AdOrganizationDefinition::defaults();
+if ($definition->diagramOrder() !== []) throw new RuntimeException('Die visuelle Diagrammordnung muss kompatibel ohne Vorgabe starten.');
 if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
 $roles = $definition->roles();
@@ -50,8 +51,9 @@ $custom['roles']['office']['label'] = 'Verwaltung';
 $custom['roles']['gf_as']['singleOccupant'] = false;
 $custom['areas']['south']['groupId'] = 'custom-south';
 $custom['areas']['south']['label'] = 'Südliches Büro';
+$custom['diagramOrder'] = ['gf_as', 'bl::west', 'bl::south'];
 $configured = AdOrganizationDefinition::get($custom);
-if ($configured->roleGroupId('office') !== 'custom-office' || $configured->areaLabel('south') !== 'Südliches Büro' || $configured->roles()['gf_as']['singleOccupant']) throw new RuntimeException('Konfigurierbare Gruppen, Anzeigenamen oder Einzelpositionen fehlen.');
+if ($configured->roleGroupId('office') !== 'custom-office' || $configured->areaLabel('south') !== 'Südliches Büro' || $configured->roles()['gf_as']['singleOccupant'] || $configured->diagramOrder() !== ['gf_as', 'bl::west', 'bl::south']) throw new RuntimeException('Konfigurierbare Gruppen, Anzeigenamen, Einzelpositionen oder visuelle Diagrammordnung fehlen.');
 $custom['hierarchy']['pdl'] = ['office'];
 $configured = AdOrganizationDefinition::get($custom);
 $policy = new AdOrganizationPermissionPolicy(new AdOrganizationHierarchy(null, $configured));
@@ -71,6 +73,22 @@ $unknown['hierarchy']['pdl'] = ['nicht_vorhanden'];
 try {
     AdOrganizationDefinition::get($unknown);
     throw new RuntimeException('Unbekanntes Hierarchieziel wurde nicht abgelehnt.');
+} catch (InvalidArgumentException) {
+}
+
+$unknownDiagramNode = $custom;
+$unknownDiagramNode['diagramOrder'][] = 'bl::unbekannt';
+try {
+    AdOrganizationDefinition::get($unknownDiagramNode);
+    throw new RuntimeException('Unbekannter Diagrammknoten wurde nicht abgelehnt.');
+} catch (InvalidArgumentException) {
+}
+
+$duplicateDiagramNode = $custom;
+$duplicateDiagramNode['diagramOrder'][] = 'gf_as';
+try {
+    AdOrganizationDefinition::get($duplicateDiagramNode);
+    throw new RuntimeException('Doppelter Diagrammknoten wurde nicht abgelehnt.');
 } catch (InvalidArgumentException) {
 }
 

@@ -30,8 +30,9 @@ namespace {
     $data = $service->definition()->toArray();
     $data['roles']['eb']['groupId'] = 'custom-eb';
     $data['roles']['eb']['label'] = 'Teamkoordination';
+    $data['diagramOrder'] = ['gf_as', 'bl::west'];
     $saved = $service->save($data);
-    if ($saved->roleGroupId('eb') !== 'custom-eb' || $service->definition()->roleLabel('eb') !== 'Teamkoordination') throw new \RuntimeException('Organisationseinstellung wurde nicht persistiert.');
+    if ($saved->roleGroupId('eb') !== 'custom-eb' || $service->definition()->roleLabel('eb') !== 'Teamkoordination' || $service->definition()->diagramOrder() !== ['gf_as', 'bl::west']) throw new \RuntimeException('Organisationseinstellung einschließlich visueller Diagrammordnung wurde nicht persistiert.');
 
     $config->values['localbase']['ad_organization_definition'] = '{kaputt';
     if ($service->definition()->roleGroupId('eb') !== 'ad-EB') throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf Defaults zurück.');

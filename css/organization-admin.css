@@ -38,7 +38,13 @@
 .orgs-level-nodes { display: flex; justify-content: center; align-items: flex-start; gap: 22px; min-width: max-content; }
 .orgs-card { position: relative; z-index: 2; width: 15rem; min-height: 64px; padding: 7px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-main-background); box-shadow: 0 2px 7px rgba(0, 0, 0, .12); transition: border-color .12s ease, box-shadow .12s ease; }
 .orgs-card.is-drag-over { border-color: var(--color-primary-element); box-shadow: 0 0 0 3px var(--color-primary-element-light); }
+.orgs-card.is-position-before { box-shadow: -6px 0 0 var(--color-primary-element), 0 2px 7px rgba(0, 0, 0, .12); }
+.orgs-card.is-position-after { box-shadow: 6px 0 0 var(--color-primary-element), 0 2px 7px rgba(0, 0, 0, .12); }
 .orgs-card code { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 400; }
+.orgs-card-position { display: flex; justify-content: flex-end; gap: 3px; margin-bottom: 4px; }
+.orgs-card-position button { min-width: 28px !important; min-height: 28px !important; height: 28px; margin: 0 !important; padding: 2px 7px !important; }
+.orgs-position-handle { cursor: ew-resize; }
+.orgs-position-handle.is-position-dragging { opacity: .55; }
 .orgs-drag-role { display: grid !important; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: center; width: 100%; min-height: 48px !important; margin: 0 !important; padding: 4px 8px !important; text-align: start; cursor: grab; }
 .orgs-drag-role strong { min-width: 0; overflow-wrap: anywhere; }
 .orgs-drag-role code { grid-column: 2; }
