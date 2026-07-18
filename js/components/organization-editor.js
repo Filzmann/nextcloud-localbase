@@ -14,6 +14,7 @@
             this.positions = [];
             this.sortDrag = null;
             this.hierarchyBoard = new window.LocalBase.components.HierarchyBoard({ container });
+            this.exporter = new window.LocalBase.components.OrganizationExporter({ container, board: this.hierarchyBoard });
             form.addEventListener('submit', event => { event.preventDefault(); if (this.definition) this.onSave(this.collect()); });
             container.addEventListener('click', event => this.onClick(event));
             container.addEventListener('dragstart', event => this.startSort(event));
@@ -51,7 +52,7 @@
                 <fieldset class="orgs-hierarchy"><legend>Direkte Hierarchie</legend>
                     <p>Ziehe eine unterstellte Rolle am Rollengriff auf die Karte ihrer Leitung. Der separate waagerechte Positionsgriff ordnet Karten derselben Ebene rein visuell von links nach rechts; dafür stehen zusätzlich Pfeiltasten bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
                     <div class="orgs-hierarchy-toolbar" aria-label="Hierarchieverbindung per Tastatur anlegen"><label>Leitung <select data-hierarchy-manager>${this.roleOptions(roles)}</select></label><label>Unterstellte Rolle <select data-hierarchy-target>${this.roleOptions(roles)}</select></label><button type="button" data-action="add-edge">Zuordnen</button></div>
-                    <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p><div class="orgs-organigram" data-hierarchy-board></div>
+                    <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p>${this.exporter.markup()}<div class="orgs-organigram" data-hierarchy-board></div>
                 </fieldset>
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Teamansichten im Urlaubsplaner</caption><thead><tr><th>ID</th><th>Anzeigename</th><th>Rollen</th><th>Bereiche</th><th>Reihenfolge</th><th>Aktion</th></tr></thead><tbody data-organization-teams>${(data.organizationTeams || []).map(team => this.teamRow(team)).join('')}</tbody></table></div>
                 <button type="button" data-action="add-team">Urlaubsansicht hinzufügen</button>`;

@@ -27,6 +27,12 @@
 .orgs-hierarchy-toolbar { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .orgs-hierarchy-toolbar label { min-width: 13rem; }
 .orgs-feedback { min-height: 1.4em; color: var(--color-main-text) !important; }
+.orgs-export { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin: 8px 0 12px; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--border-radius); background: var(--color-main-background); }
+.orgs-export label { display: flex; align-items: center; gap: 5px; }
+.orgs-export-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.orgs-export-actions button { margin: 0 !important; }
+.orgs-export-help { flex-basis: 100%; color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
+.orgs-export .orgs-feedback { flex-basis: 100%; margin: 0; }
 .orgs-organigram { min-width: 0; padding: 8px; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--border-radius); background-color: var(--color-background-dark); background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px); background-size: 20px 20px; }
 .orgs-diagram { position: relative; width: max-content; min-width: 100%; padding: 14px 24px 22px; box-sizing: border-box; }
 .orgs-diagram-links { position: absolute; inset: 0; z-index: 0; overflow: visible; pointer-events: none; }
@@ -65,6 +71,6 @@
 .orgs-panel form > button[type="submit"] { margin-top: 10px; }
 @media (max-width: 700px) {
     .orgs-panel { padding: 10px; }
-    .orgs-general,.orgs-hierarchy-toolbar { display: grid; }
+    .orgs-general,.orgs-hierarchy-toolbar,.orgs-export { display: grid; }
     .orgs-hierarchy-toolbar label { min-width: 0; }
 }

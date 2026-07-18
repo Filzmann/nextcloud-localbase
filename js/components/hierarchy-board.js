@@ -34,6 +34,25 @@
         get() { return clone(this.hierarchy); }
         getDiagramOrder() { return this.diagramNodes(this.sortedRoleKeys()).map(node => node.id); }
 
+        exportSnapshot(includePeople = false) {
+            const roleKeys = this.sortedRoleKeys();
+            const nodes = this.diagramNodes(roleKeys);
+            const levelByRole = new Map();
+            this.levels(roleKeys).forEach((roles, level) => roles.forEach(roleKey => levelByRole.set(roleKey, level)));
+            return {
+                title: 'AD-Organigramm',
+                nodes: nodes.map(node => ({
+                    id: node.id,
+                    roleKey: node.roleKey,
+                    label: this.roles[node.roleKey].label,
+                    areaLabel: node.areaKey ? this.areas[node.areaKey]?.label || node.areaKey : null,
+                    personLabel: includePeople && this.roles[node.roleKey].singleOccupant ? this.positionText(node.roleKey, node.areaKey) : null,
+                    level: levelByRole.get(node.roleKey) || 0,
+                })),
+                edges: this.diagramEdges(nodes),
+            };
+        }
+
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
             if (!button) return;

@@ -2,6 +2,7 @@
 \OCP\Util::addScript('localbase', 'api/api-client');
 \OCP\Util::addScript('localbase', 'ui/ui');
 \OCP\Util::addScript('localbase', 'components/hierarchy-board');
+\OCP\Util::addScript('localbase', 'components/organization-exporter');
 \OCP\Util::addScript('localbase', 'components/organization-editor');
 \OCP\Util::addScript('localbase', 'admin/organization-admin');
 \OCP\Util::addStyle('localbase', 'organization-admin');

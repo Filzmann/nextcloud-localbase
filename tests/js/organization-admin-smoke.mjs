@@ -16,7 +16,7 @@ for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/org
 }
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 for (const contract of ['orgs-directory-status', 'orgs-directory-groups', 'Verzeichnis- und LDAP-Kompatibilität']) if (!template.includes(contract)) throw new Error(`Verzeichnisdiagnose-Markup fehlt: ${contract}`);
-for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-column-help', '.orgs-card-person', 'background-image:']) {
+for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-export', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-column-help', '.orgs-card-person', 'background-image:']) {
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }
 if (!/\.orgs-level-nodes\s*\{[^}]*justify-content:\s*space-evenly/.test(css)) throw new Error('Wenige Organigrammkarten nutzen die verfügbare Ebenenbreite nicht gleichmäßig.');
