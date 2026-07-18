@@ -9,9 +9,10 @@
      * Vertrag: Die clientseitige Zyklusprüfung dient der Rückmeldung; LocalBase validiert den Payload serverseitig erneut.
      */
     class HierarchyBoard {
-        constructor({ container, onEditRole = () => {} }) {
+        constructor({ container, onEditRole = () => {}, onZoomChange = () => {} }) {
             this.container = container;
             this.onEditRole = onEditRole;
+            this.onZoomChange = onZoomChange;
             this.roles = {};
             this.areas = {};
             this.positions = [];
@@ -20,7 +21,14 @@
             this.draggedRole = '';
             this.draggedNode = null;
             this.connectionFrame = null;
+            this.zoom = 100;
+            this.pan = null;
             container.addEventListener('click', event => this.onClick(event));
+            container.addEventListener('keydown', event => this.onKeydown(event));
+            container.addEventListener('pointerdown', event => this.startPan(event));
+            container.addEventListener('pointermove', event => this.movePan(event));
+            container.addEventListener('pointerup', event => this.finishPan(event));
+            container.addEventListener('pointercancel', event => this.finishPan(event));
             container.addEventListener('dragstart', event => this.startDrag(event));
             container.addEventListener('dragover', event => this.overTarget(event));
             container.addEventListener('dragleave', event => this.leaveTarget(event));
@@ -34,6 +42,30 @@
         }
         get() { return clone(this.hierarchy); }
         getDiagramOrder() { return this.diagramNodes(this.sortedRoleKeys()).map(node => node.id); }
+
+        normalizeZoom(value) {
+            return Math.max(50, Math.min(150, Math.round(Number(value) / 10) * 10));
+        }
+
+        setZoom(value, emit = true) {
+            const zoom = this.normalizeZoom(value);
+            const changed = zoom !== this.zoom;
+            this.zoom = zoom;
+            this.applyZoom();
+            if (emit && changed) this.onZoomChange(zoom);
+        }
+
+        applyZoom() {
+            const diagram = this.container?.querySelector?.('[data-hierarchy-diagram]');
+            if (diagram) diagram.style.zoom = String(this.zoom / 100);
+            const output = this.container?.querySelector?.('[data-organigram-zoom]');
+            if (output) output.textContent = `${this.zoom} %`;
+            const zoomOut = this.container?.querySelector?.('[data-action="zoom-out"]');
+            const zoomIn = this.container?.querySelector?.('[data-action="zoom-in"]');
+            if (zoomOut) zoomOut.disabled = this.zoom <= 50;
+            if (zoomIn) zoomIn.disabled = this.zoom >= 150;
+            this.scheduleConnections();
+        }
 
         exportSnapshot(includePeople = false) {
             const roleKeys = this.sortedRoleKeys();
@@ -57,6 +89,9 @@
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
             if (!button) return;
+            if (button.dataset.action === 'zoom-in') this.setZoom(this.zoom + 10);
+            if (button.dataset.action === 'zoom-out') this.setZoom(this.zoom - 10);
+            if (button.dataset.action === 'zoom-reset') this.setZoom(100);
             if (button.dataset.action === 'edit-role') this.onEditRole(button.dataset.roleKey);
             if (button.dataset.action === 'move-node-left') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, -1);
             if (button.dataset.action === 'move-node-right') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, 1);
@@ -67,6 +102,53 @@
             );
         }
 
+        onKeydown(event) {
+            if (!(event.target instanceof Element) || !event.target.closest('[data-organigram-viewport]')) return;
+            const actions = { '+': 10, '=': 10, '-': -10 };
+            if (event.key in actions) {
+                event.preventDefault();
+                this.setZoom(this.zoom + actions[event.key]);
+            } else if (event.key === '0') {
+                event.preventDefault();
+                this.setZoom(100);
+            }
+        }
+
+        startPan(event) {
+            const target = event.target instanceof Element ? event.target : null;
+            const viewport = target?.closest('[data-organigram-viewport]');
+            if (!viewport || event.button !== 0 || target.closest('button,a,input,select,textarea,[data-diagram-node]')) return;
+            event.preventDefault();
+            this.beginPan(viewport, event);
+        }
+
+        beginPan(viewport, event) {
+            this.pan = {
+                viewport,
+                pointerId: event.pointerId,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                scrollLeft: viewport.scrollLeft,
+                scrollTop: viewport.scrollTop,
+            };
+            viewport.classList.add('is-panning');
+            viewport.setPointerCapture?.(event.pointerId);
+        }
+
+        movePan(event) {
+            if (!this.pan || event.pointerId !== this.pan.pointerId) return;
+            event.preventDefault();
+            this.pan.viewport.scrollLeft = this.pan.scrollLeft - (event.clientX - this.pan.clientX);
+            this.pan.viewport.scrollTop = this.pan.scrollTop - (event.clientY - this.pan.clientY);
+        }
+
+        finishPan(event) {
+            if (!this.pan || event.pointerId !== this.pan.pointerId) return;
+            this.pan.viewport.releasePointerCapture?.(event.pointerId);
+            this.pan.viewport.classList.remove('is-panning');
+            this.pan = null;
+        }
+
         render(message = '') {
             const roles = Object.entries(this.roles).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
             const roleMap = Object.fromEntries(roles);
@@ -74,17 +156,26 @@
             const nodes = this.diagramNodes(roles.map(([key]) => key));
             const roleLevels = this.levels(roles.map(([key]) => key));
             this.container.querySelector('[data-hierarchy-board]').innerHTML = `
-                <div class="orgs-diagram" data-hierarchy-diagram>
-                    <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
-                    <div class="orgs-diagram-levels">${roleLevels.map((level, index) => `
-                        <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes" data-diagram-level-list="${index}">
-                            ${this.levelNodes(level, nodes).map((node, nodeIndex, levelNodes) => this.card(node, index, nodeIndex, levelNodes.length)).join('')}
-                        </div></section>`).join('')}
+                <div class="orgs-organigram-toolbar" role="group" aria-label="Organigrammansicht vergrößern oder verkleinern">
+                    <button type="button" data-action="zoom-out" aria-label="Organigramm verkleinern">−</button>
+                    <button type="button" data-action="zoom-reset" aria-label="Organigramm auf 100 Prozent zurücksetzen">100 %</button>
+                    <button type="button" data-action="zoom-in" aria-label="Organigramm vergrößern">+</button>
+                    <output data-organigram-zoom aria-live="polite">${this.zoom} %</output>
+                    <span>Freie Fläche ziehen oder scrollen. Tastatur: +, − und 0.</span>
+                </div>
+                <div class="orgs-organigram" data-organigram-viewport tabindex="0" aria-label="Organigramm, verschiebbarer hierarchischer Ausschnitt">
+                    <div class="orgs-diagram" data-hierarchy-diagram>
+                        <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
+                        <div class="orgs-diagram-levels">${roleLevels.map((level, index) => `
+                            <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes" data-diagram-level-list="${index}">
+                                ${this.levelNodes(level, nodes).map((node, nodeIndex, levelNodes) => this.card(node, index, nodeIndex, levelNodes.length)).join('')}
+                            </div></section>`).join('')}
+                        </div>
                     </div>
                 </div>
                 <section class="orgs-connections" aria-labelledby="orgs-connections-heading"><h4 id="orgs-connections-heading">Direkte Verbindungen</h4>${this.connectionList(connections)}</section>`;
             this.container.querySelector('[data-hierarchy-feedback]').textContent = message;
-            this.scheduleConnections();
+            this.applyZoom();
         }
 
         card(node, levelIndex = 0, nodeIndex = 0, nodeCount = 1) {
@@ -188,8 +279,9 @@
             if (!diagram || !svg || !links) return;
             links.replaceChildren();
             const bounds = diagram.getBoundingClientRect();
-            const width = Math.max(diagram.scrollWidth, diagram.clientWidth);
-            const height = Math.max(diagram.scrollHeight, diagram.clientHeight);
+            const scale = this.zoom / 100;
+            const width = Math.max(diagram.scrollWidth, diagram.clientWidth, bounds.width / scale);
+            const height = Math.max(diagram.scrollHeight, diagram.clientHeight, bounds.height / scale);
             svg.setAttribute('width', String(width));
             svg.setAttribute('height', String(height));
             svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -201,10 +293,10 @@
                 if (!source || !destination) continue;
                 const from = source.getBoundingClientRect();
                 const to = destination.getBoundingClientRect();
-                const fromX = from.left - bounds.left + from.width / 2;
-                const fromY = from.bottom - bounds.top;
-                const toX = to.left - bounds.left + to.width / 2;
-                const toY = to.top - bounds.top - 4;
+                const fromX = (from.left - bounds.left + from.width / 2) / scale;
+                const fromY = (from.bottom - bounds.top) / scale;
+                const toX = (to.left - bounds.left + to.width / 2) / scale;
+                const toY = (to.top - bounds.top) / scale - 4;
                 const middleY = fromY + Math.max(20, (toY - fromY) / 2);
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.setAttribute('d', `M ${fromX} ${fromY} C ${fromX} ${middleY}, ${toX} ${middleY}, ${toX} ${toY}`);

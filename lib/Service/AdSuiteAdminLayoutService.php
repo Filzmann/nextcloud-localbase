@@ -10,9 +10,9 @@ use OCP\Config\IUserConfig;
 use Psr\Log\LoggerInterface;
 
 /**
- * Zweck: Speichert die rein persönliche Anordnung der gemeinsamen AD-Adminblöcke je Nextcloud-Konto.
+ * Zweck: Speichert die rein persönliche Anordnung der gemeinsamen AD-Adminblöcke und den Organigramm-Zoom je Nextcloud-Konto.
  * Zusammenspiel: AdSuiteAdminApiController -> IUserConfig; fachliche Organisations- und Rechtewerte bleiben unberührt.
- * Vertrag: Ausschließlich bekannte Scopes und Block-IDs werden angenommen; neue Standardblöcke werden vorhandenen Layouts angehängt.
+ * Vertrag: Ausschließlich bekannte Scopes, Block-IDs und Zoomstufen werden angenommen; neue Standardblöcke werden vorhandenen Layouts angehängt.
  */
 final class AdSuiteAdminLayoutService {
     private const CONFIG_KEY = 'ad_suite_admin_dashboard_layout';
@@ -49,6 +49,7 @@ final class AdSuiteAdminLayoutService {
         return [
             'version' => self::VERSION,
             'scopes' => array_map(static fn(array $order): array => ['order' => $order, 'collapsed' => []], self::BLOCKS),
+            'organigram' => ['zoom' => 100],
         ];
     }
 
@@ -56,7 +57,7 @@ final class AdSuiteAdminLayoutService {
         if (($layout['version'] ?? self::VERSION) !== self::VERSION || !isset($layout['scopes']) || !is_array($layout['scopes'])) {
             throw new InvalidArgumentException('Das persönliche Adminlayout ist ungültig.');
         }
-        if (array_diff(array_keys($layout), ['version', 'scopes']) !== []) throw new InvalidArgumentException('Das persönliche Adminlayout enthält unbekannte Felder.');
+        if (array_diff(array_keys($layout), ['version', 'scopes', 'organigram']) !== []) throw new InvalidArgumentException('Das persönliche Adminlayout enthält unbekannte Felder.');
         if (array_diff(array_keys($layout['scopes']), array_keys(self::BLOCKS)) !== []) throw new InvalidArgumentException('Das persönliche Adminlayout enthält einen unbekannten Bereich.');
 
         $scopes = [];
@@ -70,7 +71,12 @@ final class AdSuiteAdminLayoutService {
                 'collapsed' => $collapsed,
             ];
         }
-        return ['version' => self::VERSION, 'scopes' => $scopes];
+        $organigram = $layout['organigram'] ?? ['zoom' => 100];
+        if (!is_array($organigram) || array_diff(array_keys($organigram), ['zoom']) !== []) throw new InvalidArgumentException('Das persönliche Adminlayout enthält ungültige Organigrammdaten.');
+        $zoom = $organigram['zoom'] ?? 100;
+        if (!is_int($zoom) || $zoom < 50 || $zoom > 150 || $zoom % 10 !== 0) throw new InvalidArgumentException('Der persönliche Organigramm-Zoom ist ungültig.');
+
+        return ['version' => self::VERSION, 'scopes' => $scopes, 'organigram' => ['zoom' => $zoom]];
     }
 
     private function validatedList(mixed $value, array $allowed): array {

@@ -17,6 +17,7 @@
         container: document.getElementById('orgs-organization-editor'),
         form: organizationForm,
         onSave: saveOrganization,
+        onZoomChange: zoom => dashboard.setOrganigramZoom(zoom),
     });
 
     function renderCheckboxes(containerId, values, options) {
@@ -69,7 +70,7 @@
     async function load() {
         try {
             const data = await client.request('/api/ad-suite/admin/settings');
-            editor.set(data.organization, data.directory?.positions || []);
+            editor.set(data.organization, data.directory?.positions || [], data.dashboardLayout?.organigram?.zoom || 100);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
             renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
             renderDirectoryStatus(data.directory);

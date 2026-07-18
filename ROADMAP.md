@@ -17,6 +17,7 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 - Rollen können ausdrücklich als Einzelposition markiert werden. Organisationsweite Einzelpositionen sowie bereichsbezogene BL-/StvBL-Positionen zeigen ihre Nextcloud-Gruppenbesetzung im Diagramm; fehlende und mehrfache Besetzungen werden sichtbar diagnostiziert.
 - Die Gruppenoptionen werden über einen Edit-Stift der Diagrammkarten in einem Seitenpanel mit sichtbaren Erklärungen ihrer fachlichen Wirkung bearbeitet. Technische Zuordnungen sind eingeklappt; die fachliche Reihenfolge bleibt separat kompakt sortierbar, Bereiche und Urlaubsansichten erscheinen als aufklappbare Karten.
 - Alle Haupt-, Organisations- und Rechteblöcke der AD-Administration lassen sich wie Dashboard-Widgets unabhängig einklappen und per Drag-and-drop oder Tastatur verschieben. Diese Ansicht wird über die native Nextcloud-Benutzerkonfiguration persönlich und geräteübergreifend gespeichert; fachliche Reihenfolgen und Rechte bleiben davon getrennt.
+- Das Organigramm bleibt automatisch hierarchisch angeordnet und unterstützt einen zugänglichen persönlichen Zoom von 50 bis 150 Prozent sowie Scrollen und Zeiger-Pan des sichtbaren Ausschnitts. Nur der Zoom wird geräteübergreifend gespeichert; Exporte verwenden weiterhin die vollständige logische Diagrammgröße.
 - Organisationsvertrag Version 2 ergänzt stellvertretende PDL, Büroorganisation Pflege, Fahrzeugverwaltung und Empfang additiv in bestehenden Konfigurationen. Stv. PDL führt Pflegefachkräfte und Büroorganisation Pflege; Fahrzeugverwaltung ist GF-Digi und Empfang dem Sekretariat unterstellt.
 
 ## Geplante Erweiterungen
@@ -33,6 +34,5 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 
 ### Vor einem weiteren Ausbau des Organigramms zu klären
 
-- Bedarf und Vertrag für manuelle Knotenpositionierung und Zoom.
 - Verhalten und responsive Anordnung bei Organisationen, die deutlich größer als die aktuelle AD-Struktur sind.
 - Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.

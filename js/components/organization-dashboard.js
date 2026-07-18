@@ -12,7 +12,7 @@
         constructor({ root, onChange = () => {} }) {
             this.root = root;
             this.onChange = onChange;
-            this.layout = { version: 1, scopes: {} };
+            this.layout = { version: 1, scopes: {}, organigram: { zoom: 100 } };
             this.drag = null;
             root.addEventListener('click', event => this.onClick(event));
             root.addEventListener('dragstart', event => this.startDrag(event));
@@ -24,7 +24,8 @@
         }
 
         set(layout) {
-            this.layout = clone(layout || { version: 1, scopes: {} });
+            this.layout = clone(layout || { version: 1, scopes: {}, organigram: { zoom: 100 } });
+            this.layout.organigram ||= { zoom: 100 };
             this.applyLayout();
         }
 
@@ -67,7 +68,13 @@
                     collapsed: widgets.filter(widget => widget.querySelector('[data-dashboard-toggle]')?.getAttribute('aria-expanded') === 'false').map(widget => widget.dataset.widgetId),
                 };
             });
-            return { version: 1, scopes };
+            return { version: 1, scopes, organigram: clone(this.layout?.organigram || { zoom: 100 }) };
+        }
+
+        setOrganigramZoom(zoom) {
+            this.layout = this.collectLayout();
+            this.layout.organigram = { zoom };
+            this.onChange(clone(this.layout));
         }
 
         toggleWidget(button) {

@@ -83,11 +83,11 @@ dashboard.root = {
     querySelectorAll: selector => selector === '[data-dashboard-scope]' ? [scope] : [],
     querySelector: () => null,
 };
-dashboard.layout = { version: 1, scopes: { test: { order: ['third', 'first', 'second'], collapsed: ['first'] } } };
+dashboard.layout = { version: 1, scopes: { test: { order: ['third', 'first', 'second'], collapsed: ['first'] } }, organigram: { zoom: 120 } };
 dashboard.applyLayout();
 if (scope.children.map(item => item.dataset.widgetId).join(',') !== 'third,first,second' || !first.panel.hidden) throw new Error('Persönliche Blockreihenfolge oder Einklappzustand wird nicht angewendet.');
 const collected = dashboard.collectLayout();
-if (collected.scopes.test.order.join(',') !== 'third,first,second' || collected.scopes.test.collapsed.join(',') !== 'first') throw new Error('Dashboardzustand wird nicht vollständig gesammelt.');
+if (collected.scopes.test.order.join(',') !== 'third,first,second' || collected.scopes.test.collapsed.join(',') !== 'first' || collected.organigram.zoom !== 120) throw new Error('Dashboardzustand oder persönlicher Organigramm-Zoom wird nicht vollständig gesammelt.');
 const moveDown = first.moves['1'];
 moveDown.closest = () => first.item;
 dashboard.moveWidget(moveDown, 1);
@@ -101,5 +101,9 @@ first.state.expanded = 'false';
 first.panel.hidden = true;
 dashboard.revealInvalid({ closest: () => first.item });
 if (first.panel.hidden || first.state.expanded !== 'true') throw new Error('Ein eingeklappter Block mit ungültigem Pflichtfeld wird nicht automatisch geöffnet.');
+let savedZoom = null;
+dashboard.onChange = layout => { savedZoom = layout.organigram.zoom; };
+dashboard.setOrganigramZoom(140);
+if (savedZoom !== 140 || dashboard.layout.organigram.zoom !== 140) throw new Error('Persönlicher Organigramm-Zoom wird nicht in den Layoutvertrag übernommen.');
 
 console.log('LocalBase organization dashboard smoke passed');

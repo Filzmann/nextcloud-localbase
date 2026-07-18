@@ -6,18 +6,18 @@ const hierarchySource = readFileSync(new URL('../../js/components/hierarchy-boar
 const adminSource = readFileSync(new URL('../../js/admin/organization-admin.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../../css/organization-admin.css', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachliche Gruppenreihenfolge', 'data-role-editor', 'roleEditorMarkup(', 'openRoleEditor(', 'closeRoleEditor(', 'updateRoleFromPanel(', 'data-setting-card', 'data-action="toggle-card"', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Technische Zuordnung', 'gilt für alle Karten dieser Rolle', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
+for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachliche Gruppenreihenfolge', 'onZoomChange', 'setZoom(zoom, false)', 'data-role-editor', 'roleEditorMarkup(', 'openRoleEditor(', 'closeRoleEditor(', 'updateRoleFromPanel(', 'data-setting-card', 'data-action="toggle-card"', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Technische Zuordnung', 'gilt für alle Karten dieser Rolle', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
     if (!editorSource.includes(contract)) throw new Error(`Organisationseditor-Vertrag fehlt: ${contract}`);
 }
 if (editorSource.includes('Fachrollen und Nextcloud-Gruppen') || editorSource.includes('columnHeader(') || editorSource.includes('roleRow(')) throw new Error('Die breite Rollen-Einstellungstabelle ist weiterhin vorhanden.');
-for (const contract of ['class HierarchyBoard', 'onEditRole', 'data-action="edit-role"', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
+for (const contract of ['class HierarchyBoard', 'onEditRole', 'onZoomChange', 'data-action="edit-role"', 'data-action="zoom-in"', 'data-action="zoom-out"', 'data-action="zoom-reset"', 'data-organigram-viewport', 'tabindex="0"', 'startPan(', 'movePan(', 'finishPan(', 'normalizeZoom(', 'setZoom(', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
 if (hierarchySource.includes('Keine direkt unterstellte Rolle') || hierarchySource.includes('class="orgs-edges"')) throw new Error('Unterstellte Rollen stehen weiterhin textlastig innerhalb der Diagrammknoten.');
-for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []']) {
+for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []', 'setOrganigramZoom', 'data.dashboardLayout?.organigram?.zoom']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
 }
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 for (const contract of ['orgs-directory-status', 'orgs-directory-groups', 'Verzeichnis- und LDAP-Kompatibilität']) if (!template.includes(contract)) throw new Error(`Verzeichnisdiagnose-Markup fehlt: ${contract}`);
-for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-diagram-workspace.is-editing', '.orgs-role-editor', '.orgs-compact-list', '.orgs-setting-card', '.orgs-export', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-card-person', 'background-image:']) {
+for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-organigram-toolbar', '.orgs-organigram.is-panning', '.orgs-diagram-workspace.is-editing', '.orgs-role-editor', '.orgs-compact-list', '.orgs-setting-card', '.orgs-export', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-card-person', 'background-image:']) {
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }
 if (!/\.orgs-level-nodes\s*\{[^}]*justify-content:\s*space-evenly/.test(css)) throw new Error('Wenige Organigrammkarten nutzen die verfügbare Ebenenbreite nicht gleichmäßig.');
@@ -26,6 +26,21 @@ const context = { window: { LocalBase: { ui: { esc: value => String(value ?? '')
 runInNewContext(hierarchySource, context);
 runInNewContext(editorSource, context);
 const board = Object.create(context.window.LocalBase.components.HierarchyBoard.prototype);
+if (board.normalizeZoom(20) !== 50 || board.normalizeZoom(137) !== 140 || board.normalizeZoom(190) !== 150) throw new Error('Persönlicher Zoom wird nicht auf sichere Grenzen und Schritte normalisiert.');
+let emittedZoom = null;
+let appliedZoom = false;
+board.zoom = 100;
+board.onZoomChange = zoom => { emittedZoom = zoom; };
+board.applyZoom = () => { appliedZoom = true; };
+board.setZoom(130);
+if (board.zoom !== 130 || emittedZoom !== 130 || !appliedZoom) throw new Error('Zoomänderung wird nicht angewendet und persönlich gespeichert.');
+const viewport = { scrollLeft: 200, scrollTop: 100, classList: { add() {}, remove() {} }, setPointerCapture() {}, releasePointerCapture() {} };
+board.beginPan(viewport, { clientX: 50, clientY: 60, pointerId: 7 });
+let panPrevented = false;
+board.movePan({ clientX: 80, clientY: 90, pointerId: 7, preventDefault: () => { panPrevented = true; } });
+if (viewport.scrollLeft !== 170 || viewport.scrollTop !== 70 || !panPrevented) throw new Error('Zeiger-Pan verschiebt den hierarchischen Diagrammausschnitt nicht korrekt.');
+board.finishPan({ pointerId: 7 });
+if (board.pan !== null) throw new Error('Zeiger-Pan wird nicht sauber beendet.');
 board.hierarchy = { gf: ['pdl'], pdl: ['pfk'] };
 if (JSON.stringify(board.levels(['gf', 'pdl', 'pfk'])) !== JSON.stringify([['gf'], ['pdl'], ['pfk']])) throw new Error('Organigramm-Ebenen werden nicht aus der Hierarchie abgeleitet.');
 if (!board.reaches('gf', 'pfk') || board.reaches('pfk', 'gf')) throw new Error('Clientseitige Zyklusprüfung ist fehlerhaft.');
