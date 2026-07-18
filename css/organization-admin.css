@@ -12,6 +12,8 @@
 .orgs-table-wrap { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
 .orgs-table { width: max-content; min-width: 100%; max-width: none; margin: 10px 0; border-collapse: collapse; }
 .orgs-table th,.orgs-table td { padding: 5px; border: 1px solid var(--color-border); vertical-align: middle; }
+.orgs-table thead th { vertical-align: top; }
+.orgs-column-help { display: block; max-width: 14rem; margin-top: 3px; color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 400; line-height: 1.25; }
 .orgs-table input:not([type="checkbox"]) { min-width: 120px; width: 100%; }
 .orgs-table input[type="number"] { min-width: 72px; width: 82px; }
 .orgs-sort-cell { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 130px; }
@@ -41,6 +43,10 @@
 .orgs-drag-role strong { min-width: 0; overflow-wrap: anywhere; }
 .orgs-drag-role code { grid-column: 2; }
 .orgs-drag-role.is-dragging { opacity: .55; cursor: grabbing; }
+.orgs-card-area,.orgs-card-person { display: block; margin: 5px 8px 0 36px; overflow-wrap: anywhere; }
+.orgs-card-area { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
+.orgs-card-person { padding-top: 5px; border-top: 1px solid var(--color-border); font-weight: 600; }
+.orgs-card-person--vacant,.orgs-card-person--multiple { color: var(--color-warning-text, var(--color-main-text)); }
 .orgs-connections { min-width: 0; margin-top: 12px; padding: 10px; border-radius: var(--border-radius); background: var(--color-main-background); }
 .orgs-connections h4 { margin: 0 0 7px; }
 .orgs-connection-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 5px 12px; margin: 0; padding: 0; list-style: none; }

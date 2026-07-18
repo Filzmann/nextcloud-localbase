@@ -64,7 +64,7 @@
     async function load() {
         try {
             const data = await client.request('/api/ad-suite/admin/settings');
-            editor.set(data.organization);
+            editor.set(data.organization, data.directory?.positions || []);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
             renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
             renderDirectoryStatus(data.directory);
@@ -78,8 +78,7 @@
 
     async function saveOrganization(organization) {
         try {
-            const data = await client.request('/api/ad-suite/admin/organization', { method: 'PUT', body: JSON.stringify({ organization }) });
-            editor.set(data.organization);
+            await client.request('/api/ad-suite/admin/organization', { method: 'PUT', body: JSON.stringify({ organization }) });
             await load();
             notice.success('AD-Organisation gespeichert.');
         } catch (error) {

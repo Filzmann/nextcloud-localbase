@@ -33,7 +33,43 @@ final class OrganizationDirectoryStatusService {
             'compatible' => array_filter($result, static fn(array $group): bool => !$group['exists']) === [],
             'demoWritable' => array_filter($result, static fn(array $group): bool => !$group['demoProvisionable']) === [],
             'groups' => $result,
+            'positions' => $this->positions($definition),
         ];
+    }
+
+    /**
+     * Liefert ausschließlich Anzeigenamen für ausdrücklich konfigurierte Einzelpositionen.
+     * Bereichsrollen werden als Schnitt aus Rollen- und Bereichsgruppe aufgelöst.
+     */
+    private function positions(AdOrganizationDefinition $definition): array {
+        $positions = [];
+        foreach ($definition->roles() as $roleKey => $role) {
+            if (!$role['singleOccupant']) continue;
+            $roleUsers = $this->groupUsers($role['groupId']);
+            if (!$role['areaScoped']) {
+                $positions[] = $this->position((string)$roleKey, null, $roleUsers);
+                continue;
+            }
+            foreach ($definition->areas() as $areaKey => $area) {
+                $areaUsers = array_fill_keys(array_map(static fn($user): string => $user->getUID(), $this->groupUsers($area['groupId'])), true);
+                $users = array_values(array_filter($roleUsers, static fn($user): bool => isset($areaUsers[$user->getUID()])));
+                $positions[] = $this->position((string)$roleKey, (string)$areaKey, $users);
+            }
+        }
+        return $positions;
+    }
+
+    private function groupUsers(string $groupId): array {
+        return $this->groups->get($groupId)?->getUsers() ?? [];
+    }
+
+    private function position(string $roleKey, ?string $areaKey, array $users): array {
+        $displayNames = array_map(static function ($user): string {
+            $displayName = trim($user->getDisplayName());
+            return $displayName !== '' ? $displayName : $user->getUID();
+        }, $users);
+        natcasesort($displayNames);
+        return ['roleKey' => $roleKey, 'areaKey' => $areaKey, 'displayNames' => array_values($displayNames)];
     }
 
     private function groupStatus(string $kind, string $key, string $groupId, string $label): array {

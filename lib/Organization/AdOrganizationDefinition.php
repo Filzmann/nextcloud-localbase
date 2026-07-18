@@ -12,6 +12,8 @@ use InvalidArgumentException;
  * Vertrag: Technische Rollenschlüssel bleiben stabil, während Gruppen-IDs, Anzeigenamen, Bereiche, Teams und Hierarchiekanten konfigurierbar sind.
  */
 final class AdOrganizationDefinition {
+    private const DEFAULT_SINGLE_OCCUPANT_ROLES = ['gf_as', 'pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'];
+
     private function __construct(private array $data) {}
 
     public static function get(array $data): self {
@@ -31,18 +33,18 @@ final class AdOrganizationDefinition {
             'teamCodeMaxLength' => 16,
             'staffBlockLabel' => 'Geschäftsführung, Leitungen und Stabsstellen',
             'roles' => [
-                'gf_as' => self::role('ad-GF-AS', 'Geschäftsführung Assistenz', 10, staffBlock: true),
-                'pdl' => self::role('ad-PDL', 'Pflegedienstleitung', 20, staffBlock: true),
+                'gf_as' => self::role('ad-GF-AS', 'Geschäftsführung Assistenz', 10, staffBlock: true, singleOccupant: true),
+                'pdl' => self::role('ad-PDL', 'Pflegedienstleitung', 20, staffBlock: true, singleOccupant: true),
                 'staff_hr' => self::role('ad-Stab-HR', 'Stabsstelle HR', 30, peerEnabled: true, staffBlock: true),
                 'staff_qmb' => self::role('ad-Stab-QMB', 'Stabsstelle Qualitätsmanagement', 40, peerEnabled: true, staffBlock: true),
-                'gf_digi' => self::role('ad-GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true),
-                'assistant_gf_digi' => self::role('ad-AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true),
-                'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true),
+                'gf_digi' => self::role('ad-GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true, singleOccupant: true),
+                'assistant_gf_digi' => self::role('ad-AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true, singleOccupant: true),
+                'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
                 'finance' => self::role('ad-Finanzen-Lohn', 'Finanzen und Lohn', 80, peerEnabled: true, staffBlock: true),
                 'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true),
                 'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
-                'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true),
-                'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true),
+                'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
+                'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 220, areaScoped: true, peerEnabled: true),
                 'eb' => self::role('ad-EB', 'Einsatzbegleitung', 230, areaScoped: true, peerEnabled: true),
                 'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true),
@@ -166,8 +168,8 @@ final class AdOrganizationDefinition {
         return false;
     }
 
-    private static function role(string $groupId, string $label, int $sortOrder, bool $areaScoped = false, bool $managementAreaScoped = false, bool $peerEnabled = false, bool $staffBlock = false): array {
-        return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock') + ['calendarVisible' => true];
+    private static function role(string $groupId, string $label, int $sortOrder, bool $areaScoped = false, bool $managementAreaScoped = false, bool $peerEnabled = false, bool $staffBlock = false, bool $singleOccupant = false): array {
+        return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant') + ['calendarVisible' => true];
     }
 
     private static function validate(array $data): array {
@@ -194,6 +196,7 @@ final class AdOrganizationDefinition {
                 'managementAreaScoped' => (bool)($role['managementAreaScoped'] ?? false),
                 'peerEnabled' => (bool)($role['peerEnabled'] ?? false),
                 'staffBlock' => (bool)($role['staffBlock'] ?? false),
+                'singleOccupant' => (bool)($role['singleOccupant'] ?? in_array((string)$key, self::DEFAULT_SINGLE_OCCUPANT_ROLES, true)),
                 'calendarVisible' => (bool)($role['calendarVisible'] ?? true),
             ];
         }

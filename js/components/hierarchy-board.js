@@ -12,6 +12,8 @@
         constructor({ container }) {
             this.container = container;
             this.roles = {};
+            this.areas = {};
+            this.positions = [];
             this.hierarchy = {};
             this.draggedRole = '';
             this.connectionFrame = null;
@@ -24,7 +26,9 @@
             window.addEventListener?.('resize', () => this.scheduleConnections());
         }
 
-        set(roles, hierarchy) { this.roles = clone(roles); this.hierarchy = clone(hierarchy); this.render(); }
+        set(roles, hierarchy, areas = {}, positions = []) {
+            this.roles = clone(roles); this.hierarchy = clone(hierarchy); this.areas = clone(areas); this.positions = clone(positions); this.render();
+        }
         get() { return clone(this.hierarchy); }
 
         onClick(event) {
@@ -41,12 +45,14 @@
             const roles = Object.entries(this.roles).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
             const roleMap = Object.fromEntries(roles);
             const connections = this.connections(roleMap);
+            const nodes = this.diagramNodes(roles.map(([key]) => key));
+            const nodesByRole = this.nodesByRole(nodes);
             this.container.querySelector('[data-hierarchy-board]').innerHTML = `
                 <div class="orgs-diagram" data-hierarchy-diagram>
                     <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
                     <div class="orgs-diagram-levels">${this.levels(roles.map(([key]) => key)).map((level, index) => `
                         <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes">
-                            ${level.map(key => this.card(key, roleMap[key])).join('')}
+                            ${level.flatMap(key => nodesByRole.get(key) || []).map(node => this.card(node)).join('')}
                         </div></section>`).join('')}
                     </div>
                 </div>
@@ -55,8 +61,53 @@
             this.scheduleConnections();
         }
 
-        card(key, role) {
-            return `<article class="orgs-card" data-manager-key="${esc(key)}" data-diagram-role="${esc(key)}"><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(key)}" aria-label="${esc(role.label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(key)}</code></button></article>`;
+        card(node) {
+            const role = this.roles[node.roleKey];
+            const area = node.areaKey ? this.areas[node.areaKey] : null;
+            const person = this.positionText(node.roleKey, node.areaKey);
+            const position = this.position(node.roleKey, node.areaKey);
+            const personClass = (position?.displayNames || []).length === 0 ? ' orgs-card-person--vacant' : (position?.displayNames || []).length > 1 ? ' orgs-card-person--multiple' : '';
+            const areaLabel = area ? `<span class="orgs-card-area">Bereich ${esc(area.label)}</span>` : '';
+            const personMarkup = role.singleOccupant ? `<span class="orgs-card-person${personClass}">${esc(person)}</span>` : '';
+            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}"><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(role.label)}${area ? `, Bereich ${esc(area.label)}` : ''} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
+        }
+
+        diagramNodes(roleKeys) {
+            const areas = Object.entries(this.areas).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
+            return roleKeys.flatMap(roleKey => {
+                const role = this.roles[roleKey];
+                if (!role?.areaScoped || !areas.length) return [{ id: roleKey, roleKey, areaKey: null }];
+                return areas.map(([areaKey]) => ({ id: `${roleKey}::${areaKey}`, roleKey, areaKey }));
+            });
+        }
+
+        diagramEdges(nodes) {
+            const nodesByRole = this.nodesByRole(nodes);
+            const result = [];
+            for (const [manager, targets] of Object.entries(this.hierarchy)) for (const target of targets) {
+                for (const source of nodesByRole.get(manager) || []) for (const destination of nodesByRole.get(target) || []) {
+                    if (source.areaKey && destination.areaKey && source.areaKey !== destination.areaKey) continue;
+                    result.push({ source: source.id, destination: destination.id });
+                }
+            }
+            return result;
+        }
+
+        nodesByRole(nodes) {
+            const result = new Map();
+            for (const node of nodes) result.set(node.roleKey, [...(result.get(node.roleKey) || []), node]);
+            return result;
+        }
+
+        position(roleKey, areaKey) {
+            return this.positions.find(position => position.roleKey === roleKey && (position.areaKey || null) === (areaKey || null));
+        }
+
+        positionText(roleKey, areaKey) {
+            const names = this.position(roleKey, areaKey)?.displayNames || [];
+            if (!names.length) return 'Nicht besetzt';
+            if (names.length === 1) return names[0];
+            return `Mehrfach besetzt: ${names.join(', ')}`;
         }
 
         connections(roleMap) {
@@ -93,10 +144,11 @@
             svg.setAttribute('width', String(width));
             svg.setAttribute('height', String(height));
             svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-            const cards = new Map([...diagram.querySelectorAll('[data-diagram-role]')].map(card => [card.dataset.diagramRole, card]));
-            for (const [manager, targets] of Object.entries(this.hierarchy)) for (const target of targets) {
-                const source = cards.get(manager);
-                const destination = cards.get(target);
+            const cards = new Map([...diagram.querySelectorAll('[data-diagram-node]')].map(card => [card.dataset.diagramNode, card]));
+            const roleKeys = Object.entries(this.roles).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder)).map(([key]) => key);
+            for (const edge of this.diagramEdges(this.diagramNodes(roleKeys))) {
+                const source = cards.get(edge.source);
+                const destination = cards.get(edge.destination);
                 if (!source || !destination) continue;
                 const from = source.getBoundingClientRect();
                 const to = destination.getBoundingClientRect();

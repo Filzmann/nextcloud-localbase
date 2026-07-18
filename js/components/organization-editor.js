@@ -11,6 +11,7 @@
     class OrganizationEditor {
         constructor({ container, form, onSave }) {
             this.container = container; this.form = form; this.onSave = onSave; this.definition = null;
+            this.positions = [];
             this.sortDrag = null;
             this.hierarchyBoard = new window.LocalBase.components.HierarchyBoard({ container });
             form.addEventListener('submit', event => { event.preventDefault(); if (this.definition) this.onSave(this.collect()); });
@@ -22,7 +23,7 @@
             container.addEventListener('dragend', () => this.clearSort());
         }
 
-        set(definition) { this.definition = clone(definition); this.render(); }
+        set(definition, positions = []) { this.definition = clone(definition); this.positions = clone(positions); this.render(); }
 
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
@@ -45,24 +46,26 @@
                     <label>Titel des Leitungsblocks <input data-organization-field="staffBlockLabel" value="${esc(data.staffBlockLabel)}" required></label>
                 </fieldset>
                 <p class="orgs-feedback" data-organization-sort-feedback role="status" aria-live="polite"></p>
-                <div class="orgs-table-wrap"><table class="orgs-table"><caption>Fachrollen und Nextcloud-Gruppen</caption><thead><tr><th>Rolle</th><th>Gruppen-ID</th><th>Anzeigename</th><th>Kalender</th><th>Bereich</th><th>Leitung je Bereich</th><th>Peer-fähig</th><th>Leitungsblock</th><th>Reihenfolge</th></tr></thead><tbody data-sort-list="roles">${roles.map(([key, role]) => this.roleRow(key, role)).join('')}</tbody></table></div>
+                <div class="orgs-table-wrap"><table class="orgs-table"><caption>Fachrollen und Nextcloud-Gruppen</caption><thead><tr><th scope="col">Rolle</th><th scope="col">Gruppen-ID</th><th scope="col">Anzeigename</th>${this.columnHeader('Kalender', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.')}${this.columnHeader('Bereich', 'Mitglieder werden zusätzlich über Bürobereiche zugeordnet.')}${this.columnHeader('Leitung je Bereich', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.')}${this.columnHeader('Peer-fähig', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.')}${this.columnHeader('Leitungsblock', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.')}${this.columnHeader('Einzelposition', 'Genau eine Person; bei Bereichsrollen je Bereich.')}<th scope="col">Reihenfolge</th></tr></thead><tbody data-sort-list="roles">${roles.map(([key, role]) => this.roleRow(key, role)).join('')}</tbody></table></div>
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Bürobereiche</caption><thead><tr><th>Bereich</th><th>Gruppen-ID</th><th>Anzeigename</th><th>Reihenfolge</th></tr></thead><tbody data-sort-list="areas">${areas.map(([key, area]) => this.areaRow(key, area)).join('')}</tbody></table></div>
                 <fieldset class="orgs-hierarchy"><legend>Direkte Hierarchie</legend>
-                    <p>Ziehe eine unterstellte Rolle auf die Karte ihrer Leitung. Für die Tastatur steht dieselbe Zuordnung über die Auswahlfelder bereit.</p>
+                    <p>Ziehe eine unterstellte Rolle auf die Karte ihrer Leitung. Für die Tastatur steht dieselbe Zuordnung über die Auswahlfelder bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
                     <div class="orgs-hierarchy-toolbar" aria-label="Hierarchieverbindung per Tastatur anlegen"><label>Leitung <select data-hierarchy-manager>${this.roleOptions(roles)}</select></label><label>Unterstellte Rolle <select data-hierarchy-target>${this.roleOptions(roles)}</select></label><button type="button" data-action="add-edge">Zuordnen</button></div>
                     <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p><div class="orgs-organigram" data-hierarchy-board></div>
                 </fieldset>
                 <div class="orgs-table-wrap"><table class="orgs-table"><caption>Teamansichten im Urlaubsplaner</caption><thead><tr><th>ID</th><th>Anzeigename</th><th>Rollen</th><th>Bereiche</th><th>Reihenfolge</th><th>Aktion</th></tr></thead><tbody data-organization-teams>${(data.organizationTeams || []).map(team => this.teamRow(team)).join('')}</tbody></table></div>
                 <button type="button" data-action="add-team">Urlaubsansicht hinzufügen</button>`;
-            this.hierarchyBoard.set(data.roles, data.hierarchy || {});
+            this.hierarchyBoard.set(data.roles, data.hierarchy || {}, data.areas, this.positions);
             this.updateSortControls('roles');
             this.updateSortControls('areas');
         }
 
         roleRow(key, role) {
             const check = (field, label) => `<input data-field="${field}" type="checkbox" ${role[field] ? 'checked' : ''} aria-label="${esc(label)}">`;
-            return `<tr data-role-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="roles"><th scope="row"><code>${esc(key)}</code></th><td><input data-field="groupId" value="${esc(role.groupId)}" aria-label="Gruppen-ID ${esc(role.label)}" required></td><td><input data-field="label" value="${esc(role.label)}" aria-label="Anzeigename ${esc(key)}" required></td><td>${check('calendarVisible', `${role.label} im Kalender sichtbar`)}</td><td>${check('areaScoped', `${role.label} ist bereichsgebunden`)}</td><td>${check('managementAreaScoped', `Leitungsrecht von ${role.label} ist bereichsgebunden`)}</td><td>${check('peerEnabled', `Peer-Recht für ${role.label} konfigurierbar`)}</td><td>${check('staffBlock', `${role.label} im Leitungsblock`)}</td>${this.sortCell(role.label, role.sortOrder)}</tr>`;
+            return `<tr data-role-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="roles"><th scope="row"><code>${esc(key)}</code></th><td><input data-field="groupId" value="${esc(role.groupId)}" aria-label="Gruppen-ID ${esc(role.label)}" required></td><td><input data-field="label" value="${esc(role.label)}" aria-label="Anzeigename ${esc(key)}" required></td><td>${check('calendarVisible', `${role.label} im Kalender sichtbar`)}</td><td>${check('areaScoped', `${role.label} ist bereichsgebunden`)}</td><td>${check('managementAreaScoped', `Leitungsrecht von ${role.label} ist bereichsgebunden`)}</td><td>${check('peerEnabled', `Peer-Recht für ${role.label} konfigurierbar`)}</td><td>${check('staffBlock', `${role.label} im Leitungsblock`)}</td><td>${check('singleOccupant', `${role.label} ist eine Einzelposition`)}</td>${this.sortCell(role.label, role.sortOrder)}</tr>`;
         }
+
+        columnHeader(label, help) { return `<th scope="col"><span>${esc(label)}</span><span class="orgs-column-help">${esc(help)}</span></th>`; }
 
         areaRow(key, area) { return `<tr data-area-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="areas"><th scope="row"><code>${esc(key)}</code></th><td><input data-field="groupId" value="${esc(area.groupId)}" aria-label="Gruppen-ID ${esc(area.label)}" required></td><td><input data-field="label" value="${esc(area.label)}" aria-label="Anzeigename ${esc(key)}" required></td>${this.sortCell(area.label, area.sortOrder)}</tr>`; }
         sortCell(label, sortOrder) {
@@ -79,7 +82,7 @@
             this.container.querySelectorAll('[data-role-key]').forEach(row => {
                 const role = data.roles[row.dataset.roleKey];
                 for (const field of ['groupId', 'label']) role[field] = row.querySelector(`[data-field="${field}"]`).value.trim();
-                for (const field of ['calendarVisible', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock']) role[field] = row.querySelector(`[data-field="${field}"]`).checked;
+                for (const field of ['calendarVisible', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant']) role[field] = row.querySelector(`[data-field="${field}"]`).checked;
                 role.sortOrder = Number(row.querySelector('[data-field="sortOrder"]').value);
             });
             this.container.querySelectorAll('[data-area-key]').forEach(row => {
@@ -148,7 +151,7 @@
             this.applyOrder(kind, rows.map(row => row.dataset.sortKey));
             rows.forEach(row => { row.querySelector('[data-field="sortOrder"]').value = this.definition[kind][row.dataset.sortKey].sortOrder; });
             this.updateSortControls(kind);
-            if (kind === 'roles') this.hierarchyBoard.set(this.definition.roles, this.hierarchyBoard.get());
+            if (kind === 'roles' || kind === 'areas') this.hierarchyBoard.set(this.definition.roles, this.hierarchyBoard.get(), this.definition.areas, this.positions);
         }
 
         applyOrder(kind, orderedKeys) {

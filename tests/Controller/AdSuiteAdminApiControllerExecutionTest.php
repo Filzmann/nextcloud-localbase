@@ -45,7 +45,7 @@ namespace OCA\LocalBase\Organization {
 
 namespace OCA\LocalBase\Service {
     class OrganizationDirectoryStatusService {
-        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]]]; }
+        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
     }
 }
 
@@ -75,7 +75,7 @@ namespace {
     if ($controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
     $data = $controller->settings()->getData();
-    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
+    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung']) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
     if ($controller->saveOrganization(['roles' => ['pfk']])->getData()['organization']['roles'][0] !== 'pfk') throw new RuntimeException('Organisation wird nicht gespeichert.');
     $organization->invalid = true;
     if ($controller->saveOrganization([])->getStatus() !== 400) throw new RuntimeException('Validierungsfehler erhält keinen Status 400.');
