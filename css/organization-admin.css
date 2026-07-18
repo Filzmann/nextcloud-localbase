@@ -98,8 +98,8 @@
 .orgs-diagram-levels { position: relative; z-index: 1; display: grid; gap: 54px; min-width: max-content; }
 .orgs-organigram-level { position: relative; min-width: max-content; }
 .orgs-level-label { display: block; margin-bottom: 5px; color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 600; }
-.orgs-level-nodes { display: flex; justify-content: space-evenly; align-items: flex-start; gap: 22px; min-width: max-content; }
-.orgs-card { position: relative; z-index: 2; width: 15rem; min-height: 64px; padding: 7px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-main-background); box-shadow: 0 2px 7px rgba(0, 0, 0, .12); transition: border-color .12s ease, box-shadow .12s ease; }
+.orgs-level-nodes { display: flex; flex-wrap: nowrap; justify-content: space-evenly; align-items: flex-start; gap: 22px; min-width: max-content; }
+.orgs-card { position: relative; z-index: 2; width: fit-content; min-width: 11rem; max-width: 15rem; min-height: 64px; padding: 7px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-main-background); box-shadow: 0 2px 7px rgba(0, 0, 0, .12); transition: border-color .12s ease, box-shadow .12s ease; }
 .orgs-card.is-drag-over { border-color: var(--color-primary-element); box-shadow: 0 0 0 3px var(--color-primary-element-light); }
 .orgs-card.is-position-before { box-shadow: -6px 0 0 var(--color-primary-element), 0 2px 7px rgba(0, 0, 0, .12); }
 .orgs-card.is-position-after { box-shadow: 6px 0 0 var(--color-primary-element), 0 2px 7px rgba(0, 0, 0, .12); }

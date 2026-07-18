@@ -21,6 +21,8 @@ for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }
 if (!/\.orgs-level-nodes\s*\{[^}]*justify-content:\s*space-evenly/.test(css)) throw new Error('Wenige Organigrammkarten nutzen die verfügbare Ebenenbreite nicht gleichmäßig.');
+if (!/\.orgs-level-nodes\s*\{[^}]*flex-wrap:\s*nowrap/.test(css)) throw new Error('Karten derselben Hierarchieebene werden nicht stabil nebeneinander angeordnet.');
+if (!/\.orgs-card\s*\{[^}]*width:\s*fit-content[^}]*min-width:\s*11rem[^}]*max-width:\s*15rem/.test(css)) throw new Error('Kurze Organigrammkarten nutzen weiterhin unnötig die volle Standardbreite.');
 
 const context = { window: { LocalBase: { ui: { esc: value => String(value ?? '') } } }, JSON, Set, Math, Object, Element: class {} };
 runInNewContext(hierarchySource, context);
