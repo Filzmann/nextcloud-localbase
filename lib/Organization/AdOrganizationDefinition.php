@@ -12,12 +12,12 @@ use InvalidArgumentException;
  * Vertrag: Technische Rollenschlüssel bleiben stabil, während Gruppen-IDs, Anzeigenamen, Bereiche, Teams und Hierarchiekanten konfigurierbar sind.
  */
 final class AdOrganizationDefinition {
-    private const DEFAULT_SINGLE_OCCUPANT_ROLES = ['gf_as', 'pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'];
+    private const DEFAULT_SINGLE_OCCUPANT_ROLES = ['gf_as', 'pdl', 'deputy_pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'];
 
     private function __construct(private array $data) {}
 
     public static function get(array $data): self {
-        return new self(self::validate($data));
+        return new self(self::validate(self::migrate($data)));
     }
 
     /** @return list<self> */
@@ -27,7 +27,7 @@ final class AdOrganizationDefinition {
 
     public static function defaults(): self {
         return self::get([
-            'version' => 1,
+            'version' => 2,
             'teamGroupPrefix' => 'ad-ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
@@ -42,10 +42,14 @@ final class AdOrganizationDefinition {
                 'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
                 'finance' => self::role('ad-Finanzen-Lohn', 'Finanzen und Lohn', 80, peerEnabled: true, staffBlock: true),
                 'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true),
+                'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
                 'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
+                'reception' => self::role('ad-Empfang', 'Empfang', 105),
                 'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true),
+                'deputy_pdl' => self::role('ad-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
+                'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
                 'eb' => self::role('ad-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true),
                 'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true),
             ],
@@ -56,10 +60,12 @@ final class AdOrganizationDefinition {
             ],
             'hierarchy' => [
                 'gf_as' => ['pdl', 'bl', 'staff_hr', 'staff_qmb', 'secretariat'],
-                'gf_digi' => ['assistant_gf_digi', 'finance_lead', 'secretariat'],
+                'gf_digi' => ['assistant_gf_digi', 'finance_lead', 'fleet_management', 'secretariat'],
                 'assistant_gf_digi' => ['it'],
                 'finance_lead' => ['finance'],
-                'pdl' => ['pfk'],
+                'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
+                'deputy_pdl' => ['care_office', 'pfk'],
+                'secretariat' => ['reception'],
                 'bl' => ['deputy_bl', 'office', 'eb'],
                 'deputy_bl' => ['office', 'eb'],
             ],
@@ -69,8 +75,10 @@ final class AdOrganizationDefinition {
                 ['id' => 'office-west', 'label' => 'Büro West', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['west'], 'sortOrder' => 20],
                 ['id' => 'office-south', 'label' => 'Büro Süd', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 30],
                 ['id' => 'eb', 'label' => 'Einsatzbegleitungen', 'roles' => ['eb'], 'areas' => [], 'sortOrder' => 40],
-                ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['pfk'], 'areas' => [], 'sortOrder' => 50],
+                ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['deputy_pdl', 'care_office', 'pfk'], 'areas' => [], 'sortOrder' => 50],
                 ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
+                ['id' => 'fleet-management', 'label' => 'Fahrzeugverwaltung', 'roles' => ['fleet_management'], 'areas' => [], 'sortOrder' => 70],
+                ['id' => 'reception', 'label' => 'Empfang', 'roles' => ['reception'], 'areas' => [], 'sortOrder' => 80],
             ],
         ]);
     }
@@ -174,6 +182,58 @@ final class AdOrganizationDefinition {
         return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant') + ['calendarVisible' => true];
     }
 
+    /**
+     * Zweck: Ergänzt den freigegebenen Organisationsvertrag v1 additiv, ohne vorhandene Fachwerte umzuschreiben.
+     * Vertrag: Kollisionen und durch neue Kanten entstehende Zyklen werden anschließend von validate() abgelehnt.
+     */
+    private static function migrate(array $data): array {
+        $version = (int)($data['version'] ?? 1);
+        if ($version === 2) return $data;
+        if ($version !== 1) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
+        if (!isset($data['roles'], $data['hierarchy'], $data['organizationTeams']) || !is_array($data['roles']) || !is_array($data['hierarchy']) || !is_array($data['organizationTeams'])) return $data;
+
+        foreach (self::versionTwoRoles() as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
+        foreach ([
+            'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
+            'deputy_pdl' => ['care_office', 'pfk'],
+            'gf_digi' => ['fleet_management'],
+            'secretariat' => ['reception'],
+        ] as $manager => $targets) {
+            if (!isset($data['hierarchy'][$manager])) $data['hierarchy'][$manager] = [];
+            if (!is_array($data['hierarchy'][$manager])) continue;
+            foreach ($targets as $target) if (!in_array($target, $data['hierarchy'][$manager], true)) $data['hierarchy'][$manager][] = $target;
+        }
+
+        self::migrateOrganizationTeam($data['organizationTeams'], 'pfk', 'Pflegefachkräfte', ['deputy_pdl', 'care_office', 'pfk'], 50, true);
+        self::migrateOrganizationTeam($data['organizationTeams'], 'fleet-management', 'Fahrzeugverwaltung', ['fleet_management'], 70);
+        self::migrateOrganizationTeam($data['organizationTeams'], 'reception', 'Empfang', ['reception'], 80);
+        $data['version'] = 2;
+        return $data;
+    }
+
+    private static function versionTwoRoles(): array {
+        return [
+            'deputy_pdl' => self::role('ad-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
+            'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
+            'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
+            'reception' => self::role('ad-Empfang', 'Empfang', 105),
+        ];
+    }
+
+    private static function migrateOrganizationTeam(array &$teams, string $id, string $label, array $requiredRoles, int $sortOrder, bool $prepend = false): void {
+        foreach ($teams as &$team) {
+            if (!is_array($team) || ($team['id'] ?? null) !== $id) continue;
+            if (!isset($team['roles']) || !is_array($team['roles'])) return;
+            $existingRoles = array_values(array_map('strval', $team['roles']));
+            $missingRoles = array_values(array_diff($requiredRoles, $existingRoles));
+            $team['roles'] = $prepend ? array_values(array_unique([...$missingRoles, ...$existingRoles])) : array_values(array_unique([...$existingRoles, ...$missingRoles]));
+            unset($team);
+            return;
+        }
+        unset($team);
+        $teams[] = ['id' => $id, 'label' => $label, 'roles' => $requiredRoles, 'areas' => [], 'sortOrder' => $sortOrder];
+    }
+
     private static function validate(array $data): array {
         foreach (['roles', 'areas', 'hierarchy', 'organizationTeams'] as $key) if (!isset($data[$key]) || !is_array($data[$key])) throw new InvalidArgumentException("Organisationsfeld {$key} fehlt.");
         $teamGroupPrefix = self::text($data['teamGroupPrefix'] ?? '', 'Team-Gruppenpräfix', 64);
@@ -202,7 +262,7 @@ final class AdOrganizationDefinition {
                 'calendarVisible' => (bool)($role['calendarVisible'] ?? true),
             ];
         }
-        if (!isset($roles['eb'])) throw new InvalidArgumentException('Die fachliche Rolle eb fehlt.');
+        foreach (['eb', 'deputy_pdl', 'care_office', 'fleet_management', 'reception'] as $requiredRole) if (!isset($roles[$requiredRole])) throw new InvalidArgumentException("Die fachliche Rolle {$requiredRole} fehlt.");
 
         $areas = [];
         foreach ($data['areas'] as $key => $area) {
@@ -262,7 +322,7 @@ final class AdOrganizationDefinition {
         }
 
         return [
-            'version' => 1,
+            'version' => 2,
             'teamGroupPrefix' => $teamGroupPrefix,
             'teamLabelPrefix' => $teamLabelPrefix,
             'teamCodeMaxLength' => $teamCodeMaxLength,

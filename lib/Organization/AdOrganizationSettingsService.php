@@ -22,7 +22,11 @@ final class AdOrganizationSettingsService {
         if ($raw === '') return AdOrganizationDefinition::defaults();
         try {
             $data = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
-            return AdOrganizationDefinition::get(is_array($data) ? $data : []);
+            $definition = AdOrganizationDefinition::get(is_array($data) ? $data : []);
+            if ((int)($data['version'] ?? 1) < 2) {
+                $this->config->setValueString(Application::APP_ID, self::KEY, json_encode($definition->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+            }
+            return $definition;
         } catch (\Throwable) {
             return AdOrganizationDefinition::defaults();
         }

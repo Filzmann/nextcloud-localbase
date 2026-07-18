@@ -34,6 +34,18 @@ namespace {
     $saved = $service->save($data);
     if ($saved->roleGroupId('eb') !== 'custom-eb' || $service->definition()->roleLabel('eb') !== 'Teamkoordination' || $service->definition()->diagramOrder() !== ['gf_as', 'bl::west']) throw new \RuntimeException('Organisationseinstellung einschließlich visueller Diagrammordnung wurde nicht persistiert.');
 
+    $legacy = $service->definition()->toArray();
+    $legacy['version'] = 1;
+    foreach (['deputy_pdl', 'care_office', 'fleet_management', 'reception'] as $key) unset($legacy['roles'][$key], $legacy['hierarchy'][$key]);
+    $legacy['hierarchy']['pdl'] = ['pfk'];
+    $legacy['organizationTeams'] = array_values(array_filter($legacy['organizationTeams'], static fn(array $team): bool => !in_array($team['id'], ['fleet-management', 'reception'], true)));
+    foreach ($legacy['organizationTeams'] as &$team) if ($team['id'] === 'pfk') $team['roles'] = ['pfk'];
+    unset($team);
+    $config->values['localbase']['ad_organization_definition'] = json_encode($legacy, JSON_THROW_ON_ERROR);
+    if ($service->definition()->toArray()['version'] !== 2 || !isset($service->definition()->roles()['deputy_pdl'])) throw new \RuntimeException('Gespeicherte Organisationsversion 1 wird nicht automatisch ergänzt.');
+    $persistedMigration = json_decode($config->values['localbase']['ad_organization_definition'], true, 64, JSON_THROW_ON_ERROR);
+    if (($persistedMigration['version'] ?? null) !== 2 || !isset($persistedMigration['roles']['fleet_management'])) throw new \RuntimeException('Additive Organisationsmigration wird nicht idempotent persistiert.');
+
     $config->values['localbase']['ad_organization_definition'] = '{kaputt';
     if ($service->definition()->roleGroupId('eb') !== 'ad-EB') throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf Defaults zurück.');
     echo "AdOrganizationSettingsServiceSmokeTest: OK\n";
