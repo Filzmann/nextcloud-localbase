@@ -9,7 +9,7 @@ const css = readFileSync(new URL('../../css/organization-admin.css', import.meta
 for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachrollen und Nextcloud-Gruppen', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
     if (!editorSource.includes(contract)) throw new Error(`Organisationseditor-Vertrag fehlt: ${contract}`);
 }
-for (const contract of ['class HierarchyBoard', 'draggable="true"', 'data-position-node', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
+for (const contract of ['class HierarchyBoard', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
 if (hierarchySource.includes('Keine direkt unterstellte Rolle') || hierarchySource.includes('class="orgs-edges"')) throw new Error('Unterstellte Rollen stehen weiterhin textlastig innerhalb der Diagrammknoten.');
 for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
@@ -50,6 +50,18 @@ if (!occupiedCard.includes('orgs-card-person') || !occupiedCard.includes('Berta 
 board.diagramOrder = diagramNodes.map(node => node.id);
 board.applyDiagramOrderMove('bl::west', 'bl::south', true);
 if (board.diagramOrder.indexOf('bl::west') > board.diagramOrder.indexOf('bl::south')) throw new Error('Horizontales Drag-and-drop verschiebt einen Diagrammknoten nicht nach links.');
+const gapTarget = board.insertionTarget([
+    { id: 'left', left: 0, width: 100 },
+    { id: 'dragged', left: 170, width: 100 },
+    { id: 'right', left: 400, width: 100 },
+], 320, 'dragged');
+if (gapTarget?.targetId !== 'right' || gapTarget?.before !== true) throw new Error('Eine in den Zwischenraum gezogene Karte landet nicht zwischen ihren Nachbarkarten.');
+const endTarget = board.insertionTarget([{ id: 'left', left: 0, width: 100 }, { id: 'right', left: 200, width: 100 }], 400, 'left');
+if (endTarget?.targetId !== 'right' || endTarget?.before !== false) throw new Error('Eine rechts abgelegte Karte landet nicht am Ende ihrer Hierarchieebene.');
+if (board.insertionTarget([{ id: 'only', left: 0, width: 100 }], 50, 'only') !== null) throw new Error('Eine einzelne Karte erzeugt eine ungültige Ablageposition.');
+const rightCard = { dataset: { diagramNode: 'right' }, getBoundingClientRect: () => ({ left: 400, width: 100 }) };
+const positionedGap = board.positionTarget({ querySelectorAll: () => [rightCard] }, 320, 'dragged');
+if (positionedGap?.card !== rightCard || positionedGap?.targetId !== 'right' || !positionedGap?.before) throw new Error('Der visuelle Zwischenraum wird nicht auf die benachbarte Diagrammkarte abgebildet.');
 
 const editor = Object.create(context.window.LocalBase.components.OrganizationEditor.prototype);
 editor.definition = { roles: { first: { sortOrder: 20 }, second: { sortOrder: 10 } }, areas: { west: { sortOrder: 20 }, east: { sortOrder: 10 } } };

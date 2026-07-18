@@ -56,7 +56,7 @@
                 <div class="orgs-diagram" data-hierarchy-diagram>
                     <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
                     <div class="orgs-diagram-levels">${roleLevels.map((level, index) => `
-                        <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes">
+                        <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes" data-diagram-level-list="${index}">
                             ${this.levelNodes(level, nodes).map((node, nodeIndex, levelNodes) => this.card(node, index, nodeIndex, levelNodes.length)).join('')}
                         </div></section>`).join('')}
                     </div>
@@ -236,11 +236,13 @@
         overTarget(event) {
             const target = event.target instanceof Element ? event.target.closest('[data-manager-key]') : null;
             if (this.draggedNode) {
-                if (!target || target.dataset.diagramLevel !== this.draggedNode.level || target.dataset.diagramNode === this.draggedNode.id) return;
+                const level = event.target instanceof Element ? event.target.closest('[data-diagram-level-list]') : null;
+                if (!level || level.dataset.diagramLevelList !== this.draggedNode.level) return;
+                const placement = this.positionTarget(level, event.clientX, this.draggedNode.id);
+                if (!placement) return;
                 event.preventDefault();
                 this.container.querySelectorAll('.is-position-before,.is-position-after').forEach(element => element.classList.remove('is-position-before', 'is-position-after'));
-                const bounds = target.getBoundingClientRect();
-                target.classList.add(event.clientX < bounds.left + bounds.width / 2 ? 'is-position-before' : 'is-position-after');
+                placement.card.classList.add(placement.before ? 'is-position-before' : 'is-position-after');
                 if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
                 return;
             }
@@ -251,16 +253,18 @@
 
         dropRole(event) {
             const target = event.target instanceof Element ? event.target.closest('[data-manager-key]') : null;
-            if (!target) return;
             if (this.draggedNode) {
-                if (target.dataset.diagramLevel !== this.draggedNode.level || target.dataset.diagramNode === this.draggedNode.id) return this.clearDrag();
+                const level = event.target instanceof Element ? event.target.closest('[data-diagram-level-list]') : null;
+                if (!level || level.dataset.diagramLevelList !== this.draggedNode.level) return this.clearDrag();
+                const placement = this.positionTarget(level, event.clientX, this.draggedNode.id);
+                if (!placement) return this.clearDrag();
                 event.preventDefault();
                 const sourceId = this.draggedNode.id;
-                const before = target.classList.contains('is-position-before');
-                this.applyDiagramOrderMove(sourceId, target.dataset.diagramNode, before);
+                this.applyDiagramOrderMove(sourceId, placement.targetId, placement.before);
                 this.clearDrag();
                 return this.render('Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.');
             }
+            if (!target) return;
             event.preventDefault();
             const role = event.dataTransfer?.getData('text/plain') || this.draggedRole;
             this.clearDrag(); this.addEdge(target.dataset.managerKey, role);
@@ -283,6 +287,24 @@
             if (targetIndex < 0) return;
             order.splice(targetIndex + (before ? 0 : 1), 0, sourceId);
             this.diagramOrder = order;
+        }
+
+        positionTarget(level, clientX, sourceId) {
+            const cards = [...level.querySelectorAll('[data-diagram-node]')].map(card => {
+                const bounds = card.getBoundingClientRect();
+                return { card, id: card.dataset.diagramNode, left: bounds.left, width: bounds.width };
+            });
+            const placement = this.insertionTarget(cards, clientX, sourceId);
+            if (!placement) return null;
+            return { ...placement, card: cards.find(card => card.id === placement.targetId).card };
+        }
+
+        insertionTarget(cards, clientX, sourceId) {
+            const candidates = cards.filter(card => card.id !== sourceId);
+            if (!candidates.length) return null;
+            const next = candidates.find(card => clientX < card.left + card.width / 2);
+            if (next) return { targetId: next.id, before: true };
+            return { targetId: candidates[candidates.length - 1].id, before: false };
         }
 
         moveDiagramNode(nodeId, offset) {
