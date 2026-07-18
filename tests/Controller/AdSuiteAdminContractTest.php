@@ -9,7 +9,7 @@ $controller = file_get_contents($root . '/lib/Controller/AdSuiteAdminApiControll
 $template = file_get_contents($root . '/templates/organization-admin.php');
 $info = simplexml_load_file($root . '/appinfo/info.xml');
 foreach ([$routes, $application, $controller, $template, $info] as $source) if ($source === false) throw new RuntimeException('Organisationsvertrag konnte nicht gelesen werden.');
-if (in_array((string)$info->version, ['0.7.0-rc.2', '0.7.0-rc.3', '0.7.0-rc.4', '0.7.0-rc.5'], true)) throw new RuntimeException('Geänderte Admin-Assets verwenden weiterhin einen bereits langfristig gecachten App-Versionsschlüssel.');
+if (in_array((string)$info->version, ['0.7.0-rc.2', '0.7.0-rc.3', '0.7.0-rc.4', '0.7.0-rc.5', '0.7.0-rc.6'], true)) throw new RuntimeException('Geänderte Admin-Assets verwenden weiterhin einen bereits langfristig gecachten App-Versionsschlüssel.');
 
 foreach (['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', '/api/ad-suite/admin/layout'] as $contract) if (!str_contains($routes, $contract)) throw new RuntimeException("Admin-Route fehlt: {$contract}");
 if (preg_match('/#\[[^\]]*NoAdminRequired/', $controller)) throw new RuntimeException('Admin-Controller ist für normale Nutzer*innen freigegeben.');

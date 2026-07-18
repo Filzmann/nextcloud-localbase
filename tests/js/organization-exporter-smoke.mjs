@@ -6,7 +6,7 @@ const exporterSource = readFileSync(new URL('../../js/components/organization-ex
 const editorSource = readFileSync(new URL('../../js/components/organization-editor.js', import.meta.url), 'utf8');
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'application/pdf', 'ad-organigramm.pdf', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'toPdf(']) {
+for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'application/pdf', 'ad-organigramm.pdf', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'toPdf(', 'nodeTextLayout(']) {
     if (!exporterSource.includes(contract)) throw new Error(`Organigramm-Exportvertrag fehlt: ${contract}`);
 }
 if (exporterSource.includes('window.open') || exporterSource.includes('printWindow.print()') || exporterSource.includes('printHtml(')) throw new Error('Der PDF-Button verwendet weiterhin ein Druckfenster statt eines direkten Downloads.');
@@ -22,7 +22,7 @@ runInNewContext(exporterSource, context);
 
 const board = Object.create(context.window.LocalBase.components.HierarchyBoard.prototype);
 board.roles = {
-    gf: { label: 'Geschäftsführung & Organisation', sortOrder: 10, areaScoped: false, singleOccupant: true },
+    gf: { label: 'Geschäftsführung Digitales & Finanzen', sortOrder: 10, areaScoped: false, singleOccupant: true },
     office: { label: 'Büro', sortOrder: 20, areaScoped: true, singleOccupant: false },
 };
 board.areas = { west: { label: 'West', sortOrder: 10 }, south: { label: 'Süd', sortOrder: 20 } };
@@ -42,17 +42,21 @@ const layout = exporter.layout(namedSnapshot);
 const top = layout.nodes.find(node => node.id === 'gf');
 const officeNodes = layout.nodes.filter(node => node.roleKey === 'office');
 if (!top || officeNodes.length !== 2 || top.x <= 0 || top.x === officeNodes[0].x) throw new Error('Der Export bildet Hierarchieebenen und die verteilte Links-rechts-Anordnung nicht ab.');
+const titleLayout = exporter.nodeTextLayout(top);
+if (titleLayout.lines.filter(line => line.bold).length < 2) throw new Error('Lange Kartenüberschriften werden im Export nicht umgebrochen.');
+if (titleLayout.lines.some(line => exporter.textWidth(line.text, titleLayout.fontSize, line.bold) > top.width - 28)) throw new Error('Eine umgebrochene Exportzeile ist weiterhin breiter als der verfügbare Karteninhalt.');
+if (titleLayout.lines.at(-1).baseline + titleLayout.fontSize * 0.25 > top.height - 8) throw new Error('Der Exporttext läuft unten aus der Karte heraus.');
 
 const drawio = exporter.toDrawio(layout);
 if (!drawio.includes('<mxGraphModel') || !drawio.includes('vertex="1"') || !drawio.includes('edge="1"') || !drawio.includes('source="node-') || !drawio.includes('Gina Führung')) throw new Error('Der Draw.io-Export ist nicht als bearbeitbares Diagramm aufgebaut.');
-if (drawio.includes('Geschäftsführung & Organisation')) throw new Error('Der Draw.io-Export escaped XML-Sonderzeichen nicht.');
+if (drawio.includes('Geschäftsführung Digitales & Finanzen')) throw new Error('Der Draw.io-Export escaped XML-Sonderzeichen nicht.');
 
 const svg = exporter.toSvg(layout);
-if (!svg.includes('<svg') || !svg.includes('<rect') || !svg.includes('<path') || !svg.includes('Gina Führung') || svg.includes('Geschäftsführung & Organisation')) throw new Error('Der gemeinsame Vektorexport ist unvollständig oder unsicher escaped.');
+if (!svg.includes('<svg') || !svg.includes('<rect') || !svg.includes('<path') || !svg.includes('Gina Führung') || svg.includes('Geschäftsführung Digitales & Finanzen') || !svg.includes('clip-path=')) throw new Error('Der gemeinsame Vektorexport ist unvollständig, lässt Text aus Karten laufen oder ist unsicher escaped.');
 const pdf = exporter.toPdf(layout);
 const xrefOffset = Number(pdf.match(/startxref\n(\d+)/)?.[1]);
 const xrefEntries = pdf.slice(xrefOffset).split('\n').slice(3, 9);
-if (!pdf.startsWith('%PDF-1.4') || !pdf.includes('/Type /Page') || !pdf.includes('/Encoding /WinAnsiEncoding') || !pdf.includes('Gina F\\374hrung') || !pdf.slice(xrefOffset).startsWith('xref') || [...pdf].some(character => character.codePointAt(0) > 127)) throw new Error('Der direkte PDF-Download ist kein vollständiges, lesbares Vektordokument.');
+if (!pdf.startsWith('%PDF-1.4') || !pdf.includes('/Type /Page') || !pdf.includes('/Encoding /WinAnsiEncoding') || !pdf.includes('Gina F\\374hrung') || !pdf.includes(' re W n') || !pdf.slice(xrefOffset).startsWith('xref') || [...pdf].some(character => character.codePointAt(0) > 127)) throw new Error('Der direkte PDF-Download ist kein vollständiges, lesbares und auf Karten begrenztes Vektordokument.');
 xrefEntries.forEach((entry, index) => {
     const offset = Number(entry.slice(0, 10));
     if (!pdf.slice(offset).startsWith(`${index + 1} 0 obj`)) throw new Error('Der direkte PDF-Download enthält eine ungültige Objekttabelle.');

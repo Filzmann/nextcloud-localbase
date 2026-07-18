@@ -100,6 +100,64 @@
             return [node.label, node.areaLabel ? `Bereich ${node.areaLabel}` : null, node.personLabel].filter(Boolean);
         }
 
+        textWidth(value, fontSize, bold = false) {
+            const units = [...String(value ?? '')].reduce((width, character) => {
+                if (character === ' ') return width + 0.28;
+                if (/[ilI.,'!:;]/u.test(character)) return width + 0.28;
+                if (/[mwMW@%&]/u.test(character)) return width + 0.9;
+                if (/[A-ZÄÖÜ]/u.test(character)) return width + 0.7;
+                if (/[0-9]/u.test(character)) return width + 0.56;
+                return width + 0.57;
+            }, 0);
+            return units * fontSize * (bold ? 1.04 : 1);
+        }
+
+        wrapText(value, maxWidth, fontSize, bold = false) {
+            const lines = [];
+            let current = '';
+            for (const word of String(value ?? '').trim().split(/\s+/u).filter(Boolean)) {
+                const candidate = current ? `${current} ${word}` : word;
+                if (this.textWidth(candidate, fontSize, bold) <= maxWidth) {
+                    current = candidate;
+                    continue;
+                }
+                if (current) lines.push(current);
+                current = '';
+                if (this.textWidth(word, fontSize, bold) <= maxWidth) {
+                    current = word;
+                    continue;
+                }
+                for (const character of word) {
+                    if (current && this.textWidth(`${current}${character}`, fontSize, bold) > maxWidth) {
+                        lines.push(current);
+                        current = character;
+                    } else {
+                        current += character;
+                    }
+                }
+            }
+            if (current) lines.push(current);
+            return lines.length ? lines : [''];
+        }
+
+        nodeTextLayout(node) {
+            const maxWidth = node.width - 28;
+            const topPadding = 18;
+            const bottomPadding = 8;
+            let result = null;
+            for (let fontSize = 16; fontSize >= 8; fontSize -= 1) {
+                const lineHeight = fontSize * 1.25;
+                const lines = this.nodeLines(node).flatMap((value, sourceIndex) => this.wrapText(value, maxWidth, fontSize, sourceIndex === 0).map(text => ({ text, bold: sourceIndex === 0 })));
+                result = {
+                    fontSize,
+                    lines: lines.map((line, index) => ({ ...line, baseline: topPadding + fontSize + index * lineHeight })),
+                };
+                const last = result.lines.at(-1);
+                if (!last || last.baseline + fontSize * 0.25 <= node.height - bottomPadding) return result;
+            }
+            return result;
+        }
+
         toDrawio(layout) {
             const ids = new Map(layout.nodes.map((node, index) => [node.id, `node-${index + 1}`]));
             const vertices = layout.nodes.map(node => {
@@ -128,12 +186,13 @@
                 const middleY = fromY + Math.max(20, (toY - fromY) / 2);
                 return `<path d="M ${fromX} ${fromY} C ${fromX} ${middleY}, ${toX} ${middleY}, ${toX} ${toY - 4}" fill="none" stroke="#00679e" stroke-width="2.5" marker-end="url(#arrow)"/>`;
             }).join('');
-            const cards = layout.nodes.map(node => {
-                const lines = this.nodeLines(node);
-                const text = lines.map((line, index) => `<tspan x="${node.x + 14}" dy="${index === 0 ? 0 : 24}"${index === 0 ? ' font-weight="700"' : ''}>${xml(line)}</tspan>`).join('');
-                return `<g><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="7" fill="#ffffff" stroke="#8c8c8c" stroke-width="2"/><text x="${node.x + 14}" y="${node.y + 31}" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="16">${text}</text></g>`;
+            const clips = layout.nodes.map((node, index) => `<clipPath id="node-clip-${index}"><rect x="${node.x + 8}" y="${node.y + 8}" width="${node.width - 16}" height="${node.height - 16}"/></clipPath>`).join('');
+            const cards = layout.nodes.map((node, index) => {
+                const textLayout = this.nodeTextLayout(node);
+                const text = textLayout.lines.map(line => `<tspan x="${node.x + 14}" y="${node.y + line.baseline}"${line.bold ? ' font-weight="700"' : ''}>${xml(line.text)}</tspan>`).join('');
+                return `<g><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="7" fill="#ffffff" stroke="#8c8c8c" stroke-width="2"/><text clip-path="url(#node-clip-${index})" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="${textLayout.fontSize}">${text}</text></g>`;
             }).join('');
-            return `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="${xml(layout.title)}"><rect width="100%" height="100%" fill="#ffffff"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00679e"/></marker></defs><text x="24" y="30" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="20" font-weight="700">${xml(layout.title)}</text>${edges}${cards}</svg>`;
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="${xml(layout.title)}"><rect width="100%" height="100%" fill="#ffffff"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00679e"/></marker>${clips}</defs><text x="24" y="30" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="20" font-weight="700">${xml(layout.title)}</text>${edges}${cards}</svg>`;
         }
 
         toPdf(layout) {
@@ -166,10 +225,13 @@
             for (const node of layout.nodes) {
                 commands.push('1 1 1 rg', '0.55 0.55 0.55 RG', `${pdfNumber(Math.max(0.5, 2 * scale))} w`);
                 commands.push(`${pdfNumber(x(node.x))} ${pdfNumber(y(node.y + node.height))} ${pdfNumber(node.width * scale)} ${pdfNumber(node.height * scale)} re B`);
-                this.nodeLines(node).forEach((line, index) => {
-                    const font = index === 0 ? 'F2' : 'F1';
-                    commands.push('0.12 0.12 0.12 rg', `BT /${font} ${pdfNumber(16 * scale)} Tf 1 0 0 1 ${pdfNumber(x(node.x + 14))} ${pdfNumber(y(node.y + 31 + index * 24))} Tm (${pdfText(line)}) Tj ET`);
+                const textLayout = this.nodeTextLayout(node);
+                commands.push(`q ${pdfNumber(x(node.x + 8))} ${pdfNumber(y(node.y + node.height - 8))} ${pdfNumber((node.width - 16) * scale)} ${pdfNumber((node.height - 16) * scale)} re W n`);
+                textLayout.lines.forEach(line => {
+                    const font = line.bold ? 'F2' : 'F1';
+                    commands.push('0.12 0.12 0.12 rg', `BT /${font} ${pdfNumber(textLayout.fontSize * scale)} Tf 1 0 0 1 ${pdfNumber(x(node.x + 14))} ${pdfNumber(y(node.y + line.baseline))} Tm (${pdfText(line.text)}) Tj ET`);
                 });
+                commands.push('Q');
             }
             commands.push(`0.12 0.12 0.12 rg BT /F2 ${pdfNumber(20 * scale)} Tf 1 0 0 1 ${pdfNumber(x(24))} ${pdfNumber(y(30))} Tm (${pdfText(layout.title)}) Tj ET`);
 
