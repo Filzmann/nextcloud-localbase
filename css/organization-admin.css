@@ -14,25 +14,39 @@
 .orgs-table th,.orgs-table td { padding: 5px; border: 1px solid var(--color-border); vertical-align: middle; }
 .orgs-table input:not([type="checkbox"]) { min-width: 120px; width: 100%; }
 .orgs-table input[type="number"] { min-width: 72px; width: 82px; }
+.orgs-sort-cell { display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 130px; }
+.orgs-sort-cell button { min-width: 30px !important; min-height: 30px !important; height: 30px; margin: 0 !important; padding: 2px 7px !important; }
+.orgs-sort-handle { cursor: grab; }
+.orgs-sort-handle:active { cursor: grabbing; }
+.orgs-table tr.is-sorting { opacity: .55; }
+.orgs-table tr.is-sort-over { outline: 3px solid var(--color-primary-element); outline-offset: -3px; }
 .orgs-hierarchy { min-width: 0; margin: 16px 0; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--border-radius-large); }
 .orgs-hierarchy > p { margin: 4px 0 10px; color: var(--color-text-maxcontrast); }
 .orgs-hierarchy-toolbar { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .orgs-hierarchy-toolbar label { min-width: 13rem; }
 .orgs-feedback { min-height: 1.4em; color: var(--color-main-text) !important; }
-.orgs-organigram { display: grid; gap: 18px; min-width: min-content; padding: 8px; overflow-x: auto; border-radius: var(--border-radius); background: var(--color-background-dark); }
+.orgs-organigram { min-width: 0; padding: 8px; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--border-radius); background-color: var(--color-background-dark); background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px); background-size: 20px 20px; }
+.orgs-diagram { position: relative; width: max-content; min-width: 100%; padding: 14px 24px 22px; box-sizing: border-box; }
+.orgs-diagram-links { position: absolute; inset: 0; z-index: 0; overflow: visible; pointer-events: none; }
+.orgs-diagram-link { fill: none; stroke: var(--color-primary-element); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.orgs-diagram-links marker path { fill: var(--color-primary-element); }
+.orgs-diagram-levels { position: relative; z-index: 1; display: grid; gap: 54px; min-width: max-content; }
 .orgs-organigram-level { position: relative; min-width: max-content; }
-.orgs-organigram-level + .orgs-organigram-level::before { content: "↓"; position: absolute; inset-inline-start: 50%; top: -20px; color: var(--color-text-maxcontrast); font-weight: 700; }
 .orgs-level-label { display: block; margin-bottom: 5px; color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 600; }
-.orgs-level-nodes { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 8px; min-width: max-content; }
-.orgs-card { min-width: 15rem; max-width: 22rem; padding: 8px; border: 2px solid var(--color-border); border-radius: var(--border-radius-large); background: var(--color-main-background); transition: border-color .12s ease, box-shadow .12s ease; }
+.orgs-level-nodes { display: flex; justify-content: center; align-items: flex-start; gap: 22px; min-width: max-content; }
+.orgs-card { position: relative; z-index: 2; width: 15rem; min-height: 64px; padding: 7px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-main-background); box-shadow: 0 2px 7px rgba(0, 0, 0, .12); transition: border-color .12s ease, box-shadow .12s ease; }
 .orgs-card.is-drag-over { border-color: var(--color-primary-element); box-shadow: 0 0 0 3px var(--color-primary-element-light); }
-.orgs-card header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.orgs-card code { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
-.orgs-drag-role { min-height: 30px !important; margin: 0 !important; padding: 4px 8px !important; font-weight: 700; cursor: grab; }
+.orgs-card code { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); font-weight: 400; }
+.orgs-drag-role { display: grid !important; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: center; width: 100%; min-height: 48px !important; margin: 0 !important; padding: 4px 8px !important; text-align: start; cursor: grab; }
+.orgs-drag-role strong { min-width: 0; overflow-wrap: anywhere; }
+.orgs-drag-role code { grid-column: 2; }
 .orgs-drag-role.is-dragging { opacity: .55; cursor: grabbing; }
-.orgs-edges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-.orgs-edge { display: inline-flex; align-items: center; gap: 3px; padding-inline-start: 7px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-background-hover); font-size: var(--font-size-small); }
-.orgs-edge button { min-width: 24px !important; min-height: 24px !important; height: 24px; margin: 0 !important; padding: 0 6px !important; border-radius: 50%; }
+.orgs-connections { min-width: 0; margin-top: 12px; padding: 10px; border-radius: var(--border-radius); background: var(--color-main-background); }
+.orgs-connections h4 { margin: 0 0 7px; }
+.orgs-connection-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 5px 12px; margin: 0; padding: 0; list-style: none; }
+.orgs-connection-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; padding: 4px 6px; border: 1px solid var(--color-border); border-radius: var(--border-radius); }
+.orgs-connection-list li > span { min-width: 0; overflow-wrap: anywhere; }
+.orgs-connection-list button { flex: 0 0 auto; min-height: 28px !important; margin: 0 !important; padding: 3px 8px !important; }
 .orgs-empty { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
 .orgs-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 6px 12px; margin: 8px 0 14px; }
 .orgs-checkbox-grid label { display: flex; align-items: center; min-height: 32px; }

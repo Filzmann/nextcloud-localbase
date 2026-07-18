@@ -14,12 +14,14 @@
             this.roles = {};
             this.hierarchy = {};
             this.draggedRole = '';
+            this.connectionFrame = null;
             container.addEventListener('click', event => this.onClick(event));
             container.addEventListener('dragstart', event => this.startDrag(event));
             container.addEventListener('dragover', event => this.overTarget(event));
             container.addEventListener('dragleave', event => event.target instanceof Element && event.target.closest('[data-manager-key]')?.classList.remove('is-drag-over'));
             container.addEventListener('drop', event => this.dropRole(event));
             container.addEventListener('dragend', () => this.clearDrag());
+            window.addEventListener?.('resize', () => this.scheduleConnections());
         }
 
         set(roles, hierarchy) { this.roles = clone(roles); this.hierarchy = clone(hierarchy); this.render(); }
@@ -38,16 +40,77 @@
         render(message = '') {
             const roles = Object.entries(this.roles).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
             const roleMap = Object.fromEntries(roles);
-            this.container.querySelector('[data-hierarchy-board]').innerHTML = this.levels(roles.map(([key]) => key)).map((level, index) => `
-                <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes">
-                    ${level.map(key => this.card(key, roleMap[key], roleMap)).join('')}
-                </div></section>`).join('');
+            const connections = this.connections(roleMap);
+            this.container.querySelector('[data-hierarchy-board]').innerHTML = `
+                <div class="orgs-diagram" data-hierarchy-diagram>
+                    <svg class="orgs-diagram-links" data-hierarchy-svg aria-hidden="true"><defs><marker id="orgs-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><g data-hierarchy-links></g></svg>
+                    <div class="orgs-diagram-levels">${this.levels(roles.map(([key]) => key)).map((level, index) => `
+                        <section class="orgs-organigram-level" aria-label="Hierarchieebene ${index + 1}"><span class="orgs-level-label">Ebene ${index + 1}</span><div class="orgs-level-nodes">
+                            ${level.map(key => this.card(key, roleMap[key])).join('')}
+                        </div></section>`).join('')}
+                    </div>
+                </div>
+                <section class="orgs-connections" aria-labelledby="orgs-connections-heading"><h4 id="orgs-connections-heading">Direkte Verbindungen</h4>${this.connectionList(connections)}</section>`;
             this.container.querySelector('[data-hierarchy-feedback]').textContent = message;
+            this.scheduleConnections();
         }
 
-        card(key, role, roleMap) {
-            const children = (this.hierarchy[key] || []).map(target => `<span class="orgs-edge"><span>${esc(roleMap[target]?.label || target)}</span><button type="button" data-action="remove-edge" data-manager-key="${esc(key)}" data-target-key="${esc(target)}" aria-label="Unterstellung ${esc(roleMap[target]?.label || target)} unter ${esc(role.label)} entfernen">×</button></span>`).join('') || '<span class="orgs-empty">Keine direkt unterstellte Rolle</span>';
-            return `<article class="orgs-card" data-manager-key="${esc(key)}"><header><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(key)}" aria-label="${esc(role.label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span> ${esc(role.label)}</button><code>${esc(key)}</code></header><div class="orgs-edges" aria-label="Direkt unterstellt">${children}</div></article>`;
+        card(key, role) {
+            return `<article class="orgs-card" data-manager-key="${esc(key)}" data-diagram-role="${esc(key)}"><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(key)}" aria-label="${esc(role.label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(key)}</code></button></article>`;
+        }
+
+        connections(roleMap) {
+            const result = [];
+            for (const [manager, targets] of Object.entries(this.hierarchy)) for (const target of targets) result.push({
+                manager,
+                managerLabel: roleMap[manager]?.label || manager,
+                target,
+                targetLabel: roleMap[target]?.label || target,
+            });
+            return result;
+        }
+
+        connectionList(connections) {
+            if (!connections.length) return '<p class="orgs-empty">Keine direkten Unterstellungen.</p>';
+            return `<ul class="orgs-connection-list">${connections.map(edge => `<li><span>${esc(edge.managerLabel)} <span aria-hidden="true">→</span><span class="hidden-visually"> leitet </span> ${esc(edge.targetLabel)}</span><button type="button" data-action="remove-edge" data-manager-key="${esc(edge.manager)}" data-target-key="${esc(edge.target)}" aria-label="Unterstellung ${esc(edge.targetLabel)} unter ${esc(edge.managerLabel)} entfernen">Entfernen</button></li>`).join('')}</ul>`;
+        }
+
+        scheduleConnections() {
+            if (this.connectionFrame !== null && typeof window.cancelAnimationFrame === 'function') window.cancelAnimationFrame(this.connectionFrame);
+            if (typeof window.requestAnimationFrame !== 'function') return this.drawConnections();
+            this.connectionFrame = window.requestAnimationFrame(() => { this.connectionFrame = null; this.drawConnections(); });
+        }
+
+        drawConnections() {
+            const diagram = this.container.querySelector('[data-hierarchy-diagram]');
+            const svg = diagram?.querySelector('[data-hierarchy-svg]');
+            const links = svg?.querySelector('[data-hierarchy-links]');
+            if (!diagram || !svg || !links) return;
+            links.replaceChildren();
+            const bounds = diagram.getBoundingClientRect();
+            const width = Math.max(diagram.scrollWidth, diagram.clientWidth);
+            const height = Math.max(diagram.scrollHeight, diagram.clientHeight);
+            svg.setAttribute('width', String(width));
+            svg.setAttribute('height', String(height));
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            const cards = new Map([...diagram.querySelectorAll('[data-diagram-role]')].map(card => [card.dataset.diagramRole, card]));
+            for (const [manager, targets] of Object.entries(this.hierarchy)) for (const target of targets) {
+                const source = cards.get(manager);
+                const destination = cards.get(target);
+                if (!source || !destination) continue;
+                const from = source.getBoundingClientRect();
+                const to = destination.getBoundingClientRect();
+                const fromX = from.left - bounds.left + from.width / 2;
+                const fromY = from.bottom - bounds.top;
+                const toX = to.left - bounds.left + to.width / 2;
+                const toY = to.top - bounds.top - 4;
+                const middleY = fromY + Math.max(20, (toY - fromY) / 2);
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${fromX} ${fromY} C ${fromX} ${middleY}, ${toX} ${middleY}, ${toX} ${toY}`);
+                path.setAttribute('class', 'orgs-diagram-link');
+                path.setAttribute('marker-end', 'url(#orgs-arrowhead)');
+                links.append(path);
+            }
         }
 
         levels(roleKeys) {
