@@ -5,7 +5,7 @@
     <name>Lokale Nextcloud-Basis</name>
     <summary>Gemeinsame lokale Basisbausteine für eigene Nextcloud-Apps.</summary>
     <description>Stellt kleine, gemeinsam genutzte PHP- und JavaScript-Basisbausteine für eigene lokale Nextcloud-Apps bereit.</description>
-    <version>0.7.0-rc.3</version>
+    <version>0.7.0-rc.4</version>
     <licence>agpl</licence>
     <author>Simon</author>
     <website>https://github.com/Filzmann/ad-suite</website>

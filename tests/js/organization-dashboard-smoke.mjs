@@ -12,8 +12,11 @@ for (const contract of ['class OrganizationDashboard', 'data-dashboard-scope', '
 }
 for (const widget of ['directory', 'organization', 'permissions', 'calendar-permissions', 'vacation-permissions']) if (!template.includes(`data-widget-id="${widget}"`)) throw new Error(`Statischer Dashboardblock fehlt: ${widget}`);
 for (const widget of ['general', 'hierarchy', 'role-order', 'areas', 'vacation-views']) if (!editor.includes(`dashboardWidget('${widget}'`)) throw new Error(`Organisations-Dashboardblock fehlt: ${widget}`);
+if (!template.includes('orgs-dashboard-collection') || !template.includes('data-widget-id="organization"')) throw new Error('AD-Organisation ist nicht als ungerahmte Sammlung eigenständiger Cards markiert.');
 for (const contract of ["components/organization-dashboard", '/api/ad-suite/admin/layout', 'dashboardLayout', 'saveDashboardLayout']) if (!template.includes(contract) && !admin.includes(contract)) throw new Error(`Dashboardanbindung fehlt: ${contract}`);
 for (const contract of ['.orgs-dashboard-grid', '.orgs-dashboard-widget', '.orgs-dashboard-header', '.is-dashboard-dragging', '.is-dashboard-over']) if (!css.includes(contract)) throw new Error(`Dashboardlayout fehlt: ${contract}`);
+if (!/\.orgs-dashboard-collection\s*\{[^}]*grid-column:\s*1\s*\/\s*-1[^}]*border:\s*0[^}]*background:\s*transparent[^}]*box-shadow:\s*none/.test(css)) throw new Error('Die Organisationsbereiche liegen weiterhin gemeinsam in einer sichtbaren äußeren Card.');
+if (!/\.orgs-dashboard-collection\s*>\s*\[data-dashboard-content\]\s*\{[^}]*padding:\s*0/.test(css)) throw new Error('Die einzelnen Organisations-Cards behalten einen gemeinsamen gepolsterten Innenkasten.');
 
 const context = { window: { LocalBase: { components: {} } }, Element: class {} };
 vm.createContext(context);

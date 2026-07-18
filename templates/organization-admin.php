@@ -24,7 +24,7 @@
             </div>
         </section>
 
-        <section class="orgs-panel orgs-dashboard-widget" data-dashboard-widget data-widget-id="organization" aria-labelledby="orgs-organization-heading">
+        <section class="orgs-panel orgs-dashboard-widget orgs-dashboard-collection" data-dashboard-widget data-widget-id="organization" aria-labelledby="orgs-organization-heading">
             <header class="orgs-dashboard-header"><h3 id="orgs-organization-heading" data-dashboard-title>AD-Organisation</h3><div class="orgs-dashboard-actions"><button type="button" data-dashboard-move="-1" aria-label="AD-Organisation eine Position zurück verschieben">↑</button><button type="button" data-dashboard-handle draggable="true" aria-label="AD-Organisation per Drag-and-drop verschieben">⠿</button><button type="button" data-dashboard-move="1" aria-label="AD-Organisation eine Position weiter verschieben">↓</button><button type="button" data-dashboard-toggle aria-expanded="true" aria-controls="orgs-organization-content" aria-label="AD-Organisation ein- oder ausklappen"><span aria-hidden="true">▾</span></button></div></header>
             <div id="orgs-organization-content" data-dashboard-content>
                 <p>Diese Konfiguration steuert Gruppen, sichtbare Namen, Bereiche, Hierarchie und Urlaubsansichten in den AD-Fachapps.</p>
