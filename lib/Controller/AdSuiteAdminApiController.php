@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use OCA\LocalBase\AppInfo\Application;
 use OCA\LocalBase\Organization\AdOrganizationSettingsService;
 use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
+use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
 use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -30,6 +31,7 @@ final class AdSuiteAdminApiController extends Controller {
         private AdOrganizationSettingsService $organization,
         private AdSuiteAdminSettingsService $adminSettings,
         private OrganizationDirectoryStatusService $directoryStatus,
+        private AdSuiteAdminLayoutService $dashboardLayout,
         private LoggerInterface $logger,
     ) {
         parent::__construct(Application::APP_ID, $request);
@@ -44,6 +46,7 @@ final class AdSuiteAdminApiController extends Controller {
             'vacationPeerApproval' => $this->adminSettings->vacationPeerApproval(),
             'vacationPeerOptions' => $this->adminSettings->vacationPeerOptions(),
             'directory' => $this->directoryStatus->status(),
+            'dashboardLayout' => $this->dashboardLayout->layout($this->session->getUser()->getUID()),
         ]);
     }
 
@@ -65,6 +68,18 @@ final class AdSuiteAdminApiController extends Controller {
             'calendarPeerEditing' => $this->adminSettings->saveCalendarPeerEditing($calendarPeerEditing),
             'vacationPeerApproval' => $this->adminSettings->saveVacationPeerApproval($vacationPeerApproval),
         ]);
+    }
+
+    public function saveLayout(array $layout): JSONResponse {
+        if (!$this->isAdmin()) return $this->denied();
+        try {
+            return new JSONResponse(['dashboardLayout' => $this->dashboardLayout->save($this->session->getUser()->getUID(), $layout)]);
+        } catch (InvalidArgumentException $error) {
+            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+        } catch (\Throwable $error) {
+            $this->logger->error('Persönliches AD-Adminlayout konnte nicht gespeichert werden.', ['exception' => $error]);
+            return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+        }
     }
 
     private function isAdmin(): bool {

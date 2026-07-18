@@ -8,6 +8,11 @@
     const notice = new window.LocalBase.ui.Notice('orgs-admin-notice', { baseClass: 'orgs-notice', typeClassPrefix: 'orgs-notice--' });
     const organizationForm = document.getElementById('orgs-organization-form');
     const permissionsForm = document.getElementById('orgs-permissions-form');
+    const dashboard = new window.LocalBase.components.OrganizationDashboard({
+        root: document.getElementById('orgsuite-admin'),
+        onChange: saveDashboardLayout,
+    });
+    let layoutSave = Promise.resolve();
     const editor = new window.LocalBase.components.OrganizationEditor({
         container: document.getElementById('orgs-organization-editor'),
         form: organizationForm,
@@ -68,6 +73,7 @@
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
             renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
             renderDirectoryStatus(data.directory);
+            dashboard.set(data.dashboardLayout);
             notice.clear();
         } catch (error) {
             notice.error(error);
@@ -84,6 +90,16 @@
         } catch (error) {
             notice.error(error);
         }
+    }
+
+    function saveDashboardLayout(layout) {
+        layoutSave = layoutSave.then(async () => {
+            try {
+                await client.request('/api/ad-suite/admin/layout', { method: 'PUT', body: JSON.stringify({ layout }) });
+            } catch (error) {
+                notice.error(error);
+            }
+        });
     }
 
     permissionsForm.addEventListener('submit', async event => {

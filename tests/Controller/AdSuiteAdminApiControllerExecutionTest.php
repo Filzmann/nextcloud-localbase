@@ -44,6 +44,17 @@ namespace OCA\LocalBase\Organization {
 }
 
 namespace OCA\LocalBase\Service {
+    class AdSuiteAdminLayoutService {
+        public array $layouts = [];
+        public bool $invalid = false;
+        public bool $failure = false;
+        public function layout(string $uid): array { return $this->layouts[$uid] ?? ['version' => 1, 'scopes' => ['main' => ['order' => ['directory'], 'collapsed' => []]]]; }
+        public function save(string $uid, array $layout): array {
+            if ($this->invalid) throw new \InvalidArgumentException('Ungültiges Layout.');
+            if ($this->failure) throw new \RuntimeException('Intern');
+            return $this->layouts[$uid] = $layout;
+        }
+    }
     class OrganizationDirectoryStatusService {
         public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
     }
@@ -55,6 +66,7 @@ namespace {
     use OCA\LocalBase\Organization\AdOrganizationSettingsService;
     use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
     use OCA\LocalBase\Controller\AdSuiteAdminApiController;
+    use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
     use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
     use OCP\IGroupManager;
     use OCP\IRequest;
@@ -70,12 +82,13 @@ namespace {
     $settings = new AdSuiteAdminSettingsService();
     $logger = new class implements LoggerInterface { public array $errors = []; public function error(string $message, array $context = []): void { $this->errors[] = [$message, $context]; } };
     $directory = new OrganizationDirectoryStatusService();
-    $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $directory, $logger);
+    $layout = new AdSuiteAdminLayoutService();
+    $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $directory, $layout, $logger);
     if ($controller->settings()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen lesen.');
-    if ($controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
+    if ($controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
     $data = $controller->settings()->getData();
-    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung']) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
+    if (($data['organization']['roles'][0] ?? '') !== 'buero' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung'] || ($data['dashboardLayout']['version'] ?? null) !== 1) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
     if ($controller->saveOrganization(['roles' => ['pfk']])->getData()['organization']['roles'][0] !== 'pfk') throw new RuntimeException('Organisation wird nicht gespeichert.');
     $organization->invalid = true;
     if ($controller->saveOrganization([])->getStatus() !== 400) throw new RuntimeException('Validierungsfehler erhält keinen Status 400.');
@@ -84,6 +97,14 @@ namespace {
     if ($controller->saveOrganization([])->getStatus() !== 400 || $logger->errors === []) throw new RuntimeException('Interner Fehler wird nicht sicher behandelt.');
     $permissions = $controller->savePermissions(['ad-Buero' => false], ['ad-PFK' => true])->getData();
     if ($permissions['calendarPeerEditing']['ad-Buero'] !== false || $permissions['vacationPeerApproval']['ad-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht gespeichert.');
+    $savedLayout = $controller->saveLayout(['version' => 1, 'scopes' => []])->getData();
+    if (($savedLayout['dashboardLayout']['version'] ?? null) !== 1 || !isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht unter dem angemeldeten Admin gespeichert.');
+    $layout->invalid = true;
+    if ($controller->saveLayout([])->getStatus() !== 400) throw new RuntimeException('Ungültiges Adminlayout erhält keinen Status 400.');
+    $layout->invalid = false;
+    $layout->failure = true;
+    $loggedErrors = count($logger->errors);
+    if ($controller->saveLayout([])->getStatus() !== 400 || count($logger->errors) <= $loggedErrors) throw new RuntimeException('Interner Layoutfehler wird nicht sicher protokolliert.');
 
     echo "LocalBase AD-Suite admin controller execution tests passed\n";
 }

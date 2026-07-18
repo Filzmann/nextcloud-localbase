@@ -11,6 +11,7 @@ runJavaScriptSuite({
         'tests/js/fake-dom-smoke.js',
         'tests/js/model-smoke.js',
         'tests/js/organization-admin-smoke.mjs',
+        'tests/js/organization-dashboard-smoke.mjs',
         'tests/js/organization-exporter-smoke.mjs',
         'tests/js/repository-smoke.js',
         'tests/js/ui-smoke.js',
