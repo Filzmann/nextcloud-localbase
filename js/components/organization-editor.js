@@ -13,10 +13,12 @@
             this.container = container; this.form = form; this.onSave = onSave; this.definition = null;
             this.positions = [];
             this.sortDrag = null;
-            this.hierarchyBoard = new window.LocalBase.components.HierarchyBoard({ container });
+            this.editingRoleKey = null;
+            this.hierarchyBoard = new window.LocalBase.components.HierarchyBoard({ container, onEditRole: roleKey => this.openRoleEditor(roleKey) });
             this.exporter = new window.LocalBase.components.OrganizationExporter({ container, board: this.hierarchyBoard });
             form.addEventListener('submit', event => { event.preventDefault(); if (this.definition) this.onSave(this.collect()); });
             container.addEventListener('click', event => this.onClick(event));
+            container.addEventListener('input', event => this.onInput(event));
             container.addEventListener('dragstart', event => this.startSort(event));
             container.addEventListener('dragover', event => this.overSort(event));
             container.addEventListener('dragleave', event => event.target instanceof Element && event.target.closest('[data-sort-key]')?.classList.remove('is-sort-over'));
@@ -24,15 +26,32 @@
             container.addEventListener('dragend', () => this.clearSort());
         }
 
-        set(definition, positions = []) { this.definition = clone(definition); this.positions = clone(positions); this.render(); }
+        set(definition, positions = []) { this.definition = clone(definition); this.positions = clone(positions); this.editingRoleKey = null; this.render(); }
 
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
             if (!button) return;
             if (button.dataset.action === 'add-team') this.addTeam();
-            if (button.dataset.action === 'remove-team') button.closest('tr')?.remove();
+            if (button.dataset.action === 'remove-team') button.closest('[data-organization-team]')?.remove();
+            if (button.dataset.action === 'toggle-card') this.toggleCard(button);
+            if (button.dataset.action === 'close-role-editor') this.closeRoleEditor();
             if (button.dataset.action === 'move-up') this.moveSortRow(button, -1);
             if (button.dataset.action === 'move-down') this.moveSortRow(button, 1);
+        }
+
+        onInput(event) {
+            const input = event.target instanceof Element ? event.target : null;
+            if (!input) return;
+            if (input.matches('[data-role-editor-field]')) return this.updateRoleFromPanel(input);
+            const areaCard = input.closest('[data-area-key]');
+            if (areaCard && input.matches('[data-field="label"],[data-field="groupId"]')) {
+                this.definition.areas[areaCard.dataset.areaKey][input.dataset.field] = input.value;
+                if (input.dataset.field === 'label') areaCard.querySelector('[data-card-label]').textContent = input.value || areaCard.dataset.areaKey;
+                this.refreshBoard();
+            }
+            const teamCard = input.closest('[data-organization-team]');
+            if (teamCard && input.matches('[data-field="label"]')) teamCard.querySelector('[data-card-label]').textContent = input.value || 'Unbenannte Urlaubsansicht';
+            if (teamCard && input.matches('[data-field="id"]')) teamCard.querySelector('[data-card-key]').textContent = input.value || 'ohne-id';
         }
 
         render() {
@@ -46,33 +65,100 @@
                     <label>Maximale Kürzellänge <input data-organization-field="teamCodeMaxLength" type="number" min="1" max="64" value="${esc(data.teamCodeMaxLength)}" required></label>
                     <label>Titel des Leitungsblocks <input data-organization-field="staffBlockLabel" value="${esc(data.staffBlockLabel)}" required></label>
                 </fieldset>
-                <p class="orgs-feedback" data-organization-sort-feedback role="status" aria-live="polite"></p>
-                <div class="orgs-table-wrap"><table class="orgs-table"><caption>Fachrollen und Nextcloud-Gruppen</caption><thead><tr><th scope="col">Rolle</th><th scope="col">Gruppen-ID</th><th scope="col">Anzeigename</th>${this.columnHeader('Kalender', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.')}${this.columnHeader('Bereich', 'Mitglieder werden zusätzlich über Bürobereiche zugeordnet.')}${this.columnHeader('Leitung je Bereich', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.')}${this.columnHeader('Peer-fähig', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.')}${this.columnHeader('Leitungsblock', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.')}${this.columnHeader('Einzelposition', 'Genau eine Person; bei Bereichsrollen je Bereich.')}<th scope="col">Reihenfolge</th></tr></thead><tbody data-sort-list="roles">${roles.map(([key, role]) => this.roleRow(key, role)).join('')}</tbody></table></div>
-                <div class="orgs-table-wrap"><table class="orgs-table"><caption>Bürobereiche</caption><thead><tr><th>Bereich</th><th>Gruppen-ID</th><th>Anzeigename</th><th>Reihenfolge</th></tr></thead><tbody data-sort-list="areas">${areas.map(([key, area]) => this.areaRow(key, area)).join('')}</tbody></table></div>
                 <fieldset class="orgs-hierarchy"><legend>Direkte Hierarchie</legend>
-                    <p>Ziehe eine unterstellte Rolle am Rollengriff auf die Karte ihrer Leitung. Der separate waagerechte Positionsgriff ordnet Karten derselben Ebene rein visuell von links nach rechts; dafür stehen zusätzlich Pfeiltasten bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
+                    <p>Bearbeite Gruppeneinstellungen über den Edit-Stift einer Diagrammkarte. Ziehe eine unterstellte Rolle am Rollengriff auf die Karte ihrer Leitung. Der separate waagerechte Positionsgriff ordnet Karten derselben Ebene rein visuell von links nach rechts; dafür stehen zusätzlich Pfeiltasten bereit. Verbindungen zwischen Bereichsrollen gelten automatisch in jedem jeweils gleichen Bereich.</p>
                     <div class="orgs-hierarchy-toolbar" aria-label="Hierarchieverbindung per Tastatur anlegen"><label>Leitung <select data-hierarchy-manager>${this.roleOptions(roles)}</select></label><label>Unterstellte Rolle <select data-hierarchy-target>${this.roleOptions(roles)}</select></label><button type="button" data-action="add-edge">Zuordnen</button></div>
-                    <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p>${this.exporter.markup()}<div class="orgs-organigram" data-hierarchy-board></div>
+                    <p class="orgs-feedback" data-hierarchy-feedback role="status" aria-live="polite"></p>${this.exporter.markup()}<div class="orgs-diagram-workspace" data-diagram-workspace><div class="orgs-organigram" data-hierarchy-board></div><aside class="orgs-role-editor" data-role-editor aria-labelledby="orgs-role-editor-heading" hidden></aside></div>
                 </fieldset>
-                <div class="orgs-table-wrap"><table class="orgs-table"><caption>Teamansichten im Urlaubsplaner</caption><thead><tr><th>ID</th><th>Anzeigename</th><th>Rollen</th><th>Bereiche</th><th>Reihenfolge</th><th>Aktion</th></tr></thead><tbody data-organization-teams>${(data.organizationTeams || []).map(team => this.teamRow(team)).join('')}</tbody></table></div>
-                <button type="button" data-action="add-team">Urlaubsansicht hinzufügen</button>`;
+                <p class="orgs-feedback" data-organization-sort-feedback role="status" aria-live="polite"></p>
+                <section class="orgs-compact-section" aria-labelledby="orgs-role-order-heading"><h4 id="orgs-role-order-heading">Fachliche Gruppenreihenfolge</h4><p>Diese Reihenfolge steuert Kalender und Gruppenlisten. Sie bleibt von der Links-rechts-Anordnung im Organigramm getrennt.</p><ol class="orgs-compact-list orgs-role-order" data-sort-list="roles">${roles.map(([key, role]) => this.roleOrderItem(key, role)).join('')}</ol></section>
+                <section class="orgs-compact-section" aria-labelledby="orgs-area-heading"><h4 id="orgs-area-heading">Bürobereiche</h4><p>Öffne nur den Bereich, den du bearbeiten möchtest.</p><div class="orgs-compact-list" data-sort-list="areas">${areas.map(([key, area]) => this.areaCard(key, area)).join('')}</div></section>
+                <section class="orgs-compact-section" aria-labelledby="orgs-team-heading"><h4 id="orgs-team-heading">Teamansichten im Urlaubsplaner</h4><p>Die Karten legen fest, welche Rollen und Bereiche gemeinsam erscheinen.</p><div class="orgs-compact-list" data-organization-teams>${(data.organizationTeams || []).map(team => this.teamCard(team)).join('')}</div><button type="button" data-action="add-team">Urlaubsansicht hinzufügen</button></section>`;
             this.hierarchyBoard.set(data.roles, data.hierarchy || {}, data.areas, this.positions, data.diagramOrder || []);
             this.updateSortControls('roles');
             this.updateSortControls('areas');
         }
 
-        roleRow(key, role) {
-            const check = (field, label) => `<input data-field="${field}" type="checkbox" ${role[field] ? 'checked' : ''} aria-label="${esc(label)}">`;
-            return `<tr data-role-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="roles"><th scope="row"><code>${esc(key)}</code></th><td><input data-field="groupId" value="${esc(role.groupId)}" aria-label="Gruppen-ID ${esc(role.label)}" required></td><td><input data-field="label" value="${esc(role.label)}" aria-label="Anzeigename ${esc(key)}" required></td><td>${check('calendarVisible', `${role.label} im Kalender sichtbar`)}</td><td>${check('areaScoped', `${role.label} ist bereichsgebunden`)}</td><td>${check('managementAreaScoped', `Leitungsrecht von ${role.label} ist bereichsgebunden`)}</td><td>${check('peerEnabled', `Peer-Recht für ${role.label} konfigurierbar`)}</td><td>${check('staffBlock', `${role.label} im Leitungsblock`)}</td><td>${check('singleOccupant', `${role.label} ist eine Einzelposition`)}</td>${this.sortCell(role.label, role.sortOrder)}</tr>`;
+        roleOrderItem(key, role) {
+            return `<li class="orgs-order-item" data-role-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="roles"><span class="orgs-setting-title"><strong data-role-order-label="${esc(key)}">${esc(role.label)}</strong><code>${esc(key)}</code></span>${this.sortControls(role.label, role.sortOrder)}</li>`;
         }
 
-        columnHeader(label, help) { return `<th scope="col"><span>${esc(label)}</span><span class="orgs-column-help">${esc(help)}</span></th>`; }
+        areaCard(key, area) {
+            const panelId = `orgs-area-${key}`;
+            return `<article class="orgs-setting-card" data-setting-card data-area-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="areas"><header><button type="button" class="orgs-setting-toggle" data-action="toggle-card" aria-expanded="false" aria-controls="${esc(panelId)}"><span aria-hidden="true">▸</span><span class="orgs-setting-title"><strong data-card-label>${esc(area.label)}</strong><code>${esc(key)}</code></span></button>${this.sortControls(area.label, area.sortOrder)}</header><div id="${esc(panelId)}" class="orgs-setting-panel" data-setting-panel hidden><label>Anzeigename <input data-field="label" value="${esc(area.label)}" required></label><details><summary>Technische Zuordnung</summary><label>Nextcloud-Gruppen-ID <input data-field="groupId" value="${esc(area.groupId)}" required></label></details></div></article>`;
+        }
 
-        areaRow(key, area) { return `<tr data-area-key="${esc(key)}" data-sort-key="${esc(key)}" data-sort-kind="areas"><th scope="row"><code>${esc(key)}</code></th><td><input data-field="groupId" value="${esc(area.groupId)}" aria-label="Gruppen-ID ${esc(area.label)}" required></td><td><input data-field="label" value="${esc(area.label)}" aria-label="Anzeigename ${esc(key)}" required></td>${this.sortCell(area.label, area.sortOrder)}</tr>`; }
-        sortCell(label, sortOrder) {
-            return `<td class="orgs-sort-cell"><input data-field="sortOrder" type="hidden" value="${esc(sortOrder)}"><button type="button" class="orgs-sort-handle" draggable="true" data-sort-handle aria-label="${esc(label)} per Drag-and-drop sortieren"><span aria-hidden="true">⠿</span></button><button type="button" data-action="move-up" aria-label="${esc(label)} nach oben verschieben">↑</button><button type="button" data-action="move-down" aria-label="${esc(label)} nach unten verschieben">↓</button></td>`;
+        teamCard(team, expanded = false) {
+            const panelId = `orgs-team-${team.id}`;
+            return `<article class="orgs-setting-card" data-setting-card data-organization-team><header><button type="button" class="orgs-setting-toggle" data-action="toggle-card" aria-expanded="${expanded ? 'true' : 'false'}" aria-controls="${esc(panelId)}"><span aria-hidden="true">▸</span><span class="orgs-setting-title"><strong data-card-label>${esc(team.label)}</strong><code data-card-key>${esc(team.id)}</code></span></button><button type="button" data-action="remove-team" aria-label="Urlaubsansicht ${esc(team.label)} entfernen">Entfernen</button></header><div id="${esc(panelId)}" class="orgs-setting-panel" data-setting-panel ${expanded ? '' : 'hidden'}><label>ID <input data-field="id" value="${esc(team.id)}" required pattern="[a-z][a-z0-9_-]*"></label><label>Anzeigename <input data-field="label" value="${esc(team.label)}" required></label><label>Rollenschlüssel <span class="orgs-field-help">Kommagetrennte Rollen, die in dieser Ansicht erscheinen.</span><input data-field="roles" value="${esc((team.roles || []).join(', '))}" required></label><label>Bereichsschlüssel <span class="orgs-field-help">Optional kommagetrennte Bürobereiche.</span><input data-field="areas" value="${esc((team.areas || []).join(', '))}"></label><label>Reihenfolge <input data-field="sortOrder" type="number" value="${esc(team.sortOrder)}"></label></div></article>`;
+        }
+
+        sortControls(label, sortOrder) {
+            return `<span class="orgs-sort-controls"><input data-field="sortOrder" type="hidden" value="${esc(sortOrder)}"><button type="button" class="orgs-sort-handle" draggable="true" data-sort-handle aria-label="${esc(label)} per Drag-and-drop sortieren"><span aria-hidden="true">⠿</span></button><button type="button" data-action="move-up" aria-label="${esc(label)} nach oben verschieben">↑</button><button type="button" data-action="move-down" aria-label="${esc(label)} nach unten verschieben">↓</button></span>`;
         }
         roleOptions(roles) { return roles.map(([key, role]) => `<option value="${esc(key)}">${esc(role.label)}</option>`).join(''); }
+
+        roleEditorMarkup(roleKey) {
+            const role = this.definition.roles[roleKey];
+            if (!role) return '';
+            const option = (field, label, help) => `<label class="orgs-role-option"><input type="checkbox" data-role-editor-field="${field}" ${role[field] ? 'checked' : ''}><span><strong>${esc(label)}</strong><span class="orgs-field-help">${esc(help)}</span></span></label>`;
+            return `<div class="orgs-role-editor-header"><h4 id="orgs-role-editor-heading" tabindex="-1"><span data-role-editor-heading-text>${esc(role.label)}</span> bearbeiten</h4><button type="button" data-action="close-role-editor" aria-label="Rollenbearbeitung schließen">×</button></div><p data-role-scope-help>Diese Einstellung gilt für alle Karten dieser Rolle${role.areaScoped ? ' in sämtlichen Bereichen' : ''}.</p><label>Anzeigename <input data-role-editor-field="label" value="${esc(role.label)}" required></label><fieldset><legend>Wirkung der Rolle</legend>${option('calendarVisible', 'Im Kalender anzeigen', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.')}${option('areaScoped', 'Mit Bürobereichen verbinden', 'Mitglieder werden zusätzlich über Bürobereiche zugeordnet.')}${option('managementAreaScoped', 'Leitung nur im gemeinsamen Bereich', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.')}${option('peerEnabled', 'Gleichrangige Freigabe ermöglichen', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.')}${option('staffBlock', 'Im Leitungsblock anzeigen', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.')}${option('singleOccupant', 'Als Einzelposition behandeln', 'Genau eine Person; bei Bereichsrollen je Bereich.')}</fieldset><details><summary>Technische Zuordnung</summary><p class="orgs-field-help">Änderungen verschieben keine bestehenden Nextcloud-Mitgliedschaften.</p><label>Nextcloud-Gruppen-ID <input data-role-editor-field="groupId" value="${esc(role.groupId)}" required></label><span class="orgs-technical-key">Fachlicher Schlüssel: <code>${esc(roleKey)}</code></span></details>`;
+        }
+
+        openRoleEditor(roleKey) {
+            if (!this.definition.roles[roleKey]) return;
+            this.editingRoleKey = roleKey;
+            const panel = this.container.querySelector('[data-role-editor]');
+            panel.innerHTML = this.roleEditorMarkup(roleKey);
+            panel.hidden = false;
+            this.container.querySelector('[data-diagram-workspace]').classList.add('is-editing');
+            panel.querySelector('[data-role-editor-field="label"]')?.focus();
+        }
+
+        closeRoleEditor() {
+            const roleKey = this.editingRoleKey;
+            this.editingRoleKey = null;
+            const panel = this.container.querySelector('[data-role-editor]');
+            panel.hidden = true;
+            panel.replaceChildren();
+            this.container.querySelector('[data-diagram-workspace]').classList.remove('is-editing');
+            if (roleKey) this.hierarchyBoard.focusRoleEdit(roleKey);
+        }
+
+        updateRoleFromPanel(input) {
+            const role = this.definition.roles[this.editingRoleKey];
+            if (!role) return;
+            const field = input.dataset.roleEditorField;
+            role[field] = input.type === 'checkbox' ? input.checked : input.value;
+            if (field === 'label') {
+                const label = input.value || this.editingRoleKey;
+                this.container.querySelector('[data-role-editor-heading-text]').textContent = label;
+                const orderItem = this.container.querySelector(`[data-role-order-label="${this.editingRoleKey}"]`)?.closest('[data-role-key]');
+                if (orderItem) {
+                    orderItem.querySelector('[data-role-order-label]').textContent = label;
+                    orderItem.querySelector('[data-sort-handle]').setAttribute('aria-label', `${label} per Drag-and-drop sortieren`);
+                    orderItem.querySelector('[data-action="move-up"]').setAttribute('aria-label', `${label} nach oben verschieben`);
+                    orderItem.querySelector('[data-action="move-down"]').setAttribute('aria-label', `${label} nach unten verschieben`);
+                }
+            }
+            if (field === 'areaScoped') this.container.querySelector('[data-role-scope-help]').textContent = `Diese Einstellung gilt für alle Karten dieser Rolle${role.areaScoped ? ' in sämtlichen Bereichen' : ''}.`;
+            this.refreshBoard();
+        }
+
+        refreshBoard() {
+            const hierarchy = this.hierarchyBoard.get();
+            const diagramOrder = this.hierarchyBoard.getDiagramOrder().filter(nodeId => this.isValidDiagramNode(nodeId, this.definition.roles, this.definition.areas));
+            this.hierarchyBoard.set(this.definition.roles, hierarchy, this.definition.areas, this.positions, diagramOrder);
+        }
+
+        toggleCard(button) {
+            const card = button.closest('[data-setting-card]');
+            const panel = card?.querySelector('[data-setting-panel]');
+            if (!card || !panel) return;
+            const expanded = button.getAttribute('aria-expanded') !== 'true';
+            button.setAttribute('aria-expanded', String(expanded));
+            panel.hidden = !expanded;
+        }
 
         collect() {
             this.syncSortOrders('roles');
@@ -80,12 +166,7 @@
             const data = clone(this.definition);
             for (const field of ['teamGroupPrefix', 'teamLabelPrefix', 'staffBlockLabel']) data[field] = this.container.querySelector(`[data-organization-field="${field}"]`).value.trim();
             data.teamCodeMaxLength = Number(this.container.querySelector('[data-organization-field="teamCodeMaxLength"]').value);
-            this.container.querySelectorAll('[data-role-key]').forEach(row => {
-                const role = data.roles[row.dataset.roleKey];
-                for (const field of ['groupId', 'label']) role[field] = row.querySelector(`[data-field="${field}"]`).value.trim();
-                for (const field of ['calendarVisible', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant']) role[field] = row.querySelector(`[data-field="${field}"]`).checked;
-                role.sortOrder = Number(row.querySelector('[data-field="sortOrder"]').value);
-            });
+            for (const role of Object.values(data.roles)) for (const field of ['groupId', 'label']) role[field] = role[field].trim();
             this.container.querySelectorAll('[data-area-key]').forEach(row => {
                 const area = data.areas[row.dataset.areaKey];
                 for (const field of ['groupId', 'label']) area[field] = row.querySelector(`[data-field="${field}"]`).value.trim();
@@ -171,7 +252,7 @@
         }
 
         announceSort(row) {
-            const label = row.querySelector('[data-field="label"]')?.value || row.dataset.sortKey;
+            const label = row.querySelector('[data-field="label"]')?.value || row.querySelector('[data-role-order-label]')?.textContent || row.dataset.sortKey;
             this.container.querySelector('[data-organization-sort-feedback]').textContent = `${label} wurde an Position ${[...row.parentElement.children].indexOf(row) + 1} verschoben.`;
         }
 
@@ -191,10 +272,9 @@
             const ids = new Set(rows.map(row => row.querySelector('[data-field="id"]').value));
             let number = rows.length + 1; while (ids.has(`view-${number}`)) number += 1;
             const sortOrder = Math.max(0, ...rows.map(row => Number(row.querySelector('[data-field="sortOrder"]').value) || 0)) + 10;
-            this.container.querySelector('[data-organization-teams]').insertAdjacentHTML('beforeend', this.teamRow({ id: `view-${number}`, label: 'Neue Urlaubsansicht', roles: [], areas: [], sortOrder }));
+            this.container.querySelector('[data-organization-teams]').insertAdjacentHTML('beforeend', this.teamCard({ id: `view-${number}`, label: 'Neue Urlaubsansicht', roles: [], areas: [], sortOrder }, true));
+            this.container.querySelector('[data-organization-team]:last-child [data-field="label"]')?.focus();
         }
-
-        teamRow(team) { return `<tr data-organization-team><td><input data-field="id" value="${esc(team.id)}" aria-label="ID der Urlaubsansicht" required pattern="[a-z][a-z0-9_-]*"></td><td><input data-field="label" value="${esc(team.label)}" aria-label="Anzeigename der Urlaubsansicht ${esc(team.id)}" required></td><td><input data-field="roles" value="${esc((team.roles || []).join(', '))}" aria-label="Rollenschlüssel der Urlaubsansicht ${esc(team.id)}" required></td><td><input data-field="areas" value="${esc((team.areas || []).join(', '))}" aria-label="Bereichsschlüssel der Urlaubsansicht ${esc(team.id)}"></td><td><input data-field="sortOrder" type="number" value="${esc(team.sortOrder)}" aria-label="Reihenfolge der Urlaubsansicht ${esc(team.id)}"></td><td><button type="button" data-action="remove-team" aria-label="Urlaubsansicht ${esc(team.label)} entfernen">Entfernen</button></td></tr>`; }
         list(value) { return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]; }
     }
 

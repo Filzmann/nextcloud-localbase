@@ -15,7 +15,7 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 - Karten derselben Hierarchieebene lassen sich per Drag-and-drop einschließlich einer Ablage zwischen zwei Karten sowie über zugängliche Links-/Rechts-Schaltflächen global anordnen. Diese Diagrammordnung ist eine rein visuelle Organisationsdarstellung und bleibt technisch von der fachlichen Rollen-/Bereichsreihenfolge getrennt.
 - Das aktuell sichtbare Organigramm lässt sich clientseitig als bearbeitbares Draw.io-Diagramm, hochauflösendes PNG und über eine druckoptimierte Vektoransicht als PDF exportieren. Die Aufnahme zugeordneter Nutzer*innen muss für jeden Export ausdrücklich aktiviert werden.
 - Rollen können ausdrücklich als Einzelposition markiert werden. Organisationsweite Einzelpositionen sowie bereichsbezogene BL-/StvBL-Positionen zeigen ihre Nextcloud-Gruppenbesetzung im Diagramm; fehlende und mehrfache Besetzungen werden sichtbar diagnostiziert.
-- Die Gruppenoptionen im Organisationseditor enthalten sichtbare Erklärungen ihrer fachlichen Wirkung.
+- Die Gruppenoptionen werden über einen Edit-Stift der Diagrammkarten in einem Seitenpanel mit sichtbaren Erklärungen ihrer fachlichen Wirkung bearbeitet. Technische Zuordnungen sind eingeklappt; die fachliche Reihenfolge bleibt separat kompakt sortierbar, Bereiche und Urlaubsansichten erscheinen als aufklappbare Karten.
 - Organisationsvertrag Version 2 ergänzt stellvertretende PDL, Büroorganisation Pflege, Fahrzeugverwaltung und Empfang additiv in bestehenden Konfigurationen. Stv. PDL führt Pflegefachkräfte und Büroorganisation Pflege; Fahrzeugverwaltung ist GF-Digi und Empfang dem Sekretariat unterstellt.
 
 ## Geplante Erweiterungen

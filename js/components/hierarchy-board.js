@@ -9,8 +9,9 @@
      * Vertrag: Die clientseitige Zyklusprüfung dient der Rückmeldung; LocalBase validiert den Payload serverseitig erneut.
      */
     class HierarchyBoard {
-        constructor({ container }) {
+        constructor({ container, onEditRole = () => {} }) {
             this.container = container;
+            this.onEditRole = onEditRole;
             this.roles = {};
             this.areas = {};
             this.positions = [];
@@ -56,6 +57,7 @@
         onClick(event) {
             const button = event.target instanceof Element ? event.target.closest('button[data-action]') : null;
             if (!button) return;
+            if (button.dataset.action === 'edit-role') this.onEditRole(button.dataset.roleKey);
             if (button.dataset.action === 'move-node-left') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, -1);
             if (button.dataset.action === 'move-node-right') this.moveDiagramNode(button.closest('[data-diagram-node]')?.dataset.diagramNode, 1);
             if (button.dataset.action === 'remove-edge') this.removeEdge(button.dataset.managerKey, button.dataset.targetKey);
@@ -94,7 +96,11 @@
             const areaLabel = area ? `<span class="orgs-card-area">Bereich ${esc(area.label)}</span>` : '';
             const personMarkup = role.singleOccupant ? `<span class="orgs-card-person${personClass}">${esc(person)}</span>` : '';
             const label = `${role.label}${area ? `, Bereich ${area.label}` : ''}`;
-            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}" data-diagram-level="${levelIndex}"><div class="orgs-card-position"><button type="button" data-action="move-node-left" aria-label="${esc(label)} nach links verschieben" ${nodeIndex === 0 ? 'disabled' : ''}>←</button><button type="button" class="orgs-position-handle" draggable="true" data-position-node="${esc(node.id)}" aria-label="${esc(label)} waagerecht per Drag-and-drop anordnen"><span aria-hidden="true">↔</span></button><button type="button" data-action="move-node-right" aria-label="${esc(label)} nach rechts verschieben" ${nodeIndex === nodeCount - 1 ? 'disabled' : ''}>→</button></div><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
+            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}" data-diagram-level="${levelIndex}"><div class="orgs-card-position"><button type="button" data-action="edit-role" data-role-key="${esc(node.roleKey)}" aria-label="Einstellungen für ${esc(label)} bearbeiten"><span aria-hidden="true">✎</span></button><button type="button" data-action="move-node-left" aria-label="${esc(label)} nach links verschieben" ${nodeIndex === 0 ? 'disabled' : ''}>←</button><button type="button" class="orgs-position-handle" draggable="true" data-position-node="${esc(node.id)}" aria-label="${esc(label)} waagerecht per Drag-and-drop anordnen"><span aria-hidden="true">↔</span></button><button type="button" data-action="move-node-right" aria-label="${esc(label)} nach rechts verschieben" ${nodeIndex === nodeCount - 1 ? 'disabled' : ''}>→</button></div><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
+        }
+
+        focusRoleEdit(roleKey) {
+            [...this.container.querySelectorAll('[data-action="edit-role"]')].find(button => button.dataset.roleKey === roleKey)?.focus();
         }
 
         diagramNodes(roleKeys) {

@@ -6,17 +6,18 @@ const hierarchySource = readFileSync(new URL('../../js/components/hierarchy-boar
 const adminSource = readFileSync(new URL('../../js/admin/organization-admin.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../../css/organization-admin.css', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachrollen und Nextcloud-Gruppen', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
+for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachliche Gruppenreihenfolge', 'data-role-editor', 'roleEditorMarkup(', 'openRoleEditor(', 'closeRoleEditor(', 'updateRoleFromPanel(', 'data-setting-card', 'data-action="toggle-card"', 'data-organization-teams', 'this.hierarchyBoard.get()', 'this.hierarchyBoard.getDiagramOrder()', 'data-sort-list="roles"', 'data-sort-list="areas"', 'moveSortRow(', 'syncSortOrders(', 'singleOccupant', 'Technische Zuordnung', 'gilt für alle Karten dieser Rolle', 'Genau eine Person; bei Bereichsrollen je Bereich.', 'Rolle steht als Filter und Kalendergruppe zur Verfügung.', 'Leitungsrechte gelten nur in gemeinsamen Bereichen.', 'Gleichrangige dürfen nach Freigabe gegenseitig bearbeiten.', 'Gemeinsamer Block für Geschäftsführung, Leitungen und Stabsstellen.']) {
     if (!editorSource.includes(contract)) throw new Error(`Organisationseditor-Vertrag fehlt: ${contract}`);
 }
-for (const contract of ['class HierarchyBoard', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
+if (editorSource.includes('Fachrollen und Nextcloud-Gruppen') || editorSource.includes('columnHeader(') || editorSource.includes('roleRow(')) throw new Error('Die breite Rollen-Einstellungstabelle ist weiterhin vorhanden.');
+for (const contract of ['class HierarchyBoard', 'onEditRole', 'data-action="edit-role"', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
 if (hierarchySource.includes('Keine direkt unterstellte Rolle') || hierarchySource.includes('class="orgs-edges"')) throw new Error('Unterstellte Rollen stehen weiterhin textlastig innerhalb der Diagrammknoten.');
 for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
 }
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 for (const contract of ['orgs-directory-status', 'orgs-directory-groups', 'Verzeichnis- und LDAP-Kompatibilität']) if (!template.includes(contract)) throw new Error(`Verzeichnisdiagnose-Markup fehlt: ${contract}`);
-for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-export', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-column-help', '.orgs-card-person', 'background-image:']) {
+for (const contract of ['width: 100%', 'max-width: none', 'overflow-x: auto', '.orgs-organigram', '.orgs-diagram-workspace.is-editing', '.orgs-role-editor', '.orgs-compact-list', '.orgs-setting-card', '.orgs-export', '.orgs-card.is-drag-over', '.orgs-card.is-position-before', '.orgs-card.is-position-after', '.orgs-position-handle', '.orgs-sort-handle', '.orgs-diagram-links', '.orgs-card-person', 'background-image:']) {
     if (!css.includes(contract)) throw new Error(`Admin-Layoutvertrag fehlt: ${contract}`);
 }
 if (!/\.orgs-level-nodes\s*\{[^}]*justify-content:\s*space-evenly/.test(css)) throw new Error('Wenige Organigrammkarten nutzen die verfügbare Ebenenbreite nicht gleichmäßig.');
@@ -46,7 +47,7 @@ if (diagramNodes.filter(node => node.roleKey === 'bl').map(node => node.id).join
 if (board.diagramEdges(diagramNodes).length !== 4) throw new Error('Hierarchiepfeile werden nicht passend je Bereich aufgefächert.');
 if (board.positionText('bl', 'west') !== 'Berta West' || board.positionText('bl', 'south') !== 'Nicht besetzt') throw new Error('Besetzung von Einzelpositionen wird im Organigramm nicht verständlich dargestellt.');
 const occupiedCard = board.card(diagramNodes.find(node => node.id === 'bl::west'));
-if (!occupiedCard.includes('orgs-card-person') || !occupiedCard.includes('Berta West') || !occupiedCard.includes('Bereich West')) throw new Error('Bereich und zugeordnete Person fehlen in der Diagrammkarte.');
+if (!occupiedCard.includes('orgs-card-person') || !occupiedCard.includes('Berta West') || !occupiedCard.includes('Bereich West') || !occupiedCard.includes('data-action="edit-role"')) throw new Error('Bereich, zugeordnete Person oder Edit-Stift fehlen in der Diagrammkarte.');
 board.diagramOrder = diagramNodes.map(node => node.id);
 board.applyDiagramOrderMove('bl::west', 'bl::south', true);
 if (board.diagramOrder.indexOf('bl::west') > board.diagramOrder.indexOf('bl::south')) throw new Error('Horizontales Drag-and-drop verschiebt einen Diagrammknoten nicht nach links.');
@@ -64,10 +65,41 @@ const positionedGap = board.positionTarget({ querySelectorAll: () => [rightCard]
 if (positionedGap?.card !== rightCard || positionedGap?.targetId !== 'right' || !positionedGap?.before) throw new Error('Der visuelle Zwischenraum wird nicht auf die benachbarte Diagrammkarte abgebildet.');
 
 const editor = Object.create(context.window.LocalBase.components.OrganizationEditor.prototype);
-editor.definition = { roles: { first: { sortOrder: 20 }, second: { sortOrder: 10 } }, areas: { west: { sortOrder: 20 }, east: { sortOrder: 10 } } };
+editor.definition = {
+    roles: {
+        first: { label: 'Erste Rolle', groupId: 'ad-Erste', sortOrder: 20, calendarVisible: true, areaScoped: false, managementAreaScoped: false, peerEnabled: true, staffBlock: false, singleOccupant: false },
+        second: { label: 'Zweite Rolle', groupId: 'ad-Zweite', sortOrder: 10, calendarVisible: true, areaScoped: true, managementAreaScoped: true, peerEnabled: false, staffBlock: false, singleOccupant: true },
+    },
+    areas: { west: { label: 'West', groupId: 'ad-West', sortOrder: 20 }, east: { label: 'Ost', groupId: 'ad-Ost', sortOrder: 10 } },
+};
 editor.applyOrder('roles', ['first', 'second']);
 editor.applyOrder('areas', ['west', 'east']);
 if (editor.definition.roles.first.sortOrder !== 10 || editor.definition.roles.second.sortOrder !== 20) throw new Error('Rollenreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
 if (editor.definition.areas.west.sortOrder !== 10 || editor.definition.areas.east.sortOrder !== 20) throw new Error('Bereichsreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
+const rolePanel = editor.roleEditorMarkup('second');
+if (!rolePanel.includes('Zweite Rolle') || !rolePanel.includes('ad-Zweite') || !rolePanel.includes('Technische Zuordnung') || !rolePanel.includes('gilt für alle Karten dieser Rolle')) throw new Error('Das seitliche Rollenpanel enthält nicht alle globalen Rolleninformationen.');
+const roleOrder = editor.roleOrderItem('first', editor.definition.roles.first);
+if (!roleOrder.includes('data-sort-kind="roles"') || !roleOrder.includes('Erste Rolle') || roleOrder.includes('data-field="groupId"')) throw new Error('Die kompakte fachliche Reihenfolge vermischt Sortierung und Rolleneinstellungen.');
+const areaCard = editor.areaCard('west', editor.definition.areas.west);
+if (!areaCard.includes('data-setting-card') || !areaCard.includes('data-action="toggle-card"') || !areaCard.includes('ad-West')) throw new Error('Bereiche werden nicht als kompakte aufklappbare Karten dargestellt.');
+const teamCard = editor.teamCard({ id: 'pflege', label: 'Pflege', roles: ['first'], areas: [], sortOrder: 10 });
+if (!teamCard.includes('data-organization-team') || !teamCard.includes('data-action="toggle-card"') || !teamCard.includes('Pflege')) throw new Error('Urlaubsansichten werden nicht als kompakte aufklappbare Karten dargestellt.');
+let boardRefreshed = false;
+editor.editingRoleKey = 'second';
+editor.positions = [];
+editor.hierarchyBoard = {
+    get: () => ({ first: ['second'] }),
+    getDiagramOrder: () => ['first', 'second'],
+    set: () => { boardRefreshed = true; },
+};
+editor.container = { querySelector: selector => selector === '[data-role-scope-help]' ? { textContent: '' } : null };
+editor.updateRoleFromPanel({ dataset: { roleEditorField: 'areaScoped' }, type: 'checkbox', checked: false });
+if (editor.definition.roles.second.areaScoped !== false || !boardRefreshed) throw new Error('Eine Rollenänderung aus dem Seitenpanel aktualisiert nicht alle Diagrammkarten derselben Rolle.');
+const settingPanel = { hidden: true };
+let expanded = 'false';
+const settingCard = { querySelector: () => settingPanel };
+const toggle = { closest: () => settingCard, getAttribute: () => expanded, setAttribute: (_name, value) => { expanded = value; } };
+editor.toggleCard(toggle);
+if (expanded !== 'true' || settingPanel.hidden) throw new Error('Kompakte Einstellungskarten lassen sich nicht zugänglich aufklappen.');
 
 console.log('LocalBase organization admin smoke passed');
