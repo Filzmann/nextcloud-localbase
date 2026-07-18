@@ -6,9 +6,10 @@ const exporterSource = readFileSync(new URL('../../js/components/organization-ex
 const editorSource = readFileSync(new URL('../../js/components/organization-editor.js', import.meta.url), 'utf8');
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'window.open', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'printHtml(']) {
+for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'application/pdf', 'ad-organigramm.pdf', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'toPdf(']) {
     if (!exporterSource.includes(contract)) throw new Error(`Organigramm-Exportvertrag fehlt: ${contract}`);
 }
+if (exporterSource.includes('window.open') || exporterSource.includes('printWindow.print()') || exporterSource.includes('printHtml(')) throw new Error('Der PDF-Button verwendet weiterhin ein Druckfenster statt eines direkten Downloads.');
 if (!boardSource.includes('exportSnapshot(includePeople = false)')) throw new Error('Das Organigramm stellt keinen datensparsamen Export-Snapshot bereit.');
 if (!editorSource.includes('this.exporter.markup()') || !template.includes("components/organization-exporter")) throw new Error('Der Export ist nicht in den gemeinsamen Organisationseditor eingebunden.');
 
@@ -48,8 +49,14 @@ if (drawio.includes('Geschäftsführung & Organisation')) throw new Error('Der D
 
 const svg = exporter.toSvg(layout);
 if (!svg.includes('<svg') || !svg.includes('<rect') || !svg.includes('<path') || !svg.includes('Gina Führung') || svg.includes('Geschäftsführung & Organisation')) throw new Error('Der gemeinsame Vektorexport ist unvollständig oder unsicher escaped.');
-const printable = exporter.printHtml(svg);
-if (!printable.includes('@page') || !printable.includes('size: landscape') || !printable.includes(svg)) throw new Error('Die PDF-Druckansicht ist nicht auf einen skalierbaren Querformat-Export ausgelegt.');
+const pdf = exporter.toPdf(layout);
+const xrefOffset = Number(pdf.match(/startxref\n(\d+)/)?.[1]);
+const xrefEntries = pdf.slice(xrefOffset).split('\n').slice(3, 9);
+if (!pdf.startsWith('%PDF-1.4') || !pdf.includes('/Type /Page') || !pdf.includes('/Encoding /WinAnsiEncoding') || !pdf.includes('Gina F\\374hrung') || !pdf.slice(xrefOffset).startsWith('xref') || [...pdf].some(character => character.codePointAt(0) > 127)) throw new Error('Der direkte PDF-Download ist kein vollständiges, lesbares Vektordokument.');
+xrefEntries.forEach((entry, index) => {
+    const offset = Number(entry.slice(0, 10));
+    if (!pdf.slice(offset).startsWith(`${index + 1} 0 obj`)) throw new Error('Der direkte PDF-Download enthält eine ungültige Objekttabelle.');
+});
 
 let snapshotIncludedPeople = null;
 let downloadedFilename = '';
@@ -66,17 +73,10 @@ workflow.downloadBlob = (_blob, filename) => { downloadedFilename = filename; };
 await workflow.onClick({ target: actionButton });
 if (snapshotIncludedPeople !== false || downloadedFilename !== 'ad-organigramm.drawio' || actionButton.disabled || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der Draw.io-Download respektiert den datensparsamen Standard oder den Statusvertrag nicht.');
 
-let printed = false;
-let printMarkup = '';
-context.window.open = () => ({
-    opener: {},
-    focus() {},
-    print() { printed = true; },
-    addEventListener: (_type, callback) => callback(),
-    document: { open() {}, write(value) { printMarkup = value; }, close() {} },
-});
-exporter.exportPdf(layout);
-if (!printed || !printMarkup.includes('<svg')) throw new Error('Der PDF-Export öffnet die Vektor-Druckansicht nicht.');
+actionButton.dataset.action = 'export-pdf';
+downloadedFilename = '';
+await workflow.onClick({ target: actionButton });
+if (downloadedFilename !== 'ad-organigramm.pdf' || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der PDF-Button löst keinen direkten Dateidownload mit verständlichem Status aus.');
 
 let pngFilename = '';
 let revokedSvg = false;
