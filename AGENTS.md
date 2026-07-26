@@ -9,6 +9,9 @@ Nextcloud-App-ID:
     localbase
 
 Die priorisierte Produktplanung und offene Entscheidungen stehen in `ROADMAP.md`; verbindliche Fach-, Sicherheits- und Architekturregeln bleiben in dieser Datei.
+Der ausführliche Katalog öffentlicher Verträge steht in
+`docs/architecture.md`; diese Datei hält die bei jeder Arbeit benötigten
+Cross-App-Grenzen und Prüfungen.
 
 ## Zweck
 
@@ -21,6 +24,8 @@ Aktuell enthalten:
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
 - PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
 - Neutraler Kalendervertrag `AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
+- `CalendarContext` und `CalendarContextSettingsService` definieren Land, ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`, `DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche Nextcloud-Zeitzonen dürfen ausschließlich individuelle Terminanzeigen beeinflussen. Der Kontext ist im gemeinsamen AD-Adminbereich änderbar und wird bei bestehenden persönlichen Dashboardlayouts additiv eingeblendet.
+- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag für den gemeinsamen Kalenderkontext. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
 - `AdSuiteAdminSettingsService` speichert app-übergreifend verwendete Peer-Freigaben semantisch nach Rollen und stellt sie AD Kalender, AD Urlaub und der administrativen OrgSuite-Oberfläche gemeinsam bereit.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
@@ -104,9 +109,10 @@ Einzelne Checks, die durch die Testlaeufer gebuendelt werden:
 
 ## DDEV
 
-Die gemeinsame lokale Nextcloud-DDEV-Umgebung liegt ausserhalb dieses Repos:
-
-    ~/projects/br-nextcloud-apps/nextcloud-dev
+Die gemeinsame Nextcloud-DDEV-Umgebung wird aus dem dokumentierten
+Parent-Unterverzeichnis `nextcloud-dev` gesteuert. Bei einem eigenständigen
+Checkout ist der lokale DDEV-Pfad zuerst anhand der realen Umgebung zu
+ermitteln.
 
 Die App wird nach Nextcloud gemountet unter:
 

@@ -18,7 +18,7 @@ final class AdSuiteAdminLayoutService {
     private const CONFIG_KEY = 'ad_suite_admin_dashboard_layout';
     private const VERSION = 1;
     private const BLOCKS = [
-        'main' => ['directory', 'organization', 'permissions'],
+        'main' => ['directory', 'calendar-context', 'organization', 'permissions'],
         'organization' => ['general', 'hierarchy', 'role-order', 'areas', 'vacation-views'],
         'permissions' => ['calendar-permissions', 'vacation-permissions'],
     ];

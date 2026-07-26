@@ -7,6 +7,7 @@
     });
     const notice = new window.LocalBase.ui.Notice('orgs-admin-notice', { baseClass: 'orgs-notice', typeClassPrefix: 'orgs-notice--' });
     const organizationForm = document.getElementById('orgs-organization-form');
+    const calendarContextForm = document.getElementById('orgs-calendar-context-form');
     const permissionsForm = document.getElementById('orgs-permissions-form');
     const dashboard = new window.LocalBase.components.OrganizationDashboard({
         root: document.getElementById('orgsuite-admin'),
@@ -36,6 +37,20 @@
 
     function collect(containerId) {
         return Object.fromEntries([...document.getElementById(containerId).querySelectorAll('input[type="checkbox"]')].map(input => [input.name, input.checked]));
+    }
+
+    function renderCalendarContext(calendarContext) {
+        for (const field of ['countryCode', 'subdivisionCode', 'timezone']) {
+            const input = calendarContextForm.elements.namedItem(field);
+            if (input) input.value = calendarContext?.[field] || '';
+        }
+    }
+
+    function collectCalendarContext() {
+        return Object.fromEntries(['countryCode', 'subdivisionCode', 'timezone'].map(field => [
+            field,
+            String(calendarContextForm.elements.namedItem(field)?.value || '').trim(),
+        ]));
     }
 
     function renderDirectoryStatus(directory) {
@@ -70,6 +85,7 @@
     async function load() {
         try {
             const data = await client.request('/api/ad-suite/admin/settings');
+            renderCalendarContext(data.calendarContext);
             editor.set(data.organization, data.directory?.positions || [], data.dashboardLayout?.organigram?.zoom || 100);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
             renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
@@ -79,9 +95,24 @@
         } catch (error) {
             notice.error(error);
             organizationForm.querySelector('button[type="submit"]').disabled = true;
+            calendarContextForm.querySelector('button[type="submit"]').disabled = true;
             permissionsForm.querySelector('button[type="submit"]').disabled = true;
         }
     }
+
+    calendarContextForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        try {
+            const data = await client.request('/api/ad-suite/admin/calendar-context', {
+                method: 'PUT',
+                body: JSON.stringify({ calendarContext: collectCalendarContext() }),
+            });
+            renderCalendarContext(data.calendarContext);
+            notice.success('Gemeinsamer Kalenderkontext gespeichert.');
+        } catch (error) {
+            notice.error(error);
+        }
+    });
 
     async function saveOrganization(organization) {
         try {

@@ -10,7 +10,7 @@ const css = readFileSync(new URL('../../css/organization-admin.css', import.meta
 for (const contract of ['class OrganizationDashboard', 'data-dashboard-scope', 'data-dashboard-widget', 'data-dashboard-toggle', 'data-dashboard-handle', 'data-dashboard-move', 'aria-expanded', 'collectLayout(', 'applyLayout(', 'moveWidget(']) {
     if (!source.includes(contract)) throw new Error(`Persönlicher Dashboardvertrag fehlt: ${contract}`);
 }
-for (const widget of ['directory', 'organization', 'permissions', 'calendar-permissions', 'vacation-permissions']) if (!template.includes(`data-widget-id="${widget}"`)) throw new Error(`Statischer Dashboardblock fehlt: ${widget}`);
+for (const widget of ['directory', 'calendar-context', 'organization', 'permissions', 'calendar-permissions', 'vacation-permissions']) if (!template.includes(`data-widget-id="${widget}"`)) throw new Error(`Statischer Dashboardblock fehlt: ${widget}`);
 for (const widget of ['general', 'hierarchy', 'role-order', 'areas', 'vacation-views']) if (!editor.includes(`dashboardWidget('${widget}'`)) throw new Error(`Organisations-Dashboardblock fehlt: ${widget}`);
 if (!template.includes('orgs-dashboard-collection') || !template.includes('data-widget-id="organization"')) throw new Error('AD-Organisation ist nicht als ungerahmte Sammlung eigenständiger Cards markiert.');
 for (const contract of ["components/organization-dashboard", '/api/ad-suite/admin/layout', 'dashboardLayout', 'saveDashboardLayout']) if (!template.includes(contract) && !admin.includes(contract)) throw new Error(`Dashboardanbindung fehlt: ${contract}`);

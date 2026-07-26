@@ -5,7 +5,7 @@
     <name>Lokale Nextcloud-Basis</name>
     <summary>Gemeinsame lokale Basisbausteine für eigene Nextcloud-Apps.</summary>
     <description>Stellt kleine, gemeinsam genutzte PHP- und JavaScript-Basisbausteine für eigene lokale Nextcloud-Apps bereit.</description>
-    <version>0.7.0-rc.7</version>
+    <version>0.8.0-rc.2</version>
     <licence>agpl</licence>
     <author>Simon</author>
     <website>https://github.com/Filzmann/ad-suite</website>
@@ -13,6 +13,9 @@
     <repository type="git">https://github.com/Filzmann/nextcloud-localbase</repository>
     <namespace>LocalBase</namespace>
     <category>tools</category>
+    <background-jobs>
+        <job>OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob</job>
+    </background-jobs>
     <dependencies>
         <php min-version="8.3"/>
         <nextcloud min-version="34" max-version="34"/>

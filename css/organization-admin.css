@@ -129,6 +129,9 @@
 .orgs-empty { color: var(--color-text-maxcontrast); font-size: var(--font-size-small); }
 .orgs-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 6px 12px; margin: 8px 0 14px; }
 .orgs-checkbox-grid label { display: flex; align-items: center; min-height: 32px; }
+.orgs-calendar-context-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 10px 14px; }
+.orgs-calendar-context-fields label { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.orgs-calendar-context-fields input { width: 100%; box-sizing: border-box; }
 .orgs-panel form > button[type="submit"] { margin-top: 10px; }
 @media (max-width: 700px) {
     .orgs-panel { padding: 10px; }
