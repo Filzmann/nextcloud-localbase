@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 
 const boardSource = readFileSync(new URL('../../js/components/hierarchy-board.js', import.meta.url), 'utf8');
@@ -17,8 +18,8 @@ const context = {
     window: { LocalBase: { ui: { esc: value => String(value ?? '') } } },
     JSON, Set, Map, Math, Object, Element: class {}, Blob: class {}, URL: {}, Image: class {}, XMLSerializer: class {},
 };
-runInNewContext(boardSource, context);
-runInNewContext(exporterSource, context);
+runInNewContext(boardSource, context, { filename: fileURLToPath(new URL('../../js/components/hierarchy-board.js', import.meta.url)) });
+runInNewContext(exporterSource, context, { filename: fileURLToPath(new URL('../../js/components/organization-exporter.js', import.meta.url)) });
 
 const board = Object.create(context.window.LocalBase.components.HierarchyBoard.prototype);
 board.roles = {

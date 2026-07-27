@@ -24,6 +24,30 @@
             </div>
         </section>
 
+        <section class="orgs-panel orgs-dashboard-widget" data-dashboard-widget data-widget-id="calendar-context" aria-labelledby="orgs-calendar-context-heading">
+            <header class="orgs-dashboard-header"><h3 id="orgs-calendar-context-heading" data-dashboard-title>Kalenderregion und fachliche Zeitzone</h3><div class="orgs-dashboard-actions"><button type="button" data-dashboard-move="-1" aria-label="Kalenderregion eine Position zurück verschieben">↑</button><button type="button" data-dashboard-handle draggable="true" aria-label="Kalenderregion per Drag-and-drop verschieben">⠿</button><button type="button" data-dashboard-move="1" aria-label="Kalenderregion eine Position weiter verschieben">↓</button><button type="button" data-dashboard-toggle aria-expanded="true" aria-controls="orgs-calendar-context-content" aria-label="Kalenderregion ein- oder ausklappen"><span aria-hidden="true">▾</span></button></div></header>
+            <div id="orgs-calendar-context-content" data-dashboard-content>
+                <p>Dieser organisationsweite Kontext bestimmt gemeinsame Ferien, Feiertage und fachliche Kalendertage. Persönliche Nextcloud-Zeitzonen verändern ausschließlich die individuelle Terminanzeige.</p>
+                <form id="orgs-calendar-context-form">
+                    <div class="orgs-calendar-context-fields">
+                        <label for="orgs-calendar-country">Land
+                            <input id="orgs-calendar-country" name="countryCode" type="text" maxlength="2" pattern="[A-Za-z]{2}" required autocomplete="off" aria-describedby="orgs-calendar-country-help">
+                            <span id="orgs-calendar-country-help" class="orgs-field-help">ISO-3166-Ländercode, zum Beispiel DE.</span>
+                        </label>
+                        <label for="orgs-calendar-subdivision">Region
+                            <input id="orgs-calendar-subdivision" name="subdivisionCode" type="text" maxlength="6" pattern="[A-Za-z]{2}-[A-Za-z0-9]{1,3}" required autocomplete="off" aria-describedby="orgs-calendar-subdivision-help">
+                            <span id="orgs-calendar-subdivision-help" class="orgs-field-help">ISO-3166-2-Regionscode, zum Beispiel DE-BE.</span>
+                        </label>
+                        <label for="orgs-calendar-timezone">Fachliche Zeitzone
+                            <input id="orgs-calendar-timezone" name="timezone" type="text" maxlength="64" required autocomplete="off" aria-describedby="orgs-calendar-timezone-help">
+                            <span id="orgs-calendar-timezone-help" class="orgs-field-help">IANA-Zeitzone, zum Beispiel Europe/Berlin.</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="primary">Kalenderkontext speichern</button>
+                </form>
+            </div>
+        </section>
+
         <section class="orgs-panel orgs-dashboard-widget orgs-dashboard-collection" data-dashboard-widget data-widget-id="organization" aria-labelledby="orgs-organization-heading">
             <header class="orgs-dashboard-header"><h3 id="orgs-organization-heading" data-dashboard-title>AD-Organisation</h3><div class="orgs-dashboard-actions"><button type="button" data-dashboard-move="-1" aria-label="AD-Organisation eine Position zurück verschieben">↑</button><button type="button" data-dashboard-handle draggable="true" aria-label="AD-Organisation per Drag-and-drop verschieben">⠿</button><button type="button" data-dashboard-move="1" aria-label="AD-Organisation eine Position weiter verschieben">↓</button><button type="button" data-dashboard-toggle aria-expanded="true" aria-controls="orgs-organization-content" aria-label="AD-Organisation ein- oder ausklappen"><span aria-hidden="true">▾</span></button></div></header>
             <div id="orgs-organization-content" data-dashboard-content>

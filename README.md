@@ -10,10 +10,12 @@ Gemeinsame Basisbausteine für die lokalen AD- und BR-Nextcloud-Apps. LocalBase 
 
 ## Installation
 
-Das Releasearchiv nach `custom_apps/` entpacken und als HTTP-Benutzer aktivieren:
+Auf Staging- und Zielsystemen werden Nextcloud-Root, `custom_apps`, CLI-PHP und
+Runtimebenutzer aus der realen Konfiguration ermittelt. Danach wird LocalBase
+im vorgesehenen Runtimekontext aktiviert:
 
 ```bash
-sudo -u www-data php occ app:enable localbase
+<RUNTIME-KONTEXT> <CLI-PHP> occ app:enable localbase
 ```
 
 Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt installiert, sondern automatisch durch den geprüften Produktinstaller. Die vollständige Installationsreihenfolge und Prüfschritte stehen im öffentlichen [AD-Suite-Projekt](https://github.com/Filzmann/ad-suite).

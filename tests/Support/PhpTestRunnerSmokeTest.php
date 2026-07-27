@@ -83,6 +83,29 @@ try {
     if (($coverageCommand[0] ?? '') !== $fakeTool || !in_array('--clover', $coverageCommand, true) || !in_array($root . '/lib', $coverageCommand, true)) {
         throw new RuntimeException('PHP-Test-Runner reicht Test und Quellfilter nicht korrekt an PHPCOV weiter.');
     }
+
+    $isolatedRoot = $temporaryDirectory . '/isolated-project';
+    if (!mkdir($isolatedRoot . '/lib', 0775, true)
+        || !mkdir($isolatedRoot . '/tests', 0775, true)
+        || file_put_contents($isolatedRoot . '/tests/collision.php', '<?php $arguments = [];') === false) {
+        throw new RuntimeException('Coverage-Isolationsfixture konnte nicht angelegt werden.');
+    }
+    $isolatedCommand = PhpTestRunner::withOptionalCoverage(
+        $isolatedRoot,
+        [PHP_BINARY, 'tests/collision.php'],
+    );
+    $coverageScript = (string)end($isolatedCommand);
+    $coverageScriptPath = str_starts_with($coverageScript, '/')
+        ? $coverageScript
+        : $isolatedRoot . '/' . $coverageScript;
+    $preservesCallerScope = static function (string $script): bool {
+        $arguments = new stdClass();
+        require $script;
+        return $arguments instanceof stdClass;
+    };
+    if (!$preservesCallerScope($coverageScriptPath)) {
+        throw new RuntimeException('Coverage-Testdatei überschreibt weiterhin interne PHPCOV-Variablen.');
+    }
 } finally {
     if ($originalCoverageCommand === false) putenv('PHP_COVERAGE_COMMAND');
     else putenv('PHP_COVERAGE_COMMAND=' . $originalCoverageCommand);

@@ -6,6 +6,7 @@ namespace OCA\LocalBase\Controller;
 
 use InvalidArgumentException;
 use OCA\LocalBase\AppInfo\Application;
+use OCA\LocalBase\Calendar\CalendarContextSettingsService;
 use OCA\LocalBase\Organization\AdOrganizationSettingsService;
 use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
 use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
@@ -30,6 +31,7 @@ final class AdSuiteAdminApiController extends Controller {
         private IGroupManager $groups,
         private AdOrganizationSettingsService $organization,
         private AdSuiteAdminSettingsService $adminSettings,
+        private CalendarContextSettingsService $calendarContext,
         private OrganizationDirectoryStatusService $directoryStatus,
         private AdSuiteAdminLayoutService $dashboardLayout,
         private LoggerInterface $logger,
@@ -41,6 +43,7 @@ final class AdSuiteAdminApiController extends Controller {
         if (!$this->isAdmin()) return $this->denied();
         return new JSONResponse([
             'organization' => $this->organization->definition()->toArray(),
+            'calendarContext' => $this->calendarContext->context()->toArray(),
             'calendarPeerEditing' => $this->adminSettings->calendarPeerEditing(),
             'calendarPeerOptions' => $this->adminSettings->calendarPeerOptions(),
             'vacationPeerApproval' => $this->adminSettings->vacationPeerApproval(),
@@ -48,6 +51,18 @@ final class AdSuiteAdminApiController extends Controller {
             'directory' => $this->directoryStatus->status(),
             'dashboardLayout' => $this->dashboardLayout->layout($this->session->getUser()->getUID()),
         ]);
+    }
+
+    public function saveCalendarContext(array $calendarContext): JSONResponse {
+        if (!$this->isAdmin()) return $this->denied();
+        try {
+            return new JSONResponse(['calendarContext' => $this->calendarContext->save($calendarContext)->toArray()]);
+        } catch (InvalidArgumentException $error) {
+            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+        } catch (\Throwable $error) {
+            $this->logger->error('Gemeinsamer Kalenderkontext konnte nicht gespeichert werden.', ['exception' => $error]);
+            return new JSONResponse(['error' => 'Der gemeinsame Kalenderkontext konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+        }
     }
 
     public function saveOrganization(array $organization): JSONResponse {

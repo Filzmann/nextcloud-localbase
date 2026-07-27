@@ -33,7 +33,7 @@ namespace {
     $service = new AdSuiteAdminLayoutService($config, $logger);
     $default = $service->layout('admin-a');
     if (($default['version'] ?? null) !== 1) throw new RuntimeException('Persönliches Adminlayout besitzt keine Vertragsversion.');
-    if (($default['scopes']['main']['order'] ?? []) !== ['directory', 'organization', 'permissions']) throw new RuntimeException('Hauptblöcke fehlen im Standardlayout.');
+    if (($default['scopes']['main']['order'] ?? []) !== ['directory', 'calendar-context', 'organization', 'permissions']) throw new RuntimeException('Hauptblöcke fehlen im Standardlayout.');
     if (($default['scopes']['organization']['order'] ?? []) !== ['general', 'hierarchy', 'role-order', 'areas', 'vacation-views']) throw new RuntimeException('Organisationsblöcke fehlen im Standardlayout.');
     if (($default['scopes']['permissions']['order'] ?? []) !== ['calendar-permissions', 'vacation-permissions']) throw new RuntimeException('Rechteblöcke fehlen im Standardlayout.');
     if (($default['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Das persönliche Standardlayout besitzt keinen neutralen Organigramm-Zoom.');
@@ -47,7 +47,7 @@ namespace {
         ],
         'organigram' => ['zoom' => 130],
     ]);
-    if (($saved['scopes']['main']['order'][0] ?? '') !== 'permissions' || ($saved['scopes']['main']['collapsed'] ?? []) !== ['directory']) throw new RuntimeException('Persönliche Hauptansicht wird nicht gespeichert.');
+    if (($saved['scopes']['main']['order'] ?? []) !== ['permissions', 'directory', 'organization', 'calendar-context'] || ($saved['scopes']['main']['collapsed'] ?? []) !== ['directory']) throw new RuntimeException('Persönliche Hauptansicht wird nicht gespeichert oder erhält den neuen Kalenderblock nicht additiv.');
     if (($saved['scopes']['organization']['order'] ?? []) !== ['hierarchy', 'general', 'role-order', 'areas', 'vacation-views']) throw new RuntimeException('Neue oder ausgelassene Blöcke werden nicht sicher ergänzt.');
     if (($saved['organigram']['zoom'] ?? null) !== 130) throw new RuntimeException('Persönlicher Organigramm-Zoom wird nicht gespeichert.');
     if (($service->save('admin-d', ['scopes' => []])['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Bestehende persönliche Layouts erhalten keinen rückwärtskompatiblen Standardzoom.');

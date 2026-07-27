@@ -1,0 +1,10 @@
+{
+  "name": "br-nextcloud-apps-js-coverage",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "c8": "12.0.0"
+  }
+}
