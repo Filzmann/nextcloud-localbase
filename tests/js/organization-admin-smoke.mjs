@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 
 const editorSource = readFileSync(new URL('../../js/components/organization-editor.js', import.meta.url), 'utf8');
@@ -26,8 +27,8 @@ if (!/\.orgs-card\s*\{[^}]*width:\s*fit-content[^}]*min-width:\s*11rem[^}]*max-w
 if (!/\.orgs-dashboard-widget\[data-widget-id="hierarchy"\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/.test(css)) throw new Error('Der Organigramm-Block nutzt nicht verbindlich die volle verfügbare Breite.');
 
 const context = { window: { LocalBase: { ui: { esc: value => String(value ?? '') } } }, JSON, Set, Math, Object, Element: class {} };
-runInNewContext(hierarchySource, context);
-runInNewContext(editorSource, context);
+runInNewContext(hierarchySource, context, { filename: fileURLToPath(new URL('../../js/components/hierarchy-board.js', import.meta.url)) });
+runInNewContext(editorSource, context, { filename: fileURLToPath(new URL('../../js/components/organization-editor.js', import.meta.url)) });
 const board = Object.create(context.window.LocalBase.components.HierarchyBoard.prototype);
 if (board.normalizeZoom(20) !== 50 || board.normalizeZoom(137) !== 140 || board.normalizeZoom(190) !== 150) throw new Error('Persönlicher Zoom wird nicht auf sichere Grenzen und Schritte normalisiert.');
 let emittedZoom = null;

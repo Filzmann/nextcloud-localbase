@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('../../js/components/organization-dashboard.js', import.meta.url), 'utf8');
@@ -20,7 +21,7 @@ if (!/\.orgs-dashboard-collection\s*>\s*\[data-dashboard-content\]\s*\{[^}]*padd
 
 const context = { window: { LocalBase: { components: {} } }, Element: class {} };
 vm.createContext(context);
-vm.runInContext(source, context);
+vm.runInContext(source, context, { filename: fileURLToPath(new URL('../../js/components/organization-dashboard.js', import.meta.url)) });
 const Dashboard = context.window.LocalBase.components.OrganizationDashboard;
 const dashboard = Object.create(Dashboard.prototype);
 let changed = 0;
