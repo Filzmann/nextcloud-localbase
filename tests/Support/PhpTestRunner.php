@@ -88,7 +88,18 @@ final class PhpTestRunner {
         }
 
         $script = (string)($command[1] ?? 'test');
-        $report = rtrim($outputDirectory, '/') . '/' . hash('sha256', $root . '/' . $script) . '.xml';
+        $scriptPath = str_starts_with($script, '/')
+            ? $script
+            : rtrim($root, '/') . '/' . ltrim($script, '/');
+        $identifier = hash('sha256', $scriptPath);
+        $report = rtrim($outputDirectory, '/') . '/' . $identifier . '.xml';
+        $wrapper = rtrim($outputDirectory, '/') . '/run-' . $identifier . '.php';
+        $wrapperCode = "<?php\n\ndeclare(strict_types=1);\n\n(static function (): void {\n"
+            . '    require ' . var_export($scriptPath, true) . ";\n"
+            . "})();\n";
+        if (file_put_contents($wrapper, $wrapperCode) === false) {
+            throw new \RuntimeException("Coverage-Testwrapper konnte nicht angelegt werden: {$wrapper}");
+        }
         return [
             $tool,
             'execute',
@@ -97,7 +108,7 @@ final class PhpTestRunner {
             '--include',
             $root . '/lib',
             '--add-uncovered',
-            $script,
+            $wrapper,
         ];
     }
 }

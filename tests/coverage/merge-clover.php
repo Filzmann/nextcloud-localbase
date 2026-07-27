@@ -2,13 +2,21 @@
 
 declare(strict_types=1);
 
-if ($argc !== 3) {
-    fwrite(STDERR, "Aufruf: php merge-clover.php <App-ID> <Clover-Verzeichnis>\n");
+if ($argc !== 3 && $argc !== 4) {
+    fwrite(STDERR, "Aufruf: php merge-clover.php <App-ID> <Clover-Verzeichnis> [Mindest-Coverage]\n");
     exit(2);
 }
 
 $appId = $argv[1];
 $directory = $argv[2];
+$minimum = null;
+if ($argc === 4) {
+    if (!is_numeric($argv[3]) || (float)$argv[3] < 0.0 || (float)$argv[3] > 100.0) {
+        fwrite(STDERR, "Ungültige Mindest-Coverage: {$argv[3]}\n");
+        exit(2);
+    }
+    $minimum = (float)$argv[3];
+}
 $reports = glob(rtrim($directory, '/') . '/*.xml') ?: [];
 if ($reports === []) {
     throw new RuntimeException("Keine Clover-Berichte für {$appId} gefunden.");
@@ -39,3 +47,10 @@ foreach ($lines as $fileLines) {
 }
 $percent = $executable === 0 ? 0.0 : ($covered / $executable) * 100;
 printf("%s\t%d\t%d\t%.2f\n", $appId, $executable, $covered, $percent);
+if ($minimum !== null && round($percent, 2) < $minimum) {
+    fwrite(
+        STDERR,
+        sprintf("%s: %.2f %% liegt unter %.2f %%.\n", $appId, $percent, $minimum),
+    );
+    exit(1);
+}
