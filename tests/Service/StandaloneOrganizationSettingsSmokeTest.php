@@ -8,6 +8,7 @@ namespace OCP\Settings { interface ISettings { public function getForm(); public
 namespace OCP\AppFramework\Http { class TemplateResponse { public function __construct(public string $appName, public string $templateName, public array $params = []) {} } }
 
 namespace {
+    require_once __DIR__ . '/../../lib/Catalog/AdProductCatalog.php';
     require_once __DIR__ . '/../../lib/Service/AdProductSuiteService.php';
     require_once __DIR__ . '/../../lib/Settings/StandaloneProductAdminSection.php';
     require_once __DIR__ . '/../../lib/Settings/StandaloneOrganizationAdmin.php';

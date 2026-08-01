@@ -23,3 +23,8 @@ Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt ins
 ## Roadmap
 
 Geplante gemeinsame Bausteine und offene Architekturentscheidungen stehen in der [Roadmap](ROADMAP.md).
+
+Für die manuelle Staging-Prüfung der Administrationsoberfläche und der
+Cross-App-Verträge steht ein ausfüllbares
+[Abnahmeformular](docs/manual-acceptance.md) bereit. Es berücksichtigt, dass
+LocalBase keine eigene Fachnavigation besitzt.

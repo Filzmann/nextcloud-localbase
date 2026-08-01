@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0-rc.1
+
+- Versionierten AD-Produktkatalog als kanonischen Providervertrag ergänzt.
+- AD Recruitment als Standalone-, Menü-, Suite- und Einzelbundle-Produkt aufgenommen.
+- Bestehende Standalone-Navigation auf Katalogroute und -reihenfolge umgestellt.
+
 ## 0.7.0-rc.1
 
 - Optionale Capability-Verträge für eigenständig installierbare AD-Fachprodukte ergänzt.

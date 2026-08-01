@@ -4,22 +4,6 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 
 ## Freigegebene Umsetzungsaufgaben
 
-### LB-AD-CATALOG – Kanonischen AD-Produktkatalog bereitstellen
-
-Status: bereit für einen ausdrücklich beauftragten Cross-App-Lauf
-
-- Einen kleinen versionierten, maschinenlesbaren Katalog für stabile
-  Produkt-ID, Produkttyp, Reihenfolge und technische Einstiegsroute
-  bereitstellen.
-- `adcalendar`, `adplaner`, `adurlaub`, `adroom` und `adrecruitment`
-  aufnehmen; LocalBase und OrgSuite getrennt als Infrastruktur ausweisen.
-- Standalone-Fähigkeit, Menüzugehörigkeit und Release-Bundle-Zugehörigkeit
-  getrennt modellieren. Sichtbare Labels bleiben l10n-fähige Consumertexte.
-- Provider-Tests decken Schema, Eindeutigkeit, stabile Reihenfolge,
-  unbekannte Produkte und Rückwärtskompatibilität ab.
-- Die abhängigen Tasks `PARENT-AD-CATALOG`, `ORGS-AD-CATALOG`,
-  `RECR-AD-CATALOG` und `ADS-AD-CATALOG-DOCS` gemeinsam abnehmen.
-
 ### LB-AD-ORG-SNAPSHOT – Read-only Organisationssnapshot veröffentlichen
 
 Status: bereit für einen ausdrücklich beauftragten öffentlichen
@@ -66,6 +50,8 @@ Status: bereit nach Auswahl einer Pilot-App und ihres l10n-Vertrags
 
 ## Aktueller Fokus
 
+- Die manuellen Prüfungen werden im ausfüllbaren
+  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Bestehende gemeinsame Modelle, API-, UI-, Organisations-, Integrations- und Testverträge klein, dependency-arm und stabil halten.
 - Öffentliche Verträge mit den betroffenen Consumer-Apps auf einem realitätsnahen Staging und durch Contract-Tests absichern.
 - Den Organisationseditor mit realen Gruppenbesetzungen und großen Organisationsstrukturen visuell und fachlich abnehmen.

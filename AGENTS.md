@@ -42,7 +42,15 @@ Aktuell enthalten:
 - Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
 - `IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten. Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert niemals Berechtigungen.
-- `StandaloneAppNavigationService` registriert Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die dynamischen Settings-Adapter platzieren die gemeinsame Organisationsverwaltung bei einer Einzelinstallation unter deren Fachprodukt.
+- `AdProductCatalog` liest den versionierten AD-Produktkatalog als kanonische
+  Quelle für Produkt-IDs, Reihenfolge, Routen sowie getrennte Menü-,
+  Standalone- und Bundle-Eigenschaften. Ungültige oder fehlende Katalogdaten
+  erweitern weder Navigation noch Berechtigungen.
+- `StandaloneAppNavigationService` registriert katalogisierte
+  Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die
+  dynamischen Settings-Adapter platzieren die gemeinsame
+  Organisationsverwaltung bei einer Einzelinstallation unter deren
+  Fachprodukt.
 - Organisationseditor, Admin-API und Persistenz des gemeinsamen AD-Vertrags liegen vollständig in LocalBase. OrgSuite bindet diese Oberfläche ab zwei Produkten nur als Adminadapter ein.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
