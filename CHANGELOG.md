@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0-rc.2
+
+- Gemeinsamen API-Client um den lokalisierten Nextcloud-Fehlervertrag mit stabilem `error`-Feld ergänzt; ältere `message`-Antworten bleiben kompatibel.
+
 ## 0.10.0-rc.1
 
 - Organisationsvertrag Version 3 mit getrennten Rollen `finance` und `payroll` ergänzt; bestehende Finanzgruppen bleiben beim Upgrade erhalten.
