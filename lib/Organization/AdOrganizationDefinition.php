@@ -27,7 +27,7 @@ final class AdOrganizationDefinition {
 
     public static function defaults(): self {
         return self::get([
-            'version' => 2,
+            'version' => 3,
             'teamGroupPrefix' => 'ad-ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
@@ -40,7 +40,8 @@ final class AdOrganizationDefinition {
                 'gf_digi' => self::role('ad-GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true, singleOccupant: true),
                 'assistant_gf_digi' => self::role('ad-AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true, singleOccupant: true),
                 'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
-                'finance' => self::role('ad-Finanzen-Lohn', 'Finanzen und Lohn', 80, peerEnabled: true, staffBlock: true),
+                'finance' => self::role('ad-Finanzen', 'Finanzen', 80, peerEnabled: true, staffBlock: true),
+                'payroll' => self::role('ad-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true),
                 'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true),
                 'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
                 'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
@@ -62,7 +63,7 @@ final class AdOrganizationDefinition {
                 'gf_as' => ['pdl', 'bl', 'staff_hr', 'staff_qmb', 'secretariat'],
                 'gf_digi' => ['assistant_gf_digi', 'finance_lead', 'fleet_management', 'secretariat'],
                 'assistant_gf_digi' => ['it'],
-                'finance_lead' => ['finance'],
+                'finance_lead' => ['finance', 'payroll'],
                 'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
                 'deputy_pdl' => ['care_office', 'pfk'],
                 'secretariat' => ['reception'],
@@ -76,7 +77,7 @@ final class AdOrganizationDefinition {
                 ['id' => 'office-south', 'label' => 'Büro Süd', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 30],
                 ['id' => 'eb', 'label' => 'Einsatzbegleitungen', 'roles' => ['eb'], 'areas' => [], 'sortOrder' => 40],
                 ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['deputy_pdl', 'care_office', 'pfk'], 'areas' => [], 'sortOrder' => 50],
-                ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
+                ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'payroll', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
                 ['id' => 'fleet-management', 'label' => 'Fahrzeugverwaltung', 'roles' => ['fleet_management'], 'areas' => [], 'sortOrder' => 70],
                 ['id' => 'reception', 'label' => 'Empfang', 'roles' => ['reception'], 'areas' => [], 'sortOrder' => 80],
             ],
@@ -127,7 +128,12 @@ final class AdOrganizationDefinition {
         $lookup = array_fill_keys(array_map('strval', $groupIds), true);
         $result = [];
         foreach ($this->roles() as $key => $role) if (isset($lookup[$role['groupId']])) $result[] = $key;
-        return $result;
+        if (isset($lookup['ad-Finanzen-Lohn'])
+            && $this->roleKeyForExactGroup('ad-Finanzen-Lohn') === null
+            && isset($this->roles()['finance'])) {
+            $result[] = 'finance';
+        }
+        return array_values(array_unique($result));
     }
 
     /** @return list<string> */
@@ -161,6 +167,12 @@ final class AdOrganizationDefinition {
     public function roleManagementIsAreaScoped(string $key): bool { return (bool)($this->roles()[$key]['managementAreaScoped'] ?? false); }
 
     public function roleKeyForGroup(string $groupId): ?string {
+        $exact = $this->roleKeyForExactGroup($groupId);
+        if ($exact !== null) return $exact;
+        return $groupId === 'ad-Finanzen-Lohn' && isset($this->roles()['finance']) ? 'finance' : null;
+    }
+
+    private function roleKeyForExactGroup(string $groupId): ?string {
         foreach ($this->roles() as $key => $role) if ($role['groupId'] === $groupId) return $key;
         return null;
     }
@@ -182,33 +194,48 @@ final class AdOrganizationDefinition {
         return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant') + ['calendarVisible' => true];
     }
 
-    /**
-     * Zweck: Ergänzt den freigegebenen Organisationsvertrag v1 additiv, ohne vorhandene Fachwerte umzuschreiben.
-     * Vertrag: Kollisionen und durch neue Kanten entstehende Zyklen werden anschließend von validate() abgelehnt.
-     */
+    /** Ergänzt veröffentlichte Organisationsversionen ausschließlich additiv. */
     private static function migrate(array $data): array {
         $version = (int)($data['version'] ?? 1);
-        if ($version === 2) return $data;
-        if ($version !== 1) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
+        if ($version === 3) return $data;
+        if (!in_array($version, [1, 2], true)) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
         if (!isset($data['roles'], $data['hierarchy'], $data['organizationTeams']) || !is_array($data['roles']) || !is_array($data['hierarchy']) || !is_array($data['organizationTeams'])) return $data;
 
-        foreach (self::versionTwoRoles() as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
-        foreach ([
-            'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
-            'deputy_pdl' => ['care_office', 'pfk'],
-            'gf_digi' => ['fleet_management'],
-            'secretariat' => ['reception'],
-        ] as $manager => $targets) {
-            if (!isset($data['hierarchy'][$manager])) $data['hierarchy'][$manager] = [];
-            if (!is_array($data['hierarchy'][$manager])) continue;
-            foreach ($targets as $target) if (!in_array($target, $data['hierarchy'][$manager], true)) $data['hierarchy'][$manager][] = $target;
+        if ($version === 1) {
+            foreach (self::versionTwoRoles() as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
+            self::appendHierarchyTargets($data['hierarchy'], [
+                'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
+                'deputy_pdl' => ['care_office', 'pfk'],
+                'gf_digi' => ['fleet_management'],
+                'secretariat' => ['reception'],
+            ]);
+
+            self::migrateOrganizationTeam($data['organizationTeams'], 'pfk', 'Pflegefachkräfte', ['deputy_pdl', 'care_office', 'pfk'], 50, true);
+            self::migrateOrganizationTeam($data['organizationTeams'], 'fleet-management', 'Fahrzeugverwaltung', ['fleet_management'], 70);
+            self::migrateOrganizationTeam($data['organizationTeams'], 'reception', 'Empfang', ['reception'], 80);
+            $version = 2;
         }
 
-        self::migrateOrganizationTeam($data['organizationTeams'], 'pfk', 'Pflegefachkräfte', ['deputy_pdl', 'care_office', 'pfk'], 50, true);
-        self::migrateOrganizationTeam($data['organizationTeams'], 'fleet-management', 'Fahrzeugverwaltung', ['fleet_management'], 70);
-        self::migrateOrganizationTeam($data['organizationTeams'], 'reception', 'Empfang', ['reception'], 80);
-        $data['version'] = 2;
+        if ($version === 2) {
+            if (($data['roles']['finance']['label'] ?? null) === 'Finanzen und Lohn') {
+                $data['roles']['finance']['label'] = 'Finanzen';
+            }
+            if (!isset($data['roles']['payroll'])) $data['roles']['payroll'] = self::role('ad-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true);
+            self::appendHierarchyTargets($data['hierarchy'], ['finance_lead' => ['finance', 'payroll']]);
+            self::migrateOrganizationTeam($data['organizationTeams'], 'staff', 'Geschäftsführung, Leitungen und Stabsstellen', ['payroll'], 60);
+            $version = 3;
+        }
+
+        $data['version'] = $version;
         return $data;
+    }
+
+    private static function appendHierarchyTargets(array &$hierarchy, array $requirements): void {
+        foreach ($requirements as $manager => $targets) {
+            if (!isset($hierarchy[$manager])) $hierarchy[$manager] = [];
+            if (!is_array($hierarchy[$manager])) continue;
+            foreach ($targets as $target) if (!in_array($target, $hierarchy[$manager], true)) $hierarchy[$manager][] = $target;
+        }
     }
 
     private static function versionTwoRoles(): array {
@@ -262,7 +289,7 @@ final class AdOrganizationDefinition {
                 'calendarVisible' => (bool)($role['calendarVisible'] ?? true),
             ];
         }
-        foreach (['eb', 'deputy_pdl', 'care_office', 'fleet_management', 'reception'] as $requiredRole) if (!isset($roles[$requiredRole])) throw new InvalidArgumentException("Die fachliche Rolle {$requiredRole} fehlt.");
+        foreach (['eb', 'deputy_pdl', 'care_office', 'fleet_management', 'reception', 'finance', 'payroll'] as $requiredRole) if (!isset($roles[$requiredRole])) throw new InvalidArgumentException("Die fachliche Rolle {$requiredRole} fehlt.");
 
         $areas = [];
         foreach ($data['areas'] as $key => $area) {
@@ -322,7 +349,7 @@ final class AdOrganizationDefinition {
         }
 
         return [
-            'version' => 2,
+            'version' => 3,
             'teamGroupPrefix' => $teamGroupPrefix,
             'teamLabelPrefix' => $teamLabelPrefix,
             'teamCodeMaxLength' => $teamCodeMaxLength,

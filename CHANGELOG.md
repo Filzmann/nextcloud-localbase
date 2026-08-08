@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0-rc.1
+
+- Organisationsvertrag Version 3 mit getrennten Rollen `finance` und `payroll` ergänzt; bestehende Finanzgruppen bleiben beim Upgrade erhalten.
+- Datensparsamen, unveränderlichen Organisationssnapshot für Fachapp-Berechtigungen veröffentlicht.
+- Fehlende oder ungültige Organisationspersistenz im Snapshot explizit als nicht freigabefähig markiert.
+- Synthetische Demoorganisation um die getrennte Lohnrolle ergänzt.
+
 ## 0.9.0-rc.1
 
 - Versionierten AD-Produktkatalog als kanonischen Providervertrag ergänzt.

@@ -15,7 +15,20 @@ if ($definition->diagramOrder() !== []) throw new RuntimeException('Die visuelle
 if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
 $roles = $definition->roles();
-if ($definition->toArray()['version'] !== 2) throw new RuntimeException('Die additive Organisationsmigration verwendet nicht Vertragsversion 2.');
+if ($definition->toArray()['version'] !== 3) throw new RuntimeException('Die additive Organisationsmigration verwendet nicht Vertragsversion 3.');
+$financeGroup = $definition->roleGroupId('finance');
+$payrollGroup = $definition->roleGroupId('payroll');
+if ($financeGroup !== 'ad-Finanzen' || $payrollGroup !== 'ad-Lohn' || $financeGroup === $payrollGroup) {
+    throw new RuntimeException('Finanzen und Lohn sind nicht als getrennte semantische Rollen vorbelegt.');
+}
+if ($definition->roleKeysForGroups(['ad-Finanzen-Lohn']) !== ['finance']) {
+    throw new RuntimeException('Die bisherige kombinierte Gruppen-ID verliert ihre sichere Finanz-Kompatibilität.');
+}
+foreach (['finance', 'payroll'] as $financeRole) {
+    if (!in_array($financeRole, $definition->hierarchy()['finance_lead'] ?? [], true)) {
+        throw new RuntimeException("{$financeRole} bleibt nicht unter derselben Leitung einsortiert.");
+    }
+}
 foreach ([
     'deputy_pdl' => ['ad-StvPDL', 'Stellvertretende Pflegedienstleitung', true],
     'care_office' => ['ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', false],
@@ -69,6 +82,30 @@ foreach ([['pdl', 'deputy_pdl'], ['pdl', 'care_office'], ['deputy_pdl', 'care_of
 $organizationTeams = array_column($definition->organizationTeams(), null, 'id');
 if (($organizationTeams['pfk']['roles'] ?? []) !== ['deputy_pdl', 'care_office', 'pfk']) throw new RuntimeException('Die Pflege-Urlaubsansicht beginnt nicht mit Stv. PDL und Büroorganisation Pflege.');
 if (($organizationTeams['fleet-management']['roles'] ?? []) !== ['fleet_management'] || ($organizationTeams['reception']['roles'] ?? []) !== ['reception']) throw new RuntimeException('Urlaubsansichten für Fahrzeugverwaltung oder Empfang fehlen.');
+if (!in_array('finance', $organizationTeams['staff']['roles'] ?? [], true) || !in_array('payroll', $organizationTeams['staff']['roles'] ?? [], true)) throw new RuntimeException('Finanzen und Lohn liegen nicht gemeinsam im bisherigen Organisationsblock.');
+
+$versionTwo = $definition->toArray();
+$versionTwo['version'] = 2;
+unset($versionTwo['roles']['payroll']);
+$versionTwo['roles']['finance']['groupId'] = 'existing-finance-and-payroll';
+$versionTwo['roles']['finance']['label'] = 'Finanzen und Lohn';
+$versionTwo['hierarchy']['finance_lead'] = ['finance'];
+foreach ($versionTwo['organizationTeams'] as &$versionTwoTeam) {
+    $versionTwoTeam['roles'] = array_values(array_diff($versionTwoTeam['roles'], ['payroll']));
+}
+unset($versionTwoTeam);
+$migratedVersionTwo = AdOrganizationDefinition::get($versionTwo);
+if ($migratedVersionTwo->toArray()['version'] !== 3
+    || $migratedVersionTwo->roleGroupId('finance') !== 'existing-finance-and-payroll'
+    || $migratedVersionTwo->roleGroupId('payroll') !== 'ad-Lohn'
+    || $migratedVersionTwo->roleLabel('finance') !== 'Finanzen') {
+    throw new RuntimeException('Version 2 wird nicht additiv und mit erhaltener Bestandsgruppe migriert.');
+}
+$customVersionTwo = $versionTwo;
+$customVersionTwo['roles']['finance']['label'] = 'Individuelle Buchhaltung';
+if (AdOrganizationDefinition::get($customVersionTwo)->roleLabel('finance') !== 'Individuelle Buchhaltung') {
+    throw new RuntimeException('Eine individuelle Finanzbezeichnung wird beim Split überschrieben.');
+}
 
 $legacyOrganization = $definition->toArray();
 $legacyOrganization['version'] = 1;
@@ -82,7 +119,7 @@ $legacyOrganization['organizationTeams'] = array_values(array_filter($legacyOrga
 foreach ($legacyOrganization['organizationTeams'] as &$team) if ($team['id'] === 'pfk') $team['roles'] = ['pfk'];
 unset($team);
 $migratedOrganization = AdOrganizationDefinition::get($legacyOrganization);
-if ($migratedOrganization->toArray()['version'] !== 2 || $migratedOrganization->roleLabel('pfk') !== 'Individuelle Pflegebezeichnung' || $migratedOrganization->roles()['pfk']['sortOrder'] !== 777) throw new RuntimeException('Bestehende Organisationswerte werden bei der Migration verändert.');
+if ($migratedOrganization->toArray()['version'] !== 3 || $migratedOrganization->roleLabel('pfk') !== 'Individuelle Pflegebezeichnung' || $migratedOrganization->roles()['pfk']['sortOrder'] !== 777) throw new RuntimeException('Bestehende Organisationswerte werden bei der Migration verändert.');
 if (!in_array('office', $migratedOrganization->hierarchy()['pdl'], true) || !$migratedOrganization->managesRole('deputy_pdl', 'pfk')) throw new RuntimeException('Bestehende Kanten werden nicht bewahrt oder neue Hierarchiekanten fehlen nach der Migration.');
 
 $collidingLegacy = $legacyOrganization;

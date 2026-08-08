@@ -4,23 +4,6 @@ Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen
 
 ## Freigegebene Umsetzungsaufgaben
 
-### LB-AD-ORG-SNAPSHOT – Read-only Organisationssnapshot veröffentlichen
-
-Status: bereit für einen ausdrücklich beauftragten öffentlichen
-LocalBase-Vertrag
-
-- Einen unveränderlichen read-only Snapshot mit Vertragsversion, Prüfsumme,
-  Gültigkeitsstatus, Rollen, Bereichen, Assistenzteams und tatsächlichen
-  Gruppen-IDs bereitstellen.
-- Einen ungültigen oder nur aus Defaults rekonstruierten Persistenzstand
-  erkennbar machen; ein Consumer darf daraus keine Freigabe ableiten.
-- Keine Gruppen, Mitgliedschaften oder Fachrechte verändern und keine
-  personenbezogenen Mitgliederlisten in den Vertrag aufnehmen.
-- Provider-Tests belegen gültigen Stand, ungültige Persistenz, stabile
-  Prüfsumme, Versionierung und datensparsames Payload.
-- Gemeinsam mit `BPM-AD-ORG-SNAPSHOT` in der Berechtigungsmatrix durch
-  Provider-/Consumer-Contract-Tests abnehmen.
-
 ### LB-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag bereitstellen
 
 Status: bereit nach Klärung der Mitgliedschaftsinvariante

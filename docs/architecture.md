@@ -51,6 +51,27 @@ erhalten; Gruppen-ID-Kollisionen, ungültige Referenzen und Hierarchiezyklen
 werden abgelehnt. Eine ungültige gespeicherte Definition fällt sicher auf die
 geprüfte Standarddefinition zurück.
 
+Version 3 trennt die bisherigen Funktionen unterhalb `finance_lead` in die
+stabilen Schlüssel `finance` und `payroll`. Beim Upgrade bleibt die bestehende
+Gruppen-ID von `finance` erhalten; `payroll` wird additiv ergänzt. Beide
+Rollen bleiben im bisherigen Hierarchie- und Organisationsblock.
+Aus Sicherheitsgründen wird die Mitgliedschaft der bisherigen kombinierten
+Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
+`finance` zugeordnet und ihr unveränderter Standardtitel fachlich zu
+„Finanzen“ normalisiert. Administrator*innen verschieben Lohn-Mitarbeitende
+anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
+niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
+Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
+`ad-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
+ausdrücklich niemals die neue `payroll`-Rolle.
+
+`AdOrganizationSnapshotService` veröffentlicht Rollen und Bereiche ohne
+Mitgliederlisten oder Fachrechte. Der unveränderliche Snapshot enthält
+Vertragsversion, Definitionsversion, Gültigkeitsstatus und Prüfsumme. Eine
+fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz erzeugt
+einen ungültigen, leeren Snapshot, aus dem Consumer keine Freigabe ableiten
+dürfen.
+
 `AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen
 zentral in LocalBase-AppConfig. Bei Einzelinstallation erscheinen sie im
