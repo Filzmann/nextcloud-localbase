@@ -16,15 +16,15 @@ if ($event->start() !== $start || $event->end() !== $end || $event->employeeUids
     throw new RuntimeException('Eine unbeantwortete Discovery muss begrenzt und leer bleiben.');
 }
 
-$event->provide([' bob ', 'alice', '', 'alice', "\t"]);
+$event->provide([' bob ', 'alice', '', 'alice', "\t", '0']);
 $event->provide(['carol', 'bob']);
-if ($event->employeeUids() !== ['alice', 'bob', 'carol']) {
+if ($event->employeeUids() !== ['0', 'alice', 'bob', 'carol']) {
     throw new RuntimeException('Provider-UIDs werden nicht normalisiert, dedupliziert und stabil sortiert.');
 }
 
 /** @phpstan-ignore-next-line Absichtlich fehlerhafte Providerdaten am öffentlichen Vertrag. */
 $event->provide([42, ['nested'], new stdClass()]);
-if ($event->employeeUids() !== ['alice', 'bob', 'carol']) {
+if ($event->employeeUids() !== ['0', 'alice', 'bob', 'carol']) {
     throw new RuntimeException('Ungültige Providerwerte dürfen die Discovery-Menge nicht erweitern.');
 }
 

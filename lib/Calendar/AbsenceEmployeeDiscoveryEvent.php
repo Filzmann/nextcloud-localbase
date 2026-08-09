@@ -14,7 +14,7 @@ use OCP\EventDispatcher\Event;
  * Vertrag: Der Zeitraum ist halboffen [Beginn, Ende); ohne Listener bleibt die UID-Menge leer.
  */
 final class AbsenceEmployeeDiscoveryEvent extends Event {
-    /** @var array<string,true> */
+    /** @var array<string,string> */
     private array $employees = [];
 
     public function __construct(private DateTimeImmutable $start, private DateTimeImmutable $end) {
@@ -35,14 +35,14 @@ final class AbsenceEmployeeDiscoveryEvent extends Event {
             }
             $employeeUid = trim($employeeUid);
             if ($employeeUid !== '') {
-                $this->employees[$employeeUid] = true;
+                $this->employees['uid:' . $employeeUid] = $employeeUid;
             }
         }
     }
 
     /** @return list<string> */
     public function employeeUids(): array {
-        $employeeUids = array_keys($this->employees);
+        $employeeUids = array_values($this->employees);
         sort($employeeUids, SORT_STRING);
         return $employeeUids;
     }
