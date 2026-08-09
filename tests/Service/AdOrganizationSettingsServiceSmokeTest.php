@@ -12,14 +12,12 @@ namespace OCP {
 }
 
 namespace OCA\LocalBase\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'localbase'; }
     }
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Organization/AdOrganizationDefinition.php';
-    require_once __DIR__ . '/../../lib/Organization/AdOrganizationSettingsService.php';
 
     $config = new class implements \OCP\IAppConfig {
         public array $values = [];

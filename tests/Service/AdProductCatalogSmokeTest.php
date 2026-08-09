@@ -9,8 +9,6 @@ if (!is_file($class) || !is_file($catalogFile)) {
     throw new RuntimeException('Der kanonische AD-Produktkatalog fehlt.');
 }
 
-require_once $class;
-
 use OCA\LocalBase\Catalog\AdProductCatalog;
 
 $catalog = new AdProductCatalog($catalogFile);

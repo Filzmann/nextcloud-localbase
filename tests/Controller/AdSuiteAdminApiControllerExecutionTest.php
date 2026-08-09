@@ -74,7 +74,6 @@ namespace OCA\LocalBase\Service {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Controller/AdSuiteAdminApiController.php';
 
     use OCA\LocalBase\Organization\AdOrganizationSettingsService;
     use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;

@@ -69,7 +69,7 @@ Abnahme auf den dokumentierten Ausgangsstand zurückgeführt.
 
 | ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
 |---|---|---|---|---|---|
-| D1 | Abwesenheitsvertrag | Mit neutralen Daten `planned` und `approved` über AD Urlaub bereitstellen und in AD Kalender lesen. | `planned` erscheint als `U?` ohne Blockade; `approved` erscheint als `U` mit der vereinbarten Blockade. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| D1 | Abwesenheitsvertrag | Für einen begrenzten halboffenen Zeitraum neutrale Konten mit `planned` und `approved` über AD Urlaub entdecken und in AD Kalender lesen. | Die Discovery liefert ausschließlich die passenden normalisierten Konto-UIDs; `planned` erscheint als `U?` ohne Blockade und `approved` als `U` mit der vereinbarten Blockade. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D2 | Fehlender Abwesenheitsprovider | Consumer ohne AD Urlaub öffnen. | Der leere Providerzustand ist gültig und blockiert die Consumer-App nicht. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D3 | Konfliktabfrage | Einen genehmigungsrelevanten synthetischen Konflikt zwischen AD Urlaub und AD Kalender prüfen. | Der read-only Vertrag meldet Konflikte, verändert oder löscht aber keine Daten in einer App. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D4 | Capability-Snapshot | Consumer mit und ohne optionale Provider öffnen und die angebotenen Integrationen vergleichen. | Fähigkeiten entsprechen den aktiven Providern; ein leerer Snapshot bleibt zulässig und erweitert niemals Rechte. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |

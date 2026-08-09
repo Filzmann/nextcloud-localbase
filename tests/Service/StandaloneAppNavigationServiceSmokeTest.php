@@ -11,8 +11,6 @@ namespace OCP {
 namespace OCP\App { interface IAppManager { public function isEnabledForUser($appId, $user = null); } }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Catalog/AdProductCatalog.php';
-    require_once __DIR__ . '/../../lib/Service/StandaloneAppNavigationService.php';
 
     use OCA\LocalBase\Catalog\AdProductCatalog;
     use OCA\LocalBase\Service\StandaloneAppNavigationService;

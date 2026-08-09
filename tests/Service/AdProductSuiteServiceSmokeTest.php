@@ -6,8 +6,6 @@ namespace OCP { interface IUser {} }
 namespace OCP\App { interface IAppManager { public function isEnabledForUser($appId, $user = null); } }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Catalog/AdProductCatalog.php';
-    require_once __DIR__ . '/../../lib/Service/AdProductSuiteService.php';
 
     use OCA\LocalBase\Catalog\AdProductCatalog;
     use OCA\LocalBase\Service\AdProductSuiteService;

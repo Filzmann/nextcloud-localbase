@@ -12,14 +12,12 @@ namespace OCP {
 }
 
 namespace OCA\LocalBase\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'localbase'; }
     }
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Calendar/CalendarContext.php';
-    require_once __DIR__ . '/../../lib/Calendar/CalendarContextSettingsService.php';
 
     use OCA\LocalBase\Calendar\CalendarContext;
     use OCA\LocalBase\Calendar\CalendarContextSettingsService;

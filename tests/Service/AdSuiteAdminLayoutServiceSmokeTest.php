@@ -13,7 +13,6 @@ namespace OCA\LocalBase\AppInfo { final class Application { public const APP_ID 
 namespace Psr\Log { interface LoggerInterface { public function warning(string $message, array $context = []): void; } }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Service/AdSuiteAdminLayoutService.php';
 
     use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
     use OCP\Config\IUserConfig;

@@ -23,9 +23,6 @@ namespace OCP\Settings {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Catalog/AdProductCatalog.php';
-    require_once __DIR__ . '/../../lib/Service/AdProductSuiteService.php';
-    require_once __DIR__ . '/../../lib/AppInfo/Application.php';
 
     use OCA\LocalBase\AppInfo\Application;
     use OCA\LocalBase\Service\AdProductSuiteService;

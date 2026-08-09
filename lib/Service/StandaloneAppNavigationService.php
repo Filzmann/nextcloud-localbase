@@ -73,9 +73,6 @@ final class StandaloneAppNavigationService {
     }
 
     private function catalog(): AdProductCatalog {
-        if (!class_exists(AdProductCatalog::class)) {
-            require_once dirname(__DIR__) . '/Catalog/AdProductCatalog.php';
-        }
         return $this->catalog ??= new AdProductCatalog();
     }
 }

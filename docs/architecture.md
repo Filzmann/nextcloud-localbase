@@ -15,9 +15,12 @@ sie isoliert aus.
 
 ## Kalender- und Abwesenheitsverträge
 
-`AbsenceQueryEvent` und `AbsenceInterval` bilden optionale read-only
-Abwesenheitsprovider ab. `planned` liefert `U?` ohne Blockade, `approved`
-liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
+`AbsenceEmployeeDiscoveryEvent`, `AbsenceQueryEvent` und `AbsenceInterval`
+bilden optionale read-only Abwesenheitsprovider ab. Die Discovery ist an einen
+halboffenen Zeitraum gebunden und aggregiert ausschließlich normalisierte
+Konto-UIDs; leere und nicht-stringförmige Providerwerte werden verworfen, und
+ohne Provider bleibt sie leer. `planned` liefert `U?` ohne Blockade,
+`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
 Abwesenheiten read-only Konflikte aus optionalen Planungsapps; Provider
 löschen oder verändern keine Daten.
 
