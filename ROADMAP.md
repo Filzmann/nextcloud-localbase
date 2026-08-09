@@ -18,9 +18,12 @@ Status: bereit nach Klärung der Mitgliedschaftsinvariante
 - Provider-, Migrations- und Deny-Tests gemeinsam mit
   `BRT-BR-GROUPS` und `BRS-BR-GROUPS` abnehmen.
 
+## Zukunftsplanung – nicht freigegeben
+
 ### LB-L10N – LocalBase-Oberflächen vollständig lokalisieren
 
-Status: bereit nach Auswahl einer Pilot-App und ihres l10n-Vertrags
+Status: später, nicht freigegeben; Pilot-App, Reihenfolge und Rohtext-Gate
+werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 - Nur von LocalBase selbst gerenderte sichtbare Texte, Meldungen,
   Datumsnamen, Pluralformen und Platzhalter auf Nextcloud-l10n umstellen.
