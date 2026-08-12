@@ -27,7 +27,7 @@ final class AdOrganizationDefinition {
 
     public static function defaults(): self {
         return self::get([
-            'version' => 3,
+            'version' => 4,
             'teamGroupPrefix' => 'ad-ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
@@ -42,22 +42,22 @@ final class AdOrganizationDefinition {
                 'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
                 'finance' => self::role('ad-Finanzen', 'Finanzen', 80, peerEnabled: true, staffBlock: true),
                 'payroll' => self::role('ad-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true),
-                'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true),
+                'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true, shortLabel: 'IT'),
                 'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
                 'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
                 'reception' => self::role('ad-Empfang', 'Empfang', 105),
                 'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
-                'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true),
+                'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true, shortLabel: 'BO'),
                 'deputy_pdl' => self::role('ad-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
-                'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
-                'eb' => self::role('ad-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true),
-                'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true),
+                'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237, shortLabel: 'BO-Pflege'),
+                'eb' => self::role('ad-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true, shortLabel: 'EB'),
+                'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true, shortLabel: 'PFK'),
             ],
             'areas' => [
-                'northeast' => ['groupId' => 'ad-Bereich-Nordost', 'label' => 'Nordost', 'sortOrder' => 10],
-                'west' => ['groupId' => 'ad-Bereich-West', 'label' => 'West', 'sortOrder' => 20],
-                'south' => ['groupId' => 'ad-Bereich-Sued', 'label' => 'Süd', 'sortOrder' => 30],
+                'northeast' => ['groupId' => 'ad-Bereich-Nordost', 'label' => 'Nordost', 'shortLabel' => 'NO', 'sortOrder' => 10],
+                'west' => ['groupId' => 'ad-Bereich-West', 'label' => 'West', 'shortLabel' => 'W', 'sortOrder' => 20],
+                'south' => ['groupId' => 'ad-Bereich-Sued', 'label' => 'Süd', 'shortLabel' => 'S', 'sortOrder' => 30],
             ],
             'hierarchy' => [
                 'gf_as' => ['pdl', 'bl', 'staff_hr', 'staff_qmb', 'secretariat'],
@@ -159,6 +159,16 @@ final class AdOrganizationDefinition {
         return $groupId;
     }
 
+    public function roleShortLabelForGroup(string $groupId): string {
+        foreach ($this->roles() as $role) if ($role['groupId'] === $groupId) return $role['shortLabel'];
+        return $groupId;
+    }
+
+    public function areaShortLabelForGroup(string $groupId): string {
+        foreach ($this->areas() as $area) if ($area['groupId'] === $groupId) return $area['shortLabel'];
+        return $groupId;
+    }
+
     public function roleIsAreaScopedByGroup(string $groupId): bool {
         foreach ($this->roles() as $role) if ($role['groupId'] === $groupId) return $role['areaScoped'];
         return false;
@@ -190,16 +200,16 @@ final class AdOrganizationDefinition {
         return false;
     }
 
-    private static function role(string $groupId, string $label, int $sortOrder, bool $areaScoped = false, bool $managementAreaScoped = false, bool $peerEnabled = false, bool $staffBlock = false, bool $singleOccupant = false): array {
-        return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant') + ['calendarVisible' => true];
+    private static function role(string $groupId, string $label, int $sortOrder, bool $areaScoped = false, bool $managementAreaScoped = false, bool $peerEnabled = false, bool $staffBlock = false, bool $singleOccupant = false, ?string $shortLabel = null): array {
+        return compact('groupId', 'label', 'sortOrder', 'areaScoped', 'managementAreaScoped', 'peerEnabled', 'staffBlock', 'singleOccupant') + ['shortLabel' => $shortLabel ?? $label, 'calendarVisible' => true];
     }
 
     /** Ergänzt veröffentlichte Organisationsversionen ausschließlich additiv. */
     private static function migrate(array $data): array {
         $version = (int)($data['version'] ?? 1);
-        if ($version === 3) return $data;
-        if (!in_array($version, [1, 2], true)) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
-        if (!isset($data['roles'], $data['hierarchy'], $data['organizationTeams']) || !is_array($data['roles']) || !is_array($data['hierarchy']) || !is_array($data['organizationTeams'])) return $data;
+        if ($version === 4) return $data;
+        if (!in_array($version, [1, 2, 3], true)) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
+        if (!isset($data['roles'], $data['areas'], $data['hierarchy'], $data['organizationTeams']) || !is_array($data['roles']) || !is_array($data['areas']) || !is_array($data['hierarchy']) || !is_array($data['organizationTeams'])) return $data;
 
         if ($version === 1) {
             foreach (self::versionTwoRoles() as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
@@ -224,6 +234,20 @@ final class AdOrganizationDefinition {
             self::appendHierarchyTargets($data['hierarchy'], ['finance_lead' => ['finance', 'payroll']]);
             self::migrateOrganizationTeam($data['organizationTeams'], 'staff', 'Geschäftsführung, Leitungen und Stabsstellen', ['payroll'], 60);
             $version = 3;
+        }
+
+        if ($version === 3) {
+            $roleShortLabels = ['office' => 'BO', 'eb' => 'EB', 'pfk' => 'PFK', 'care_office' => 'BO-Pflege', 'it' => 'IT'];
+            foreach ($data['roles'] as $key => &$role) {
+                if (is_array($role) && !isset($role['shortLabel'])) $role['shortLabel'] = $roleShortLabels[(string)$key] ?? ($role['label'] ?? (string)$key);
+            }
+            unset($role);
+            $areaShortLabels = ['northeast' => 'NO', 'west' => 'W', 'south' => 'S'];
+            foreach ($data['areas'] as $key => &$area) {
+                if (is_array($area) && !isset($area['shortLabel'])) $area['shortLabel'] = $areaShortLabels[(string)$key] ?? ($area['label'] ?? (string)$key);
+            }
+            unset($area);
+            $version = 4;
         }
 
         $data['version'] = $version;
@@ -280,6 +304,7 @@ final class AdOrganizationDefinition {
             $roles[(string)$key] = [
                 'groupId' => $groupId,
                 'label' => self::text($role['label'] ?? '', "Anzeigename der Rolle {$key}", 120),
+                'shortLabel' => self::text($role['shortLabel'] ?? $role['label'] ?? '', "Kürzel der Rolle {$key}", 120),
                 'sortOrder' => (int)($role['sortOrder'] ?? 0),
                 'areaScoped' => (bool)($role['areaScoped'] ?? false),
                 'managementAreaScoped' => (bool)($role['managementAreaScoped'] ?? false),
@@ -298,7 +323,7 @@ final class AdOrganizationDefinition {
             $groupId = self::text($area['groupId'] ?? '', "Gruppen-ID des Bereichs {$key}", 255);
             if (isset($groupIds[$groupId])) throw new InvalidArgumentException("Die Gruppen-ID {$groupId} ist mehrfach vergeben.");
             $groupIds[$groupId] = true;
-            $areas[(string)$key] = ['groupId' => $groupId, 'label' => self::text($area['label'] ?? '', "Anzeigename des Bereichs {$key}", 120), 'sortOrder' => (int)($area['sortOrder'] ?? 0)];
+            $areas[(string)$key] = ['groupId' => $groupId, 'label' => self::text($area['label'] ?? '', "Anzeigename des Bereichs {$key}", 120), 'shortLabel' => self::text($area['shortLabel'] ?? $area['label'] ?? '', "Kürzel des Bereichs {$key}", 120), 'sortOrder' => (int)($area['sortOrder'] ?? 0)];
         }
 
         // Spiegelvertrag: js/components/hierarchy-board.js erzeugt dieselben Rollen- bzw. Rolle::Bereich-Knoten-IDs.
@@ -349,7 +374,7 @@ final class AdOrganizationDefinition {
         }
 
         return [
-            'version' => 3,
+            'version' => 4,
             'teamGroupPrefix' => $teamGroupPrefix,
             'teamLabelPrefix' => $teamLabelPrefix,
             'teamCodeMaxLength' => $teamCodeMaxLength,

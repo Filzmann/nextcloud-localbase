@@ -2,8 +2,9 @@
 
 Gemeinsame Basisbausteine für die lokalen AD- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den AD-Fachprodukten ausgeliefert.
 
-Der öffentliche AD-Organisationsvertrag Version 3 trennt Finanzen und Lohn
-unter derselben Leitung. Fachapps konsumieren Rollen und Bürobereiche über
+Der öffentliche AD-Organisationsvertrag Version 4 ergänzt die betriebsweit
+festgelegten Kalenderkürzel für Rollen und Bürobereiche. Fachapps konsumieren
+Rollen und Bürobereiche über
 einen unveränderlichen, datensparsamen Snapshot; fehlende oder ungültige
 Persistenz erteilt keine fachlichen Rechte.
 

@@ -68,6 +68,12 @@ Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
 `ad-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
 ausdrücklich niemals die neue `payroll`-Rolle.
 
+Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
+Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
+`NO`, `W` und `S`; alle übrigen Einträge fallen auf ihren Anzeigenamen zurück.
+Bestehende Gruppen-IDs, Anzeigenamen, Reihenfolgen und Rechte bleiben dabei
+unverändert.
+
 `AdOrganizationSnapshotService` veröffentlicht Rollen und Bereiche ohne
 Mitgliederlisten oder Fachrechte. Der unveränderliche Snapshot enthält
 Vertragsversion, Definitionsversion, Gültigkeitsstatus und Prüfsumme. Eine

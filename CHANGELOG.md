@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Organisationsvertrag Version 4 um zentrale Kalenderkürzel für Rollen und Bürobereiche ergänzt und bestehende Definitionen additiv migriert.
+
 ## 0.10.0-rc.2
 
 - Gemeinsamen API-Client um den lokalisierten Nextcloud-Fehlervertrag mit stabilem `error`-Feld ergänzt; ältere `message`-Antworten bleiben kompatibel.

@@ -38,7 +38,7 @@ namespace {
     $settings->save($settings->definition()->toArray());
     $snapshot = $snapshots->snapshot();
     if (!$snapshot->isValid()
-        || $snapshot->definitionVersion() !== 3
+        || $snapshot->definitionVersion() !== 4
         || $snapshot->roleGroupId('finance') === $snapshot->roleGroupId('payroll')
         || $snapshot->areaGroupId('west') === null
         || strlen($snapshot->checksum()) !== 64) {

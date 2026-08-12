@@ -11,8 +11,20 @@ $definition = AdOrganizationDefinition::defaults();
 if ($definition->diagramOrder() !== []) throw new RuntimeException('Die visuelle Diagrammordnung muss kompatibel ohne Vorgabe starten.');
 if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
+foreach ([
+    'ad-Buero' => 'BO',
+    'ad-EB' => 'EB',
+    'ad-PFK' => 'PFK',
+    'ad-Bueroorganisation-Pflege' => 'BO-Pflege',
+    'ad-IT' => 'IT',
+] as $groupId => $shortLabel) {
+    if ($definition->roleShortLabelForGroup($groupId) !== $shortLabel) throw new RuntimeException("Betriebsweites Rollenkürzel {$shortLabel} fehlt.");
+}
+foreach (['ad-Bereich-Nordost' => 'NO', 'ad-Bereich-West' => 'W', 'ad-Bereich-Sued' => 'S'] as $groupId => $shortLabel) {
+    if ($definition->areaShortLabelForGroup($groupId) !== $shortLabel) throw new RuntimeException("Betriebsweites Bereichskürzel {$shortLabel} fehlt.");
+}
 $roles = $definition->roles();
-if ($definition->toArray()['version'] !== 3) throw new RuntimeException('Die additive Organisationsmigration verwendet nicht Vertragsversion 3.');
+if ($definition->toArray()['version'] !== 4) throw new RuntimeException('Die additive Organisationsmigration verwendet nicht Vertragsversion 4.');
 $financeGroup = $definition->roleGroupId('finance');
 $payrollGroup = $definition->roleGroupId('payroll');
 if ($financeGroup !== 'ad-Finanzen' || $payrollGroup !== 'ad-Lohn' || $financeGroup === $payrollGroup) {
@@ -57,10 +69,21 @@ foreach (['gf_as', 'pdl', 'deputy_pdl', 'gf_digi', 'assistant_gf_digi', 'finance
 }
 if (($roles['staff_hr']['singleOccupant'] ?? null) !== false || ($roles['office']['singleOccupant'] ?? null) !== false) throw new RuntimeException('Mehrpersonenrollen wurden als Einzelposition vorbelegt.');
 $legacy = $definition->toArray();
+$legacy['version'] = 3;
 foreach ($legacy['roles'] as &$legacyRole) unset($legacyRole['singleOccupant']);
 unset($legacyRole);
+foreach ($legacy['roles'] as &$legacyRole) unset($legacyRole['shortLabel']);
+unset($legacyRole);
+foreach ($legacy['areas'] as &$legacyArea) unset($legacyArea['shortLabel']);
+unset($legacyArea);
 $legacyRoles = AdOrganizationDefinition::get($legacy)->roles();
 if (!$legacyRoles['gf_as']['singleOccupant'] || $legacyRoles['office']['singleOccupant']) throw new RuntimeException('Bestehende Organisationsdefinitionen erhalten keine kompatible Einzelpositions-Vorbelegung.');
+$migratedVersionThree = AdOrganizationDefinition::get($legacy);
+if ($migratedVersionThree->toArray()['version'] !== 4
+    || $migratedVersionThree->roleShortLabelForGroup('ad-Buero') !== 'BO'
+    || $migratedVersionThree->areaShortLabelForGroup('ad-Bereich-Nordost') !== 'NO') {
+    throw new RuntimeException('Version 3 erhält die betriebsweiten Kalenderkürzel nicht additiv.');
+}
 $organizationTeams = array_column($definition->organizationTeams(), null, 'id');
 if (($organizationTeams['office-northeast']['areas'] ?? []) !== ['northeast']) throw new RuntimeException('Urlaubsansicht Büro Nordost fehlt.');
 if (($organizationTeams['office-west']['areas'] ?? []) !== ['west']) throw new RuntimeException('Urlaubsansicht Büro West fehlt.');
@@ -92,7 +115,7 @@ foreach ($versionTwo['organizationTeams'] as &$versionTwoTeam) {
 }
 unset($versionTwoTeam);
 $migratedVersionTwo = AdOrganizationDefinition::get($versionTwo);
-if ($migratedVersionTwo->toArray()['version'] !== 3
+if ($migratedVersionTwo->toArray()['version'] !== 4
     || $migratedVersionTwo->roleGroupId('finance') !== 'existing-finance-and-payroll'
     || $migratedVersionTwo->roleGroupId('payroll') !== 'ad-Lohn'
     || $migratedVersionTwo->roleLabel('finance') !== 'Finanzen') {
@@ -116,7 +139,7 @@ $legacyOrganization['organizationTeams'] = array_values(array_filter($legacyOrga
 foreach ($legacyOrganization['organizationTeams'] as &$team) if ($team['id'] === 'pfk') $team['roles'] = ['pfk'];
 unset($team);
 $migratedOrganization = AdOrganizationDefinition::get($legacyOrganization);
-if ($migratedOrganization->toArray()['version'] !== 3 || $migratedOrganization->roleLabel('pfk') !== 'Individuelle Pflegebezeichnung' || $migratedOrganization->roles()['pfk']['sortOrder'] !== 777) throw new RuntimeException('Bestehende Organisationswerte werden bei der Migration verändert.');
+if ($migratedOrganization->toArray()['version'] !== 4 || $migratedOrganization->roleLabel('pfk') !== 'Individuelle Pflegebezeichnung' || $migratedOrganization->roles()['pfk']['sortOrder'] !== 777) throw new RuntimeException('Bestehende Organisationswerte werden bei der Migration verändert.');
 if (!in_array('office', $migratedOrganization->hierarchy()['pdl'], true) || !$migratedOrganization->managesRole('deputy_pdl', 'pfk')) throw new RuntimeException('Bestehende Kanten werden nicht bewahrt oder neue Hierarchiekanten fehlen nach der Migration.');
 
 $collidingLegacy = $legacyOrganization;
@@ -132,12 +155,14 @@ try {
 $custom = $definition->toArray();
 $custom['roles']['office']['groupId'] = 'custom-office';
 $custom['roles']['office']['label'] = 'Verwaltung';
+$custom['roles']['office']['shortLabel'] = 'VW';
 $custom['roles']['gf_as']['singleOccupant'] = false;
 $custom['areas']['south']['groupId'] = 'custom-south';
 $custom['areas']['south']['label'] = 'Südliches Büro';
+$custom['areas']['south']['shortLabel'] = 'SB';
 $custom['diagramOrder'] = ['gf_as', 'bl::west', 'bl::south'];
 $configured = AdOrganizationDefinition::get($custom);
-if ($configured->roleGroupId('office') !== 'custom-office' || $configured->areaLabel('south') !== 'Südliches Büro' || $configured->roles()['gf_as']['singleOccupant'] || $configured->diagramOrder() !== ['gf_as', 'bl::west', 'bl::south']) throw new RuntimeException('Konfigurierbare Gruppen, Anzeigenamen, Einzelpositionen oder visuelle Diagrammordnung fehlen.');
+if ($configured->roleGroupId('office') !== 'custom-office' || $configured->roleShortLabelForGroup('custom-office') !== 'VW' || $configured->areaLabel('south') !== 'Südliches Büro' || $configured->areaShortLabelForGroup('custom-south') !== 'SB' || $configured->roles()['gf_as']['singleOccupant'] || $configured->diagramOrder() !== ['gf_as', 'bl::west', 'bl::south']) throw new RuntimeException('Konfigurierbare Gruppen, Anzeigenamen, Kürzel, Einzelpositionen oder visuelle Diagrammordnung fehlen.');
 $custom['hierarchy']['pdl'] = ['office'];
 $configured = AdOrganizationDefinition::get($custom);
 $policy = new AdOrganizationPermissionPolicy(new AdOrganizationHierarchy(null, $configured));
