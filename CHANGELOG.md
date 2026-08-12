@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.11.0-rc.1
+
+- Selbstbedienungs-Auskunft nach Art. 15 DSGVO mit intuitivem Nextcloud-Menü- und Einstellungszugang sowie mehrseitigem PDF-Download ergänzt.
+- Personenbezogene Daten je App und Datentyp in menschenlesbaren Tabellen mit deutschen Kurzdatumswerten, Zweck, Aufbewahrung und weiteren Verarbeitungsangaben dargestellt.
+- Nextcloud-Konto, sämtliche nichtleeren Profilfelder und eigene Gruppenzuordnungen aus den öffentlichen Nextcloud-APIs aufgenommen; Anmeldegeheimnisse und Drittpersonendaten bleiben ausgeschlossen.
+- Noch nicht angebundene Datenquellen sichtbar ausgewiesen und die spätere Ausweitung auf die vollständige Nextcloud-Instanz in der Roadmap vorgemerkt.
+- Öffentliche, fehlerisolierte PersonalData- und Retention-Providerverträge sowie geschützte Self-Service-, Admin- und Dry-Run-Endpunkte eingeführt.
 - Organisationsvertrag Version 4 um zentrale Kalenderkürzel für Rollen und Bürobereiche ergänzt und bestehende Definitionen additiv migriert.
 
 ## 0.10.0-rc.2

@@ -5,7 +5,7 @@
     <name>Lokale Nextcloud-Basis</name>
     <summary>Gemeinsame lokale Basisbausteine für eigene Nextcloud-Apps.</summary>
     <description>Stellt kleine, gemeinsam genutzte PHP- und JavaScript-Basisbausteine für eigene lokale Nextcloud-Apps bereit.</description>
-    <version>0.10.0-rc.2</version>
+    <version>0.11.0-rc.1</version>
     <licence>agpl</licence>
     <author>Simon</author>
     <namespace>LocalBase</namespace>
@@ -20,4 +20,18 @@
     <background-jobs>
         <job>OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob</job>
     </background-jobs>
+    <settings>
+        <personal>OCA\LocalBase\Settings\PersonalPrivacy</personal>
+        <personal-section>OCA\LocalBase\Settings\PersonalPrivacySection</personal-section>
+    </settings>
+    <navigations>
+        <navigation>
+            <id>localbase_privacy</id>
+            <name>Datenschutz</name>
+            <route>localbase.privacy_page.selfService</route>
+            <order>90</order>
+            <icon>privacy.svg</icon>
+            <type>settings</type>
+        </navigation>
+    </navigations>
 </info>

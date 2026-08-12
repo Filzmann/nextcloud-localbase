@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Calendar;
 
-use OCA\LocalBase\AppInfo\Application;
+use OCA\LocalBase\AppInfo\AppId;
 use OCP\IAppConfig;
 
 /**
@@ -18,7 +18,7 @@ final class CalendarContextSettingsService {
     }
 
     public function context(): CalendarContext {
-        $raw = $this->config->getValueString(Application::APP_ID, self::KEY, '');
+        $raw = $this->config->getValueString(AppId::VALUE, self::KEY, '');
         if ($raw === '') return CalendarContext::defaults();
         try {
             $data = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
@@ -31,7 +31,7 @@ final class CalendarContextSettingsService {
     public function save(array $data): CalendarContext {
         $context = CalendarContext::get($data);
         $this->config->setValueString(
-            Application::APP_ID,
+            AppId::VALUE,
             self::KEY,
             json_encode($context->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         );

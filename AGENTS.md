@@ -19,6 +19,34 @@ LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eig
 
 Aktuell enthalten:
 
+- Öffentliche Privacy-Verträge für Nextcloud-User-Subjects,
+  `PersonalDataProvider`, feste Provider-Registry-Snapshots, fehlerisolierte
+  Aggregation sowie ausschließlich lesende `RetentionProvider`-Dry-Runs mit
+  `REVIEW`-Kandidaten. Self-Service bindet die Session-UID; Admin-Auskunft und
+  Retention-Preview verlangen die explizit konfigurierte Nextcloud-Gruppe
+  `privacy_admin_group` und bleiben ohne Konfiguration deny by default.
+- Die flüchtige Self-Service- und Admin-Grundansicht persistiert keine
+  Berichtskopie. Sie weist die Betroffenenrechte einmal im Kopf aus und
+  zeigt je App weitere Verarbeitungsangaben vor den Datentabellen und gliedert
+  danach nach Datentyp. Der Tabellenkopf besteht aus den freigegebenen
+  Datenfeldern. Innerhalb eines Datentyps identische Zwecke oder
+  Aufbewahrungsaussagen stehen einmal vor der Tabelle; nur unterschiedliche
+  Werte bleiben zusätzliche Tabellenspalten.
+  Menschenlesbare Datumsangaben verwenden die deutsche Kurzform `TT.MM.JJ`;
+  Uhrzeiten werden bei Bedarf als `HH:MM Uhr` ergänzt.
+  Derselbe Stand
+  kann clientseitig als mehrseitiges PDF heruntergeladen werden; geheime
+  Anmeldewerte und Identitäten geschützter Drittpersonen bleiben ausgeschlossen.
+  Der app-eigene Nextcloud-Kontoprovider liest Konto, sämtliche nichtleeren
+  Nextcloud-Profilfelder einschließlich ihrer Sichtbarkeit und Bestätigung
+  sowie die eigenen Gruppenzuordnungen ausschließlich über öffentliche
+  Nextcloud-User-, Account- und GroupManager-APIs. Der Bericht weist außerdem
+  sichtbar darauf hin, dass er noch nicht die gesamte Instanz abdeckt, und
+  benennt die noch nicht implementierten Datenabrufe. Normale Konten erreichen dieselbe kanonische
+  Self-Service-Seite über den `Datenschutz`-Eintrag im rechten
+  Nextcloud-Benutzermenü und über den persönlichen Einstellungsbereich.
+  Der Pilot besitzt keine Retention-Ausführung, keine
+  automatische Löschung und keinen Lifecycle-Provider.
 - PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.

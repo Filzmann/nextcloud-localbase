@@ -20,6 +20,24 @@ Status: bereit nach Klärung der Mitgliedschaftsinvariante
 
 ## Zukunftsplanung – nicht freigegeben
 
+### LB-PRIVACY-INSTANCE – Datenauskunft auf die vollständige Nextcloud-Instanz erweitern
+
+Status: vorgemerkt, später; nicht freigegeben
+
+- Den persönlichen Daten-Download schrittweise von den derzeit angebundenen
+  Providern auf sämtliche personenbezogenen Datenquellen der vollständigen
+  Nextcloud-Instanz erweitern.
+- Nextcloud-Core-Daten wie Dateien, Freigaben, Versionen, Papierkorb,
+  Aktivitäten, Anmeldungen, Sitzungen sowie Sicherheits- und Auditprotokolle
+  ebenso einbeziehen wie installierte Core-, Drittanbieter- und lokale Apps.
+- Jede Quelle über einen öffentlichen, subject-gebundenen Providervertrag
+  anbinden; LocalBase liest keine fremden Tabellen oder Dateien direkt.
+- Im Nutzerreport und im PDF bis zur vollständigen Abdeckung die noch nicht
+  implementierten Datenabrufe verständlich und sichtbar ausweisen.
+- Vor Umsetzung Umfang, Drittpersonenschutz, Geheimnisse, große Datenmengen,
+  Dateiinhaltsexporte, Providerfehler und ein reproduzierbares
+  Vollständigkeits-Gate je installierter App entscheiden und testen.
+
 ### LB-L10N – LocalBase-Oberflächen vollständig lokalisieren
 
 Status: später, nicht freigegeben; Pilot-App, Reihenfolge und Rohtext-Gate
