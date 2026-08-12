@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../../js/privacy/privacy-download.js', import.meta.url), 'utf8');
+const sourceUrl = new URL('../../js/privacy/privacy-download.js', import.meta.url);
+const source = readFileSync(sourceUrl, 'utf8');
 const actions = [];
 class FakeBlob { constructor(parts, options) { this.parts = parts; this.type = options.type; } }
 const document = {
@@ -16,7 +18,7 @@ const FakeURL = {
     revokeObjectURL(url) { actions.push(['revoke', url]); },
 };
 const window = {};
-vm.runInNewContext(source, { window, document, URL: FakeURL, Blob: FakeBlob });
+vm.runInNewContext(source, { window, document, URL: FakeURL, Blob: FakeBlob }, { filename: fileURLToPath(sourceUrl) });
 
 const report = {
     subject: { id: 'user-17' },

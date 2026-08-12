@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../../js/privacy/privacy-report.js', import.meta.url), 'utf8');
+const sourceUrl = new URL('../../js/privacy/privacy-report.js', import.meta.url);
+const source = readFileSync(sourceUrl, 'utf8');
 class Node {
     constructor(name = '') { this.name = name; this.children = []; this.dataset = {}; this.textContent = ''; this.className = ''; this.disabled = false; }
     append(...nodes) { this.children.push(...nodes); }
@@ -33,7 +35,7 @@ const report = {
     ] }],
 };
 const window = { LocalBase: { api: { ApiClient: class { async request() { return report; } } }, privacy: { PrivacyReportDownload: { download() {} } } } };
-vm.runInNewContext(source, { window, document, console, encodeURIComponent, setTimeout });
+vm.runInNewContext(source, { window, document, console, encodeURIComponent, setTimeout }, { filename: fileURLToPath(sourceUrl) });
 await new Promise(resolve => setTimeout(resolve, 0));
 
 const flatten = node => [node.textContent, ...node.children.flatMap(flatten)].filter(Boolean);
