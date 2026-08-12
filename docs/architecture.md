@@ -15,9 +15,12 @@ sie isoliert aus.
 
 ## Kalender- und Abwesenheitsverträge
 
-`AbsenceQueryEvent` und `AbsenceInterval` bilden optionale read-only
-Abwesenheitsprovider ab. `planned` liefert `U?` ohne Blockade, `approved`
-liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
+`AbsenceEmployeeDiscoveryEvent`, `AbsenceQueryEvent` und `AbsenceInterval`
+bilden optionale read-only Abwesenheitsprovider ab. Die Discovery ist an einen
+halboffenen Zeitraum gebunden und aggregiert ausschließlich normalisierte
+Konto-UIDs; leere und nicht-stringförmige Providerwerte werden verworfen, und
+ohne Provider bleibt sie leer. `planned` liefert `U?` ohne Blockade,
+`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
 Abwesenheiten read-only Konflikte aus optionalen Planungsapps; Provider
 löschen oder verändern keine Daten.
 
@@ -50,6 +53,33 @@ diese Rollen, Kanten und Urlaubsansichten additiv. Bestehende Werte bleiben
 erhalten; Gruppen-ID-Kollisionen, ungültige Referenzen und Hierarchiezyklen
 werden abgelehnt. Eine ungültige gespeicherte Definition fällt sicher auf die
 geprüfte Standarddefinition zurück.
+
+Version 3 trennt die bisherigen Funktionen unterhalb `finance_lead` in die
+stabilen Schlüssel `finance` und `payroll`. Beim Upgrade bleibt die bestehende
+Gruppen-ID von `finance` erhalten; `payroll` wird additiv ergänzt. Beide
+Rollen bleiben im bisherigen Hierarchie- und Organisationsblock.
+Aus Sicherheitsgründen wird die Mitgliedschaft der bisherigen kombinierten
+Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
+`finance` zugeordnet und ihr unveränderter Standardtitel fachlich zu
+„Finanzen“ normalisiert. Administrator*innen verschieben Lohn-Mitarbeitende
+anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
+niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
+Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
+`ad-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
+ausdrücklich niemals die neue `payroll`-Rolle.
+
+Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
+Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
+`NO`, `W` und `S`; alle übrigen Einträge fallen auf ihren Anzeigenamen zurück.
+Bestehende Gruppen-IDs, Anzeigenamen, Reihenfolgen und Rechte bleiben dabei
+unverändert.
+
+`AdOrganizationSnapshotService` veröffentlicht Rollen und Bereiche ohne
+Mitgliederlisten oder Fachrechte. Der unveränderliche Snapshot enthält
+Vertragsversion, Definitionsversion, Gültigkeitsstatus und Prüfsumme. Eine
+fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz erzeugt
+einen ungültigen, leeren Snapshot, aus dem Consumer keine Freigabe ableiten
+dürfen.
 
 `AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen

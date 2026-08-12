@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "localbase",
+      "kind": "infrastructure",
+      "suite": null,
+      "order": null,
+      "route": null,
+      "productLabel": null,
+      "navigationLabel": null,
+      "standalone": false,
+      "menu": false,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "orgsuite",
+      "kind": "infrastructure",
+      "suite": null,
+      "order": null,
+      "route": null,
+      "productLabel": null,
+      "navigationLabel": null,
+      "standalone": false,
+      "menu": false,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "adcalendar",
+      "kind": "product",
+      "suite": "ad",
+      "order": 80,
+      "route": "adcalendar.page.index",
+      "productLabel": "AD Kalender",
+      "navigationLabel": "Kalender",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "adplaner",
+      "kind": "product",
+      "suite": "ad",
+      "order": 81,
+      "route": "adplaner.page.index",
+      "productLabel": "Assistenzplanung",
+      "navigationLabel": "Assistenzplanung",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "adurlaub",
+      "kind": "product",
+      "suite": "ad",
+      "order": 82,
+      "route": "adurlaub.page.index",
+      "productLabel": "AD Urlaub",
+      "navigationLabel": "Urlaub",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "adroom",
+      "kind": "product",
+      "suite": "ad",
+      "order": 83,
+      "route": "adroom.page.index",
+      "productLabel": "AD Raumplaner",
+      "navigationLabel": "Räume",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "adrecruitment",
+      "kind": "product",
+      "suite": "ad",
+      "order": 84,
+      "route": "adrecruitment.page.index",
+      "productLabel": "AD Recruitment",
+      "navigationLabel": "Recruitment",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    }
+  ]
+}

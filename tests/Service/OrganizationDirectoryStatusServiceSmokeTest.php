@@ -17,8 +17,6 @@ namespace OCP {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Organization/AdOrganizationDefinition.php';
-    require_once __DIR__ . '/../../lib/Service/OrganizationDirectoryStatusService.php';
 
     use OCA\LocalBase\Organization\AdOrganizationDefinition;
     use OCA\LocalBase\Service\OrganizationDirectoryStatusService;

@@ -18,13 +18,29 @@ final class PhpTestRunner {
      * @param list<string> $testDirectories
      * @param list<string> $testSuffixes
      */
-    public static function run(string $root, array $lintDirectories, array $testDirectories, array $testSuffixes, string $successMessage): void {
+    public static function run(
+        string $root,
+        array $lintDirectories,
+        array $testDirectories,
+        array $testSuffixes,
+        string $successMessage,
+        bool $prependBootstrap = false,
+    ): void {
         foreach (self::collect($root, $lintDirectories, static fn(string $path): bool => str_ends_with($path, '.php')) as $file) {
             self::execute($root, [PHP_BINARY, '-l', self::relativePath($root, $file)]);
         }
 
         foreach (self::collect($root, $testDirectories, static fn(string $path): bool => self::hasSuffix($path, $testSuffixes)) as $file) {
-            self::execute($root, [PHP_BINARY, self::relativePath($root, $file)]);
+            $command = [PHP_BINARY];
+            $bootstrap = $prependBootstrap
+                ? $root . '/tests/bootstrap.php'
+                : dirname(__DIR__) . '/bootstrap.php';
+            if (is_file($bootstrap)) {
+                $command[] = '-d';
+                $command[] = 'auto_prepend_file=' . $bootstrap;
+            }
+            $command[] = self::relativePath($root, $file);
+            self::execute($root, $command);
         }
 
         echo $successMessage . PHP_EOL;
@@ -87,14 +103,23 @@ final class PhpTestRunner {
             throw new \RuntimeException("Coverage-Ausgabe konnte nicht angelegt werden: {$outputDirectory}");
         }
 
-        $script = (string)($command[1] ?? 'test');
+        $script = (string)($command[array_key_last($command)] ?? 'test');
         $scriptPath = str_starts_with($script, '/')
             ? $script
             : rtrim($root, '/') . '/' . ltrim($script, '/');
         $identifier = hash('sha256', $scriptPath);
         $report = rtrim($outputDirectory, '/') . '/' . $identifier . '.xml';
         $wrapper = rtrim($outputDirectory, '/') . '/run-' . $identifier . '.php';
+        $bootstrapOption = array_values(array_filter(
+            $command,
+            static fn(string $argument): bool => str_starts_with($argument, 'auto_prepend_file='),
+        ));
+        $bootstrap = isset($bootstrapOption[0]) ? substr($bootstrapOption[0], strlen('auto_prepend_file=')) : '';
+        $bootstrapCode = $bootstrap !== '' && is_file($bootstrap)
+            ? '    require_once ' . var_export($bootstrap, true) . ";\n"
+            : '';
         $wrapperCode = "<?php\n\ndeclare(strict_types=1);\n\n(static function (): void {\n"
+            . $bootstrapCode
             . '    require ' . var_export($scriptPath, true) . ";\n"
             . "})();\n";
         if (file_put_contents($wrapper, $wrapperCode) === false) {

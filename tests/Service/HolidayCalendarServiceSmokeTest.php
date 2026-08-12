@@ -18,19 +18,12 @@ namespace OCP\Http\Client {
 namespace OCP\AppFramework\Utility { interface ITimeFactory { public function getTime(): int; } }
 namespace Psr\Log { interface LoggerInterface { public function warning(string $message, array $context = []): void; } }
 namespace OCA\LocalBase\AppInfo {
-    if (!class_exists(Application::class)) {
+    if (!class_exists(Application::class, false)) {
         final class Application { public const APP_ID = 'localbase'; }
     }
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Calendar/CalendarContext.php';
-    require_once __DIR__ . '/../../lib/Calendar/CalendarContextSettingsService.php';
-    require_once __DIR__ . '/../../lib/Calendar/HolidayPeriod.php';
-    require_once __DIR__ . '/../../lib/Calendar/HolidayCalendar.php';
-    require_once __DIR__ . '/../../lib/Calendar/OpenHolidaysClient.php';
-    require_once __DIR__ . '/../../lib/Calendar/HolidayCalendarCacheStore.php';
-    require_once __DIR__ . '/../../lib/Calendar/HolidayCalendarService.php';
 
     use OCA\LocalBase\Calendar\CalendarContextSettingsService;
     use OCA\LocalBase\Calendar\HolidayCalendarCacheStore;

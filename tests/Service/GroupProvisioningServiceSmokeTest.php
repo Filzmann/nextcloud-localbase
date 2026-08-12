@@ -7,8 +7,6 @@ namespace {
         eval('namespace OCP; interface IGroupManager { public function groupExists($gid); public function createGroup($gid); }');
     }
 
-    require __DIR__ . '/../helpers.php';
-    require __DIR__ . '/../../lib/Service/GroupProvisioningService.php';
 
     use OCA\LocalBase\Service\GroupProvisioningService;
     use OCP\IGroupManager;

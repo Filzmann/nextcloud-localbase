@@ -124,6 +124,23 @@ async function run() {
             && error.status === 500
             && Object.keys(error.data).length === 0
     );
+
+    const localizedErrorClient = new ApiClient({
+        appId: 'demo',
+        generateUrl: (path) => path,
+        requestToken: () => 'token-localized',
+        fetcher: async () => ({
+            ok: false,
+            status: 400,
+            text: async () => JSON.stringify({ code: 'invalid_input', error: 'Die Eingabe ist ungültig.' })
+        })
+    });
+    await assert.rejects(
+        () => localizedErrorClient.request('/api/fail-localized'),
+        (error) => error.message === 'Die Eingabe ist ungültig.'
+            && error.status === 400
+            && error.data.code === 'invalid_input'
+    );
 }
 
 run()

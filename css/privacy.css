@@ -1,0 +1,22 @@
+.lb-privacy { box-sizing:border-box; width:100%; height:100%; min-height:0; overflow-y:auto; padding:20px; background:var(--color-main-background); }
+.lb-privacy header { margin-bottom:18px; }
+.lb-privacy header :is(h1,p) { margin:0 0 6px; }
+.lb-privacy form { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin-bottom:16px; }
+.lb-privacy form label { display:grid; gap:4px; font-weight:600; }
+.lb-privacy :is(button,input):focus-visible { outline:2px solid var(--color-primary-element); outline-offset:2px; }
+#lb-privacy-status { margin:10px 0; padding:8px; border:1px solid var(--color-border); border-radius:var(--border-radius); }
+.lb-privacy-rights { max-width:72rem; padding:14px 18px; border-left:4px solid var(--color-primary-element); background:var(--color-background-dark); }
+.lb-privacy-apps { display:grid; gap:16px; max-width:80rem; }
+.lb-privacy-app-card { padding:18px; border:1px solid var(--color-border); border-radius:var(--border-radius-large); background:var(--color-main-background); box-shadow:0 1px 4px var(--color-box-shadow); }
+.lb-privacy-app-card :is(h3,h4,h5) { margin-top:0; }
+.lb-privacy-app-card section + section { margin-top:18px; }
+.lb-privacy-common { margin:10px 0 14px; padding:10px 14px; border-left:3px solid var(--color-primary-element); background:var(--color-background-dark); }
+.lb-privacy-common p { margin:3px 0; }
+.lb-privacy-table-wrap { max-width:100%; overflow-x:auto; }
+.lb-privacy table { width:100%; min-width:46rem; border-collapse:collapse; }
+.lb-privacy :is(th,td) { padding:10px; border:1px solid var(--color-border); text-align:left; vertical-align:top; }
+.lb-privacy th { background:var(--color-background-dark); }
+.lb-privacy caption { padding:0 0 8px; text-align:left; font-weight:600; }
+.lb-privacy-third-party { font-style:italic; }
+.lb-privacy-processing { margin-top:16px; }
+.lb-privacy-processing h4 { margin-bottom:8px; }

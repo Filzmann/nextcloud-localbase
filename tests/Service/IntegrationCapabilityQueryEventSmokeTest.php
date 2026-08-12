@@ -6,8 +6,6 @@ if (!class_exists(\OCP\EventDispatcher\Event::class)) {
     eval('namespace OCP\\EventDispatcher; class Event { public function __construct() {} }');
 }
 
-require_once __DIR__ . '/../../lib/Integration/AdIntegrationCapabilities.php';
-require_once __DIR__ . '/../../lib/Integration/IntegrationCapabilityQueryEvent.php';
 
 use OCA\LocalBase\Integration\AdIntegrationCapabilities;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;

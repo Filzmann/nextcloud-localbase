@@ -29,7 +29,6 @@ namespace OCP {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Service/DemoAccountProvisioningService.php';
 
     use OCA\LocalBase\Service\DemoAccountProvisioningService;
     use OCP\IAppConfig;

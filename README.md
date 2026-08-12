@@ -2,6 +2,12 @@
 
 Gemeinsame Basisbausteine für die lokalen AD- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den AD-Fachprodukten ausgeliefert.
 
+Der öffentliche AD-Organisationsvertrag Version 4 ergänzt die betriebsweit
+festgelegten Kalenderkürzel für Rollen und Bürobereiche. Fachapps konsumieren
+Rollen und Bürobereiche über
+einen unveränderlichen, datensparsamen Snapshot; fehlende oder ungültige
+Persistenz erteilt keine fachlichen Rechte.
+
 ## Staging-Kompatibilität
 
 - Nextcloud 34
@@ -23,3 +29,8 @@ Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt ins
 ## Roadmap
 
 Geplante gemeinsame Bausteine und offene Architekturentscheidungen stehen in der [Roadmap](ROADMAP.md).
+
+Für die manuelle Staging-Prüfung der Administrationsoberfläche und der
+Cross-App-Verträge steht ein ausfüllbares
+[Abnahmeformular](docs/manual-acceptance.md) bereit. Es berücksichtigt, dass
+LocalBase keine eigene Fachnavigation besitzt.

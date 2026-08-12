@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 namespace {
-    require __DIR__ . '/../helpers.php';
-    require __DIR__ . '/../../lib/Model/ModelApiTrait.php';
 
     use OCA\LocalBase\Model\ModelApiTrait;
     use function OCA\LocalBase\Tests\assertSameValue;
