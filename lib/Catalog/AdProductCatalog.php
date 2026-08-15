@@ -52,6 +52,14 @@ final class AdProductCatalog {
         ));
     }
 
+    /** @return list<array<string, mixed>> */
+    public function bundleProducts(): array {
+        return array_values(array_filter(
+            $this->products(),
+            static fn(array $entry): bool => $entry['productBundle'] === true,
+        ));
+    }
+
     /** @return array<string, mixed> */
     public function product(string $appId): array {
         foreach ($this->products() as $entry) {

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- AD BQ-Planer als navigierbares Standalone-Produkt im kanonischen Produktkatalog ergänzt; bis zur Release-Reife bleibt es aus Full-Suite- und Einzelprodukt-Bundles ausgeschlossen.
+- Freigegebene Einzelbundle-Produkte sind über einen eigenen Katalogvertrag von noch nicht auslieferbaren Produkten getrennt.
+
 ## 0.11.0-rc.1
 
 - Selbstbedienungs-Auskunft nach Art. 15 DSGVO mit intuitivem Nextcloud-Menü- und Einstellungszugang sowie mehrseitigem PDF-Download ergänzt.

@@ -17,7 +17,7 @@ if ($catalog->version() !== 1) {
 }
 
 $productIds = array_column($catalog->products(), 'id');
-$expectedProducts = ['adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment'];
+$expectedProducts = ['adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment', 'adbqplanung'];
 if ($productIds !== $expectedProducts) {
     throw new RuntimeException('AD-Fachprodukte oder ihre Reihenfolge weichen vom Vertrag ab.');
 }
@@ -28,8 +28,11 @@ if ($menuIds !== $expectedProducts) {
 }
 
 $fullSuite = $catalog->fullSuiteAppIds();
-if ($fullSuite !== ['localbase', 'orgsuite', ...$expectedProducts]) {
+if ($fullSuite !== ['localbase', 'orgsuite', 'adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
     throw new RuntimeException('Das vollständige Suite-Bundle enthält nicht Infrastruktur und alle AD-Produkte.');
+}
+if (array_column($catalog->bundleProducts(), 'id') !== ['adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
+    throw new RuntimeException('Nicht freigegebene Entwicklungsprodukte gelangen in Einzelproduktbundles.');
 }
 
 if ($catalog->productBundleAppIds('adrecruitment') !== ['localbase', 'orgsuite', 'adrecruitment']) {
@@ -43,6 +46,15 @@ if ($recruitment['route'] !== 'adrecruitment.page.index'
     || $recruitment['fullSuiteBundle'] !== true
     || $recruitment['productBundle'] !== true) {
     throw new RuntimeException('Der Recruitment-Katalogeintrag erfüllt den Suite-Vertrag nicht.');
+}
+
+$bqPlanning = $catalog->product('adbqplanung');
+if ($bqPlanning['route'] !== 'adbqplanung.page.index'
+    || $bqPlanning['standalone'] !== true
+    || $bqPlanning['menu'] !== true
+    || $bqPlanning['fullSuiteBundle'] !== false
+    || $bqPlanning['productBundle'] !== false) {
+    throw new RuntimeException('Der BQ-Planer ist nicht korrekt als Entwicklungsprodukt eingeordnet.');
 }
 
 try {
@@ -121,7 +133,7 @@ try {
     file_put_contents($temporaryCatalog, json_encode($reordered, JSON_THROW_ON_ERROR));
     $reorderedCatalog = new AdProductCatalog($temporaryCatalog);
     if (array_column($reorderedCatalog->products(), 'id') !== $expectedProducts
-        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', ...$expectedProducts]) {
+        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', 'adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
         throw new RuntimeException('Katalogreihenfolge hängt von der JSON-Dateireihenfolge statt vom Vertrag ab.');
     }
 } finally {

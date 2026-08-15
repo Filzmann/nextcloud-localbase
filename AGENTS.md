@@ -74,7 +74,10 @@ Aktuell enthalten:
 - `AdProductCatalog` liest den versionierten AD-Produktkatalog als kanonische
   Quelle für Produkt-IDs, Reihenfolge, Routen sowie getrennte Menü-,
   Standalone- und Bundle-Eigenschaften. Ungültige oder fehlende Katalogdaten
-  erweitern weder Navigation noch Berechtigungen.
+  erweitern weder Navigation noch Berechtigungen. Menüfähige
+  Entwicklungsprodukte dürfen über explizit falsche Bundle-Flags von
+  Release-Artefakten ausgeschlossen bleiben; Delivery-Code verwendet dafür
+  ausschließlich die gefilterte Bundle-Produktmenge.
 - `StandaloneAppNavigationService` registriert katalogisierte
   Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die
   dynamischen Settings-Adapter platzieren die gemeinsame

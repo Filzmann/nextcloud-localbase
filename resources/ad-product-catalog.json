@@ -91,6 +91,19 @@
       "menu": true,
       "fullSuiteBundle": true,
       "productBundle": true
+    },
+    {
+      "id": "adbqplanung",
+      "kind": "product",
+      "suite": "ad",
+      "order": 85,
+      "route": "adbqplanung.page.index",
+      "productLabel": "AD BQ-Planer",
+      "navigationLabel": "BQ-Planer",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": false,
+      "productBundle": false
     }
   ]
 }
