@@ -93,7 +93,8 @@ namespace {
     );
 
     $fresh = $service->forYear(2026)->toArray();
-    if (($fresh['cacheStatus'] ?? '') !== 'fresh'
+    if (($fresh['version'] ?? null) !== 1
+        || ($fresh['cacheStatus'] ?? '') !== 'fresh'
         || ($fresh['schoolHolidays'][0]['name'] ?? '') !== 'Winterferien'
         || ($fresh['publicHolidays'][0]['name'] ?? '') !== 'Internationaler Frauentag'
         || ($fresh['context']['subdivisionCode'] ?? '') !== 'DE-BE') {
