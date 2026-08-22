@@ -50,10 +50,27 @@ Aktuell enthalten:
 - PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
-- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
+- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum
+  idempotenten Anlegen beliebiger Nextcloud-Gruppen und zur read-only Prüfung,
+  dass Mitglieder definierter Rollengruppen zugleich einer Basisgruppe
+  angehören. Widersprüche werden ohne automatische Mitgliedschaftsänderung
+  abgelehnt.
+- `BrGroupDefinition` und `BrGroupSettingsService` bilden den versionierten,
+  zentral persistierten BR-Gruppenvertrag mit den getrennten semantischen
+  Schlüsseln `member`, `chair` und `deputy`. Ein fehlender, ungültiger oder
+  hinsichtlich der nativen Nextcloud-Mitgliedschaften widersprüchlicher
+  Vertrag ist für Consumer nicht freigabefähig. Vorsitz und Stellvertretung
+  müssen immer auch der Mitgliedergruppe angehören.
+- `DemoAccountProvisioningService` erzeugt ausschließlich explizit
+  registrierte lokale Test- und Demokonten. Für diese Konten gilt
+  Benutzername = Passwort; eine erneute Provisionierung stellt diesen Zustand
+  nur für dasselbe registrierte Demo-Pack wieder her. Fremde, externe oder
+  nicht passwortänderbare Konten werden vor jeder Mutation abgewiesen. Dieser
+  bewusst schwache Zugang darf nicht für echte oder produktive Konten
+  verwendet werden.
 - Neutraler Kalendervertrag `AbsenceEmployeeDiscoveryEvent`/`AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. Die Discovery bleibt auf einen halboffenen Zeitraum begrenzt, liefert ausschließlich normalisierte Konto-UIDs und bleibt ohne Provider leer. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
 - `CalendarContext` und `CalendarContextSettingsService` definieren Land, ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`, `DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche Nextcloud-Zeitzonen dürfen ausschließlich individuelle Terminanzeigen beeinflussen. Der Kontext ist im gemeinsamen AD-Adminbereich änderbar und wird bei bestehenden persönlichen Dashboardlayouts additiv eingeblendet.
-- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag für den gemeinsamen Kalenderkontext. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
+- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag Version 1 für den gemeinsamen Kalenderkontext. Consumer prüfen Version und `cacheStatus`; `stale` bleibt nur mit sichtbarer Aktualitätseinschränkung nutzbar, `unavailable` ist niemals eine konfliktfreie Leerliste. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
 - `AdSuiteAdminSettingsService` speichert app-übergreifend verwendete Peer-Freigaben semantisch nach Rollen und stellt sie AD Kalender, AD Urlaub und der administrativen OrgSuite-Oberfläche gemeinsam bereit.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.

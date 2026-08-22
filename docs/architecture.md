@@ -13,6 +13,45 @@ Test-Helper bleiben test-only, fachlich neutral und dependency-arm; der
 `PhpTestRunner` sammelt dependency-arme PHP-Smokes deterministisch und führt
 sie isoliert aus.
 
+`GroupProvisioningService::assertRoleMembersBelongTo()` prüft eine allgemeine
+native Nextcloud-Gruppenhierarchie read-only. Fehlende Gruppen oder Mitglieder
+einer Rollengruppe außerhalb der geforderten Basisgruppe werden abgelehnt;
+die Prüfung legt keine Mitgliedschaften an und nennt in Fehlern keine
+Konto-UIDs.
+
+## BR-Gruppenvertrag
+
+`BrGroupDefinition` und `BrGroupSettingsService` sind die kanonische,
+versionierte Quelle für die drei getrennten semantischen Gruppen `member`,
+`chair` und `deputy`. Technische Nextcloud-Gruppen-IDs bleiben konfigurierbar,
+müssen eindeutig sein und werden zentral in der LocalBase-AppConfig
+persistiert. Ein fehlender oder beschädigter persistierter Vertrag liefert
+nur nicht freigabefähige Defaults; Consumer verwenden ausschließlich
+`validatedDefinition()`.
+
+Vor Initialisierung oder Speicherung müssen alle referenzierten nativen
+Gruppen existieren. Jedes Mitglied von Vorsitz oder Stellvertretung muss
+zugleich Mitglied der allgemeinen BR-Gruppe sein. Widersprüche, fehlende
+Gruppen und veraltete Revisionen werden ohne AppConfig- oder
+Mitgliedschaftsänderung abgelehnt. Die einmalige Übernahme einer bisherigen
+Mitgliedergruppe ist nur zulässig, solange noch kein persistierter Vertrag
+existiert; beschädigte Bestandswerte werden dabei nicht überschrieben.
+
+## Lokale Demokonten
+
+`DemoAccountProvisioningService` ist die kanonische Provisionierung für die
+app-spezifischen AD-Demo-Packs. Neu erzeugte lokale Demokonten erhalten ihre
+UID als initiales Passwort; bei einem bereits eindeutig für dasselbe
+Demo-Pack registrierten Konto wird dieser Zustand bei erneuter Provisionierung
+wiederhergestellt. Das ist ein bewusst schwacher, ausschließlich für lokale
+Test- und Demokonten bestimmter Zugang und kein Produktionsvertrag.
+
+Fremde Konten, Konten mit geändertem Benutzer-Backend sowie Konten ohne
+änderbares Passwort oder Anzeigenamen werden im Preflight abgewiesen. Dabei
+werden weder Gruppen angelegt noch Mitgliedschaften oder Passwörter verändert.
+Die Provisionierung übernimmt insbesondere keine LDAP- oder sonstigen
+externen Konten.
+
 ## Kalender- und Abwesenheitsverträge
 
 `AbsenceEmployeeDiscoveryEvent`, `AbsenceQueryEvent` und `AbsenceInterval`
@@ -30,7 +69,11 @@ ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,
 Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle Anzeigen.
 
 `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als
-validierten read-only Jahresvertrag. `OpenHolidaysClient` ist der einzige
+validierten read-only Jahresvertrag Version 1. Consumer werten neben der
+Vertragsversion zwingend `cacheStatus` aus: `fresh` und `current` sind aktuell,
+`stale` bleibt mit sichtbarer Aktualitätseinschränkung nutzbar und
+`unavailable` darf niemals als leere, konfliktfreie Kalenderlage interpretiert
+werden. `OpenHolidaysClient` ist der einzige
 Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene
 Jahresstände in LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert
 das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein

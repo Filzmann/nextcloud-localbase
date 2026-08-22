@@ -51,6 +51,9 @@ final class DemoAccountProvisioningService {
                 if ($backend !== $user->getBackendClassName()) {
                     throw new RuntimeException("Das registrierte Demokonto {$fixture['uid']} verwendet inzwischen ein anderes Benutzer-Backend. Es wurde nichts verändert.");
                 }
+                if (!$user->canChangePassword()) {
+                    throw new RuntimeException("Das Passwort des registrierten Demokontos {$fixture['uid']} kann im Benutzer-Backend nicht geändert werden. Es wurde nichts verändert.");
+                }
                 if (!$user->canChangeDisplayName()) {
                     throw new RuntimeException("Das registrierte Demokonto {$fixture['uid']} ist im Benutzer-Backend schreibgeschützt.");
                 }
@@ -83,7 +86,7 @@ final class DemoAccountProvisioningService {
         foreach ($fixtures as $fixture) {
             $user = $knownUsers[$fixture['uid']];
             if ($user === null) {
-                $user = $this->users->createUser($fixture['uid'], bin2hex(random_bytes(32)));
+                $user = $this->users->createUser($fixture['uid'], $fixture['uid']);
                 if ($user === null) throw new RuntimeException("Das Demokonto {$fixture['uid']} konnte nicht angelegt werden.");
                 $registry[$fixture['uid']] = [
                     'ownerAppId' => $ownerAppId,
@@ -92,6 +95,9 @@ final class DemoAccountProvisioningService {
                 $this->saveRegistry($registry);
                 $createdUsers++;
             } else {
+                if (!$user->setPassword($fixture['uid'])) {
+                    throw new RuntimeException("Das Passwort des registrierten Demokontos {$fixture['uid']} konnte nicht aktualisiert werden.");
+                }
                 $reusedUsers++;
             }
 
