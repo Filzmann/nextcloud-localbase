@@ -2,31 +2,6 @@
 
 Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
 
-## Freigegebene Umsetzungsaufgaben
-
-### LB-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag bereitstellen
-
-Status: Providervertrag und BRTop-Consumer umgesetzt und lokal getestet;
-Consumer-Migration `BRS-BR-GROUPS` ausstehend
-
-- Konfigurierbare semantische Schlüssel für BR-Mitglieder, Vorsitz und
-  Stellvertretung bereitstellen; die drei Bedeutungen bleiben getrennt.
-- Bestehende Gruppennamen additiv übernehmen. Der Provider benennt oder
-  löscht keine Gruppen und verändert keine Mitgliedschaften.
-- Fehlende, doppelte oder widersprüchliche Gruppenbezüge sicher ablehnen.
-- Vorsitz und Stellvertretung müssen zwingend zugleich Mitglieder der
-  allgemeinen BR-Gruppe sein. Ein widersprüchlicher Gruppenstand wird sicher
-  abgelehnt und nicht durch automatische Mitgliedschaftsänderungen repariert.
-- Umgesetzt: versionierte Definition, zentrale AppConfig-Persistenz,
-  optimistische Revision, einmalige Legacy-Mitgliedergruppenübernahme sowie
-  Provider- und Deny-Tests ohne automatische Gruppenmutation.
-- BRTop übernimmt seinen früheren Mitgliedergruppenwert einmalig, verwendet
-  den gemeinsamen Vertrag für Zugriff, Demoanlage und neue Ladungssnapshots
-  und verweigert widersprüchliche Gruppenstände; die lokale Bestandsmigration
-  mit Defaultgruppen ist geprüft.
-- Ausstehend: Fresh-Install-/Bestandsmigration und Consumer-Tests für
-  `BRS-BR-GROUPS` abnehmen.
-
 ## Zukunftsplanung – nicht freigegeben
 
 ### LB-PRIVACY-INSTANCE – Datenauskunft auf die vollständige Nextcloud-Instanz erweitern
