@@ -7,7 +7,7 @@ namespace OCP\AppFramework {
 }
 namespace OCP\AppFramework\Bootstrap {
     interface IBootstrap {}
-    interface IRegistrationContext {}
+    interface IRegistrationContext { public function registerEventListener(string $event, string $listener): void; }
     interface IBootContext { public function injectFn(callable $fn): void; }
 }
 namespace OCP { interface IUser {} }
@@ -23,10 +23,10 @@ namespace OCP\Settings {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Service/AdProductSuiteService.php';
-    require_once __DIR__ . '/../../lib/AppInfo/Application.php';
 
     use OCA\LocalBase\AppInfo\Application;
+    use OCA\LocalBase\Privacy\NextcloudAccountPrivacyProviderListener;
+    use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
     use OCA\LocalBase\Service\AdProductSuiteService;
     use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
     use OCA\LocalBase\Settings\StandaloneProductAdminSection;
@@ -53,8 +53,16 @@ namespace {
     };
 
     $application = new Application();
-    $application->register(new class implements IRegistrationContext {});
+    $registration = new class implements IRegistrationContext {
+        public array $listeners = [];
+        public function registerEventListener(string $event, string $listener): void { $this->listeners[] = [$event, $listener]; }
+    };
+    $application->register($registration);
     $application->boot($boot);
+
+    if ($registration->listeners !== [[PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class]]) {
+        throw new RuntimeException('Nextcloud-Kontodatenprovider wurde nicht registriert.');
+    }
 
     if ($settings->sections !== [[IManager::SETTINGS_ADMIN, StandaloneProductAdminSection::class]]) {
         throw new RuntimeException('Standalone-Adminabschnitt wurde nicht registriert.');

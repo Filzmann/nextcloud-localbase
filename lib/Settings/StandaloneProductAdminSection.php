@@ -23,7 +23,7 @@ final class StandaloneProductAdminSection implements IIconSection {
     }
 
     public function getName(): string {
-        return AdProductSuiteService::label($this->getID());
+        return $this->suite->label($this->getID());
     }
 
     public function getPriority(): int {

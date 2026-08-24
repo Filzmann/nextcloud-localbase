@@ -6,7 +6,11 @@
             this.fetcher = options.fetcher || window.fetch.bind(window);
             this.generateUrl = options.generateUrl || ((path) => OC.generateUrl(path));
             this.requestToken = options.requestToken || (() => OC.requestToken);
-            this.errorMessage = options.errorMessage || ((data, status) => data && data.message ? data.message : `HTTP ${status}`);
+            this.errorMessage = options.errorMessage || ((data, status) => {
+                const message = typeof data?.message === 'string' ? data.message.trim() : '';
+                const error = typeof data?.error === 'string' ? data.error.trim() : '';
+                return message || error || `HTTP ${status}`;
+            });
         }
 
         async request(path, options = {}) {

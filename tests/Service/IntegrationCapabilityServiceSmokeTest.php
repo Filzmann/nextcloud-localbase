@@ -8,9 +8,6 @@ namespace OCP\EventDispatcher {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Integration/AdIntegrationCapabilities.php';
-    require_once __DIR__ . '/../../lib/Integration/IntegrationCapabilityQueryEvent.php';
-    require_once __DIR__ . '/../../lib/Service/IntegrationCapabilityService.php';
 
     use OCA\LocalBase\Integration\AdIntegrationCapabilities;
     use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;

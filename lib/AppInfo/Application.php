@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OCA\LocalBase\AppInfo;
 
 use OCA\LocalBase\Service\AdProductSuiteService;
+use OCA\LocalBase\Privacy\NextcloudAccountPrivacyProviderListener;
+use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
 use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
 use OCA\LocalBase\Settings\StandaloneProductAdminSection;
 use OCP\AppFramework\App;
@@ -18,13 +20,14 @@ use OCP\Settings\IManager;
  * Zusammenspiel: Nextcloud-Bootstrap -> AdProductSuiteService -> Settings-Manager.
  */
 class Application extends App implements IBootstrap {
-    public const APP_ID = 'localbase';
+    public const APP_ID = AppId::VALUE;
 
     public function __construct(array $urlParams = []) {
         parent::__construct(self::APP_ID, $urlParams);
     }
 
     public function register(IRegistrationContext $context): void {
+        $context->registerEventListener(PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class);
     }
 
     public function boot(IBootContext $context): void {

@@ -26,7 +26,6 @@ namespace OCA\LocalBase\Calendar {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/BackgroundJob/RefreshHolidayCalendarJob.php';
 
     use OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob;
     use OCA\LocalBase\Calendar\CalendarContextSettingsService;

@@ -19,18 +19,64 @@ LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eig
 
 Aktuell enthalten:
 
+- Öffentliche Privacy-Verträge für Nextcloud-User-Subjects,
+  `PersonalDataProvider`, feste Provider-Registry-Snapshots, fehlerisolierte
+  Aggregation sowie ausschließlich lesende `RetentionProvider`-Dry-Runs mit
+  `REVIEW`-Kandidaten. Self-Service bindet die Session-UID; Admin-Auskunft und
+  Retention-Preview verlangen die explizit konfigurierte Nextcloud-Gruppe
+  `privacy_admin_group` und bleiben ohne Konfiguration deny by default.
+- Die flüchtige Self-Service- und Admin-Grundansicht persistiert keine
+  Berichtskopie. Sie weist die Betroffenenrechte einmal im Kopf aus und
+  zeigt je App weitere Verarbeitungsangaben vor den Datentabellen und gliedert
+  danach nach Datentyp. Der Tabellenkopf besteht aus den freigegebenen
+  Datenfeldern. Innerhalb eines Datentyps identische Zwecke oder
+  Aufbewahrungsaussagen stehen einmal vor der Tabelle; nur unterschiedliche
+  Werte bleiben zusätzliche Tabellenspalten.
+  Menschenlesbare Datumsangaben verwenden die deutsche Kurzform `TT.MM.JJ`;
+  Uhrzeiten werden bei Bedarf als `HH:MM Uhr` ergänzt.
+  Derselbe Stand
+  kann clientseitig als mehrseitiges PDF heruntergeladen werden; geheime
+  Anmeldewerte und Identitäten geschützter Drittpersonen bleiben ausgeschlossen.
+  Der app-eigene Nextcloud-Kontoprovider liest Konto, sämtliche nichtleeren
+  Nextcloud-Profilfelder einschließlich ihrer Sichtbarkeit und Bestätigung
+  sowie die eigenen Gruppenzuordnungen ausschließlich über öffentliche
+  Nextcloud-User-, Account- und GroupManager-APIs. Der Bericht weist außerdem
+  sichtbar darauf hin, dass er noch nicht die gesamte Instanz abdeckt, und
+  benennt die noch nicht implementierten Datenabrufe. Normale Konten erreichen dieselbe kanonische
+  Self-Service-Seite über den `Datenschutz`-Eintrag im rechten
+  Nextcloud-Benutzermenü und über den persönlichen Einstellungsbereich.
+  Der Pilot besitzt keine Retention-Ausführung, keine
+  automatische Löschung und keinen Lifecycle-Provider.
 - PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
-- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum idempotenten Anlegen beliebiger Nextcloud-Gruppen.
-- Neutraler Kalendervertrag `AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
+- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum
+  idempotenten Anlegen beliebiger Nextcloud-Gruppen und zur read-only Prüfung,
+  dass Mitglieder definierter Rollengruppen zugleich einer Basisgruppe
+  angehören. Widersprüche werden ohne automatische Mitgliedschaftsänderung
+  abgelehnt.
+- `BrGroupDefinition` und `BrGroupSettingsService` bilden den versionierten,
+  zentral persistierten BR-Gruppenvertrag mit den getrennten semantischen
+  Schlüsseln `member`, `chair` und `deputy`. Ein fehlender, ungültiger oder
+  hinsichtlich der nativen Nextcloud-Mitgliedschaften widersprüchlicher
+  Vertrag ist für Consumer nicht freigabefähig. Vorsitz und Stellvertretung
+  müssen immer auch der Mitgliedergruppe angehören.
+- `DemoAccountProvisioningService` erzeugt ausschließlich explizit
+  registrierte lokale Test- und Demokonten. Für diese Konten gilt
+  Benutzername = Passwort; eine erneute Provisionierung stellt diesen Zustand
+  nur für dasselbe registrierte Demo-Pack wieder her. Fremde, externe oder
+  nicht passwortänderbare Konten werden vor jeder Mutation abgewiesen. Dieser
+  bewusst schwache Zugang darf nicht für echte oder produktive Konten
+  verwendet werden.
+- Neutraler Kalendervertrag `AbsenceEmployeeDiscoveryEvent`/`AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. Die Discovery bleibt auf einen halboffenen Zeitraum begrenzt, liefert ausschließlich normalisierte Konto-UIDs und bleibt ohne Provider leer. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
 - `CalendarContext` und `CalendarContextSettingsService` definieren Land, ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`, `DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche Nextcloud-Zeitzonen dürfen ausschließlich individuelle Terminanzeigen beeinflussen. Der Kontext ist im gemeinsamen AD-Adminbereich änderbar und wird bei bestehenden persönlichen Dashboardlayouts additiv eingeblendet.
-- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag für den gemeinsamen Kalenderkontext. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
+- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag Version 1 für den gemeinsamen Kalenderkontext. Consumer prüfen Version und `cacheStatus`; `stale` bleibt nur mit sichtbarer Aktualitätseinschränkung nutzbar, `unavailable` ist niemals eine konfliktfreie Leerliste. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
 - `AdOrganizationDefinition`, `AdOrganizationSettingsService`, `AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen AD-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
 - `AdSuiteAdminSettingsService` speichert app-übergreifend verwendete Peer-Freigaben semantisch nach Rollen und stellt sie AD Kalender, AD Urlaub und der administrativen OrgSuite-Oberfläche gemeinsam bereit.
 - Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
 - Die initiale Reihenfolge umfasst Fahrzeugverwaltung nach IT, Empfang nach Sekretariat sowie im Pflegebereich stellvertretende PDL, Büroorganisation Pflege und Pflegefachkraft. Für den Bürobereich bleibt Büroleitung, stellvertretende Büroleitung, Einsatzbegleitung und Büromitarbeiter*innen maßgeblich. Die im Adminbereich gespeicherte Reihenfolge bleibt für alle Verbraucher verbindlich.
 - Organisationsvertrag Version 2 ergänzt bestehende Version-1-Einstellungen additiv um `deputy_pdl`, `care_office`, `fleet_management` und `reception`, die freigegebenen Hierarchiekanten sowie Urlaubsansichten. Bestehende Werte und Kanten bleiben erhalten; Gruppen-ID-Kollisionen und Zyklen werden abgelehnt.
+- Organisationsvertrag Version 3 trennt `finance` und `payroll` additiv unter `finance_lead`; Version 4 ergänzt die betriebsweit festgelegten Kalenderkürzel `BO`, `EB`, `PFK`, `BO-Pflege`, `IT`, `NO`, `W` und `S`. Die bestehende Finanzgruppen-ID bleibt erhalten. Der read-only `AdOrganizationSnapshot` enthält nur Rollen und Bereiche, keine Mitgliederlisten, und ist bei fehlender oder ungültiger Persistenz nicht freigabefähig.
 - `diagramOrder` speichert davon getrennt ausschließlich die globale Links-rechts-Anordnung der Organigrammkarten innerhalb ihrer Hierarchieebene. Beim horizontalen Drag-and-drop bestimmt der Zwischenraum zwischen zwei Karten die neue Einfügeposition. Diese visuelle Anordnung verändert weder Rollen-/Bereichsreihenfolgen noch Kalender, Rechte oder Hierarchiekanten.
 - Das Organigramm bleibt automatisch nach Hierarchieebenen angeordnet; freie X-/Y-Knotenpositionen sind kein Bestandteil des Organisationsvertrags. Karten derselben Ebene stehen waagerecht nebeneinander und verwenden innerhalb definierter Mindest-/Maximalgrenzen nur ihre benötigte Breite; sie brechen nicht in scheinbare zusätzliche Hierarchiezeilen um. Der persönliche Zoom wird in 10-Prozent-Schritten von 50 bis 150 Prozent über `IUserConfig` geräteübergreifend gespeichert. Der verschobene Ausschnitt bleibt wegen unterschiedlicher Viewportgrößen flüchtig. Zoom und Ausschnitt verändern weder Hierarchie und Diagrammordnung noch die logische Größe der Exporte.
 - Fachliche Rolleneinstellungen werden über den Edit-Stift der Diagrammkarten in einem zugänglichen Seitenpanel bearbeitet und gelten für alle Diagrammkarten derselben semantischen Rolle. Technische Gruppen-IDs bleiben dort eingeklappt; die für Kalender und Gruppenlisten verbindliche Rollenreihenfolge bleibt als eigene kompakte Drag-and-drop-Liste sichtbar. Bürobereiche und Urlaubsansichten werden als aufklappbare Einstellungskarten dargestellt.
@@ -42,7 +88,18 @@ Aktuell enthalten:
 - Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
 - `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
 - `IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten. Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert niemals Berechtigungen.
-- `StandaloneAppNavigationService` registriert Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die dynamischen Settings-Adapter platzieren die gemeinsame Organisationsverwaltung bei einer Einzelinstallation unter deren Fachprodukt.
+- `AdProductCatalog` liest den versionierten AD-Produktkatalog als kanonische
+  Quelle für Produkt-IDs, Reihenfolge, Routen sowie getrennte Menü-,
+  Standalone- und Bundle-Eigenschaften. Ungültige oder fehlende Katalogdaten
+  erweitern weder Navigation noch Berechtigungen. Menüfähige
+  Entwicklungsprodukte dürfen über explizit falsche Bundle-Flags von
+  Release-Artefakten ausgeschlossen bleiben; Delivery-Code verwendet dafür
+  ausschließlich die gefilterte Bundle-Produktmenge.
+- `StandaloneAppNavigationService` registriert katalogisierte
+  Fachapp-Einstiege nur ohne aktive OrgSuite. `AdProductSuiteService` und die
+  dynamischen Settings-Adapter platzieren die gemeinsame
+  Organisationsverwaltung bei einer Einzelinstallation unter deren
+  Fachprodukt.
 - Organisationseditor, Admin-API und Persistenz des gemeinsamen AD-Vertrags liegen vollständig in LocalBase. OrgSuite bindet diese Oberfläche ab zwei Produkten nur als Adminadapter ein.
 - JavaScript-Basisklasse `window.LocalBase.models.Model`.
 - JavaScript-API-Client `window.LocalBase.api.ApiClient`.
@@ -117,3 +174,22 @@ ermitteln.
 Die App wird nach Nextcloud gemountet unter:
 
     /var/www/html/html/custom_apps/localbase
+
+## Parent-Governance-Vertrag: 1
+
+- Die für dieses Subrepository anwendbaren Regeln des Parent-Workspaces sind
+  verbindlich. Dazu gehören insbesondere app-übergreifende ADRs und
+  öffentliche Verträge, Repositorygrenzen sowie Workspace-, Delivery- und
+  Release-Gates.
+- Diese lokale `AGENTS.md` und die lokalen Skills bleiben die vollständige,
+  ohne Parent-Checkout arbeitsfähige Repository-Steuerung. Die anwendbaren
+  Parent-Regeln werden dafür hier oder in den lokalen Skills mitgeführt.
+- Repository-lokale Regeln dürfen Parent-Verträge konkretisieren und verschärfen,
+  aber nicht abschwächen oder umgehen.
+- Bei einem Widerspruch gilt bis zur Klärung die strengere Regel. Die Arbeit
+  stoppt, bis die kanonische Quelle bestimmt, die Regelprojektionen
+  synchronisiert und eine erforderliche Entscheidung dokumentiert ist.
+- Ist der Parent-Workspace nicht verfügbar, bleibt die lokale Steuerung
+  wirksam. Vor Cross-App-, Release- oder Delivery-Arbeit muss ein vermuteter
+  neuerer Parent-Stand oder eine Regelungslücke zuerst gegen den Parent
+  geprüft werden.

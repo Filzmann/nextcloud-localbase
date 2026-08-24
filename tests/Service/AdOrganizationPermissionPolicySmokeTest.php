@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../lib/Organization/AdOrganizationDefinition.php';
-require_once __DIR__ . '/../../lib/Organization/AdOrganizationHierarchy.php';
-require_once __DIR__ . '/../../lib/Organization/AdOrganizationPermissionPolicy.php';
 
 use OCA\LocalBase\Organization\AdOrganizationHierarchy;
 use OCA\LocalBase\Organization\AdOrganizationPermissionPolicy;

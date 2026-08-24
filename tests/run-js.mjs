@@ -13,6 +13,8 @@ runJavaScriptSuite({
         'tests/js/organization-admin-smoke.mjs',
         'tests/js/organization-dashboard-smoke.mjs',
         'tests/js/organization-exporter-smoke.mjs',
+        'tests/js/privacy-download-smoke.mjs',
+        'tests/js/privacy-table-smoke.mjs',
         'tests/js/repository-smoke.js',
         'tests/js/ui-smoke.js',
     ],

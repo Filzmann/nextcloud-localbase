@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../lib/Organization/AdOrganizationDefinition.php';
-require_once __DIR__ . '/../../lib/Service/AdDemoFixtureCatalog.php';
 
 use OCA\LocalBase\Organization\AdOrganizationDefinition;
 use OCA\LocalBase\Service\AdDemoFixtureCatalog;

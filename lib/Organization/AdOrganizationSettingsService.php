@@ -18,17 +18,22 @@ final class AdOrganizationSettingsService {
     public function __construct(private IAppConfig $config) {}
 
     public function definition(): AdOrganizationDefinition {
+        return $this->state()['definition'];
+    }
+
+    /** @return array{definition: AdOrganizationDefinition, valid: bool, persisted: bool} */
+    public function state(): array {
         $raw = $this->config->getValueString(Application::APP_ID, self::KEY, '');
-        if ($raw === '') return AdOrganizationDefinition::defaults();
+        if ($raw === '') return ['definition' => AdOrganizationDefinition::defaults(), 'valid' => false, 'persisted' => false];
         try {
             $data = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
             $definition = AdOrganizationDefinition::get(is_array($data) ? $data : []);
-            if ((int)($data['version'] ?? 1) < 2) {
+            if ((int)($data['version'] ?? 1) < 3) {
                 $this->config->setValueString(Application::APP_ID, self::KEY, json_encode($definition->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
             }
-            return $definition;
+            return ['definition' => $definition, 'valid' => true, 'persisted' => true];
         } catch (\Throwable) {
-            return AdOrganizationDefinition::defaults();
+            return ['definition' => AdOrganizationDefinition::defaults(), 'valid' => false, 'persisted' => true];
         }
     }
 

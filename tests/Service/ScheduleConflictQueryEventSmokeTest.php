@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 if (!class_exists(\OCP\EventDispatcher\Event::class)) eval('namespace OCP\\EventDispatcher; class Event { public function __construct() {} }');
-require_once __DIR__ . '/../../lib/Calendar/ScheduleConflict.php';
-require_once __DIR__ . '/../../lib/Calendar/ScheduleConflictQueryEvent.php';
 
 use OCA\LocalBase\Calendar\ScheduleConflict;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;

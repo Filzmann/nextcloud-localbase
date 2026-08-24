@@ -2,58 +2,30 @@
 
 Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
 
-## Freigegebene Umsetzungsaufgaben
+## Zukunftsplanung – nicht freigegeben
 
-### LB-AD-CATALOG – Kanonischen AD-Produktkatalog bereitstellen
+### LB-PRIVACY-INSTANCE – Datenauskunft auf die vollständige Nextcloud-Instanz erweitern
 
-Status: bereit für einen ausdrücklich beauftragten Cross-App-Lauf
+Status: vorgemerkt, später; nicht freigegeben
 
-- Einen kleinen versionierten, maschinenlesbaren Katalog für stabile
-  Produkt-ID, Produkttyp, Reihenfolge und technische Einstiegsroute
-  bereitstellen.
-- `adcalendar`, `adplaner`, `adurlaub`, `adroom` und `adrecruitment`
-  aufnehmen; LocalBase und OrgSuite getrennt als Infrastruktur ausweisen.
-- Standalone-Fähigkeit, Menüzugehörigkeit und Release-Bundle-Zugehörigkeit
-  getrennt modellieren. Sichtbare Labels bleiben l10n-fähige Consumertexte.
-- Provider-Tests decken Schema, Eindeutigkeit, stabile Reihenfolge,
-  unbekannte Produkte und Rückwärtskompatibilität ab.
-- Die abhängigen Tasks `PARENT-AD-CATALOG`, `ORGS-AD-CATALOG`,
-  `RECR-AD-CATALOG` und `ADS-AD-CATALOG-DOCS` gemeinsam abnehmen.
-
-### LB-AD-ORG-SNAPSHOT – Read-only Organisationssnapshot veröffentlichen
-
-Status: bereit für einen ausdrücklich beauftragten öffentlichen
-LocalBase-Vertrag
-
-- Einen unveränderlichen read-only Snapshot mit Vertragsversion, Prüfsumme,
-  Gültigkeitsstatus, Rollen, Bereichen, Assistenzteams und tatsächlichen
-  Gruppen-IDs bereitstellen.
-- Einen ungültigen oder nur aus Defaults rekonstruierten Persistenzstand
-  erkennbar machen; ein Consumer darf daraus keine Freigabe ableiten.
-- Keine Gruppen, Mitgliedschaften oder Fachrechte verändern und keine
-  personenbezogenen Mitgliederlisten in den Vertrag aufnehmen.
-- Provider-Tests belegen gültigen Stand, ungültige Persistenz, stabile
-  Prüfsumme, Versionierung und datensparsames Payload.
-- Gemeinsam mit `BPM-AD-ORG-SNAPSHOT` in der Berechtigungsmatrix durch
-  Provider-/Consumer-Contract-Tests abnehmen.
-
-### LB-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag bereitstellen
-
-Status: bereit nach Klärung der Mitgliedschaftsinvariante
-
-- Konfigurierbare semantische Schlüssel für BR-Mitglieder, Vorsitz und
-  Stellvertretung bereitstellen; die drei Bedeutungen bleiben getrennt.
-- Bestehende Gruppennamen additiv übernehmen. Der Provider benennt oder
-  löscht keine Gruppen und verändert keine Mitgliedschaften.
-- Fehlende, doppelte oder widersprüchliche Gruppenbezüge sicher ablehnen.
-- Vor Implementierung entscheiden, ob Vorsitz und Stellvertretung zwingend
-  zugleich Mitglieder der allgemeinen BR-Gruppe sein müssen.
-- Provider-, Migrations- und Deny-Tests gemeinsam mit
-  `BRT-BR-GROUPS` und `BRS-BR-GROUPS` abnehmen.
+- Den persönlichen Daten-Download schrittweise von den derzeit angebundenen
+  Providern auf sämtliche personenbezogenen Datenquellen der vollständigen
+  Nextcloud-Instanz erweitern.
+- Nextcloud-Core-Daten wie Dateien, Freigaben, Versionen, Papierkorb,
+  Aktivitäten, Anmeldungen, Sitzungen sowie Sicherheits- und Auditprotokolle
+  ebenso einbeziehen wie installierte Core-, Drittanbieter- und lokale Apps.
+- Jede Quelle über einen öffentlichen, subject-gebundenen Providervertrag
+  anbinden; LocalBase liest keine fremden Tabellen oder Dateien direkt.
+- Im Nutzerreport und im PDF bis zur vollständigen Abdeckung die noch nicht
+  implementierten Datenabrufe verständlich und sichtbar ausweisen.
+- Vor Umsetzung Umfang, Drittpersonenschutz, Geheimnisse, große Datenmengen,
+  Dateiinhaltsexporte, Providerfehler und ein reproduzierbares
+  Vollständigkeits-Gate je installierter App entscheiden und testen.
 
 ### LB-L10N – LocalBase-Oberflächen vollständig lokalisieren
 
-Status: bereit nach Auswahl einer Pilot-App und ihres l10n-Vertrags
+Status: später, nicht freigegeben; Pilot-App, Reihenfolge und Rohtext-Gate
+werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 - Nur von LocalBase selbst gerenderte sichtbare Texte, Meldungen,
   Datumsnamen, Pluralformen und Platzhalter auf Nextcloud-l10n umstellen.
@@ -66,6 +38,8 @@ Status: bereit nach Auswahl einer Pilot-App und ihres l10n-Vertrags
 
 ## Aktueller Fokus
 
+- Die manuellen Prüfungen werden im ausfüllbaren
+  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Bestehende gemeinsame Modelle, API-, UI-, Organisations-, Integrations- und Testverträge klein, dependency-arm und stabil halten.
 - Öffentliche Verträge mit den betroffenen Consumer-Apps auf einem realitätsnahen Staging und durch Contract-Tests absichern.
 - Den Organisationseditor mit realen Gruppenbesetzungen und großen Organisationsstrukturen visuell und fachlich abnehmen.

@@ -123,8 +123,8 @@ jobs:
       - name: Berechtigungsmatrix auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-br-permission-matrix
-          path: br_permission_matrix
+          repository: Filzmann/nextcloud-filzmann-permission-matrix
+          path: filzmann_permission_matrix
       - name: AD Recruitment auschecken
         uses: actions/checkout@v7
         with:
@@ -177,7 +177,7 @@ jobs:
           php tests/run.php
           node tests/run-js.mjs
       - name: Berechtigungsmatrix-Vertrag
-        working-directory: br_permission_matrix
+        working-directory: filzmann_permission_matrix
         run: |
           php tests/run.php
           node tests/run-js.mjs
@@ -186,3 +186,12 @@ jobs:
         run: |
           php tests/run.php
           node tests/run-js.mjs
+
+  deploy-staging:
+    name: Staging-Deployment
+    if: github.event_name == 'push'
+    needs: [php, javascript, consumer-contracts]
+    uses: Filzmann/br-nextcloud-apps/.github/workflows/deploy-staging.yml@main
+    with:
+      app-id: localbase
+    secrets: inherit

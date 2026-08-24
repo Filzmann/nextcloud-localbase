@@ -15,7 +15,6 @@ namespace OCP\Migration {
 }
 
 namespace {
-    require_once __DIR__ . '/../../lib/Migration/Version000001Date202607220001.php';
 
     use OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob;
     use OCA\LocalBase\Migration\Version000001Date202607220001;

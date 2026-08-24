@@ -10,7 +10,6 @@ namespace {
         eval('namespace OCP\AppFramework\Http; class DataResponse { public function __construct(private mixed $data = [], private int $status = 200) {} public function getData(): mixed { return $this->data; } public function getStatus(): int { return $this->status; } }');
     }
 
-    require __DIR__ . '/../../lib/Controller/ApiResponder.php';
 
     use OCA\LocalBase\Controller\ApiResponder;
     use OCP\AppFramework\Http;

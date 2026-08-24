@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Tests\Support;
 
-require_once __DIR__ . '/assertions.php';
 
 assertSameValue(['a' => 1], ['a' => 1], 'Equal arrays should pass.');
 assertContainsString('base', 'localbase', 'Needles should be detected.');

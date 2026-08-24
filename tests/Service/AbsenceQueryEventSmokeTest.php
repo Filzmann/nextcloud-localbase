@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../lib/Calendar/AbsenceInterval.php';
 
 if (!class_exists(\OCP\EventDispatcher\Event::class)) {
     eval('namespace OCP\\EventDispatcher; class Event { public function __construct() {} }');
 }
-require_once __DIR__ . '/../../lib/Calendar/AbsenceQueryEvent.php';
 
 use OCA\LocalBase\Calendar\AbsenceInterval;
 use OCA\LocalBase\Calendar\AbsenceQueryEvent;
