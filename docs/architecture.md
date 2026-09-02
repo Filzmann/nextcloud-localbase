@@ -59,9 +59,17 @@ bilden optionale read-only Abwesenheitsprovider ab. Die Discovery ist an einen
 halboffenen Zeitraum gebunden und aggregiert ausschließlich normalisierte
 Konto-UIDs; leere und nicht-stringförmige Providerwerte werden verworfen, und
 ohne Provider bleibt sie leer. `planned` liefert `U?` ohne Blockade,
-`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
-Abwesenheiten read-only Konflikte aus optionalen Planungsapps; Provider
-löschen oder verändern keine Daten.
+`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert
+read-only Konflikte aus optionalen Planungsapps. Eine Abfrage kann ihre
+validierte `requesterAppId` angeben; jeder Konflikt kann seine validierte
+`sourceAppId` tragen. Das Event schließt Konflikte derselben Source zentral
+aus, damit bidirektionale Provider ihre eigenen Einträge nicht zurückmelden.
+Leere IDs halten bestehende Consumer und Provider rückwärtskompatibel. Typen
+bleiben auf `shift` und `appointment` begrenzt, Zeiträume sind halboffen und
+Labels enthalten ausschließlich knappe, nicht vertrauliche Anzeigenamen.
+Provider löschen oder verändern keine Daten. Ohne registrierten Provider
+bleibt die Konfliktmenge leer; Consumer greifen niemals auf Tabellen oder
+interne Services einer anderen Fachapp zu.
 
 `CalendarContext` und `CalendarContextSettingsService` definieren Land,
 ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,

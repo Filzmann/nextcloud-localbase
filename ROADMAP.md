@@ -2,39 +2,46 @@
 
 Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
 
-## Zukunftsplanung – nicht freigegeben
+## Nextcloud-Kompatibilitätsgate
 
-### LB-PRIVACY-INSTANCE – Datenauskunft auf die vollständige Nextcloud-Instanz erweitern
+### LB-NC-COMPAT – OpenDesk-Boden 33 und Consumer-Matrix nachweisen
 
-Status: vorgemerkt, später; nicht freigegeben
+Status: `info.xml` bleibt bei 34/34; die öffentlichen OCP-Imports sind auf
+NC 33.0.7 statisch vorhanden, eine Laufzeitevidenz fehlt. Vor
+`min-version="33"` sind Fresh Install/Upgrade, DI, Migrationen, Jobs,
+öffentliche Events/Capabilities, Assets und UI sowie repräsentative
+Standalone- und Consumer-Kombinationen mit OrgSuite, Kalender-, Planungs-,
+Urlaubs-, Privacy- und Matrixgrenzen grün zu prüfen. Jede künftige Major wird
+lückenlos mit `verify-nextcloud-future-compatibility` belegt; fehlende oder
+inkompatible optionale Consumer bleiben kontrollierte Vertragszustände.
 
-- Den persönlichen Daten-Download schrittweise von den derzeit angebundenen
-  Providern auf sämtliche personenbezogenen Datenquellen der vollständigen
-  Nextcloud-Instanz erweitern.
-- Nextcloud-Core-Daten wie Dateien, Freigaben, Versionen, Papierkorb,
-  Aktivitäten, Anmeldungen, Sitzungen sowie Sicherheits- und Auditprotokolle
-  ebenso einbeziehen wie installierte Core-, Drittanbieter- und lokale Apps.
-- Jede Quelle über einen öffentlichen, subject-gebundenen Providervertrag
-  anbinden; LocalBase liest keine fremden Tabellen oder Dateien direkt.
-- Im Nutzerreport und im PDF bis zur vollständigen Abdeckung die noch nicht
-  implementierten Datenabrufe verständlich und sichtbar ausweisen.
-- Vor Umsetzung Umfang, Drittpersonenschutz, Geheimnisse, große Datenmengen,
-  Dateiinhaltsexporte, Providerfehler und ein reproduzierbares
-  Vollständigkeits-Gate je installierter App entscheiden und testen.
+## App-lokale Migrationsaufgabe
 
-### LB-L10N – LocalBase-Oberflächen vollständig lokalisieren
+### LB-PRIVACY-PILOT-RETIREMENT – LocalBase-Pilot kontrolliert zurückbauen
 
-Status: später, nicht freigegeben; Pilot-App, Reihenfolge und Rohtext-Gate
-werden vor jeder Umsetzung appübergreifend separat freigegeben
+Status: offen; die systemweite Reihenfolge und Freigabe wird im kanonischen
+Root-Zukunftsplan geführt
 
-- Nur von LocalBase selbst gerenderte sichtbare Texte, Meldungen,
-  Datumsnamen, Pluralformen und Platzhalter auf Nextcloud-l10n umstellen.
-- Konfigurierte Eigennamen, technische Schlüssel, API-Werte und
-  Organisationsdaten unverändert lassen.
-- Deutsche Ausgabe, eine weitere Locale, Fallback, Pluralformen,
-  Platzhalter und Escaping in PHP und JavaScript testen.
-- Erst nach vollständiger Migration einen Rohtext-Check für LocalBase
-  verbindlich schalten.
+- LocalBase bleibt während der Migration ein charakterisierter, aber nicht
+  parallel kanonischer Rückfallstand. Die dauerhaft öffentliche
+  Privacy-Runtime ist `filzmann_data_protection`.
+- App-eigene persönliche UI-Werte, Demo-Registry und verbliebene
+  Pilotprovider vollständig inventarisieren und ihre zulässige Projektion
+  beziehungsweise begründete Nichtanwendbarkeit festhalten.
+- Self-Service, Adminoberfläche, Registry und öffentliche Privacy-Klassen
+  erst entfernen, wenn alle vorgesehenen Consumer migriert und Installation,
+  Update, Deinstallation sowie Rückbau gemeinsam grün sind.
+- Keine fremden Tabellen, Dateien, AppConfig-Werte oder internen Klassen als
+  Coverage-Fallback lesen. Fehlende oder inkompatible Provider bleiben
+  sichtbar unvollständig.
+
+### LB-L10N – app-lokale LocalBase-Texte lokalisieren
+
+Aktivierung ausschließlich nach Freigabe des systemweiten Root-Vorhabens
+`ZM-06`. Nur von LocalBase selbst gerenderte sichtbare Texte, Datumsnamen,
+Pluralformen und Platzhalter wechseln auf Nextcloud-l10n; konfigurierte
+Eigennamen, technische Schlüssel, API-Werte und Organisationsdaten bleiben
+unverändert.
 
 ## Aktueller Fokus
 
