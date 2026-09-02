@@ -34,3 +34,11 @@ Für die manuelle Staging-Prüfung der Administrationsoberfläche und der
 Cross-App-Verträge steht ein ausfüllbares
 [Abnahmeformular](docs/manual-acceptance.md) bereit. Es berücksichtigt, dass
 LocalBase keine eigene Fachnavigation besitzt.
+
+## Dokumentation
+
+- [Architektur](docs/architecture.md)
+- [Manuelle Abnahme](docs/manual-acceptance.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+- [Arbeitsregeln](AGENTS.md)

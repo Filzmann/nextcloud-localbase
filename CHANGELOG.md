@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Dokumentations- und Steuerungsstruktur vereinheitlicht.
+
 - AD BQ-Planer als navigierbares Standalone-Produkt im kanonischen Produktkatalog ergänzt; bis zur Release-Reife bleibt es aus Full-Suite- und Einzelprodukt-Bundles ausgeschlossen.
 - Freigegebene Einzelbundle-Produkte sind über einen eigenen Katalogvertrag von noch nicht auslieferbaren Produkten getrennt.
 

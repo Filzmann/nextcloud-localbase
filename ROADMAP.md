@@ -1,6 +1,9 @@
 # Roadmap – LocalBase
 
-Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
+Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
+und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
+erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
+`docs/architecture.md`.
 
 ## Nextcloud-Kompatibilitätsgate
 
