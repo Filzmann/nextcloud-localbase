@@ -8,8 +8,10 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use OCP\EventDispatcher\Event;
 
-/** Zweck: Fragt optionale Planungsapps synchron nach Konflikten vor einer Abwesenheitsgenehmigung. */
+/** Zweck: Fragt optionale Planungsapps synchron nach Konflikten für read-only Planungsprüfungen. */
 final class ScheduleConflictQueryEvent extends Event {
+    public const CONTRACT_VERSION = '1.0';
+
     /** @var list<ScheduleConflict> */
     private array $conflicts = [];
 
@@ -31,6 +33,7 @@ final class ScheduleConflictQueryEvent extends Event {
     public function start(): DateTimeImmutable { return $this->start; }
     public function end(): DateTimeImmutable { return $this->end; }
     public function requesterAppId(): string { return $this->requesterAppId; }
+    public function contractVersion(): string { return self::CONTRACT_VERSION; }
 
     public function add(ScheduleConflict $conflict): void {
         if ($this->requesterAppId !== '' && $conflict->sourceAppId() === $this->requesterAppId) {

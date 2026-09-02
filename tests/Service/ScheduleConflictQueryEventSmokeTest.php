@@ -11,6 +11,7 @@ $event->add(new ScheduleConflict('shift',$start->modify('+8 hours'),$start->modi
 if (count($event->conflicts()) !== 1 || $event->conflicts()[0]->toArray()['type'] !== 'shift') throw new RuntimeException('Konfliktvertrag verletzt.');
 
 $scoped = new ScheduleConflictQueryEvent('alice', $start, $start->modify('+1 day'), 'adplaner');
+if ($scoped->contractVersion() !== '1.0') throw new RuntimeException('Der öffentliche Konfliktvertrag besitzt keine stabile Schema-Version.');
 $scoped->add(new ScheduleConflict('shift', $start->modify('+8 hours'), $start->modify('+14 hours'), 'Assistenz', 'adplaner'));
 $scoped->add(new ScheduleConflict('shift', $start->modify('+9 hours'), $start->modify('+17 hours'), 'Dienst/Büro', 'adcalendar'));
 if ($scoped->requesterAppId() !== 'adplaner') throw new RuntimeException('Die anfragende App fehlt im öffentlichen Konfliktvertrag.');

@@ -8,6 +8,10 @@ Rollen und Bürobereiche über
 einen unveränderlichen, datensparsamen Snapshot; fehlende oder ungültige
 Persistenz erteilt keine fachlichen Rechte.
 
+Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
+Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
+verhindern Eigenmeldungen; ohne Listener bleibt die Konfliktmenge leer.
+
 ## Staging-Kompatibilität
 
 - Nextcloud 34

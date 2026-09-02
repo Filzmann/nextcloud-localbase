@@ -60,8 +60,9 @@ halboffenen Zeitraum gebunden und aggregiert ausschließlich normalisierte
 Konto-UIDs; leere und nicht-stringförmige Providerwerte werden verworfen, und
 ohne Provider bleibt sie leer. `planned` liefert `U?` ohne Blockade,
 `approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert
-read-only Konflikte aus optionalen Planungsapps. Eine Abfrage kann ihre
-validierte `requesterAppId` angeben; jeder Konflikt kann seine validierte
+read-only Konflikte aus optionalen Planungsapps. Der additive Payloadvertrag
+weist über `contractVersion()` die stabile Schema-Version `1.0` aus. Eine
+Abfrage kann ihre validierte `requesterAppId` angeben; jeder Konflikt kann seine validierte
 `sourceAppId` tragen. Das Event schließt Konflikte derselben Source zentral
 aus, damit bidirektionale Provider ihre eigenen Einträge nicht zurückmelden.
 Leere IDs halten bestehende Consumer und Provider rückwärtskompatibel. Typen

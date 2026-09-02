@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
+- Planungskonfliktvertrag als additive API Version 1.0 ausgewiesen; anfragende
+  und liefernde App-IDs grenzen bidirektionale Eigenmeldungen zentral aus.
 
 - AD BQ-Planer als navigierbares Standalone-Produkt im kanonischen Produktkatalog ergänzt; bis zur Release-Reife bleibt es aus Full-Suite- und Einzelprodukt-Bundles ausgeschlossen.
 - Freigegebene Einzelbundle-Produkte sind über einen eigenen Katalogvertrag von noch nicht auslieferbaren Produkten getrennt.
