@@ -5,19 +5,6 @@ und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
 erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 `docs/architecture.md`.
 
-## Nextcloud-Kompatibilitätsgate
-
-### LB-NC-COMPAT – OpenDesk-Boden 33 und Consumer-Matrix nachweisen
-
-Status: `info.xml` bleibt bei 34/34; die öffentlichen OCP-Imports sind auf
-NC 33.0.7 statisch vorhanden, eine Laufzeitevidenz fehlt. Vor
-`min-version="33"` sind Fresh Install/Upgrade, DI, Migrationen, Jobs,
-öffentliche Events/Capabilities, Assets und UI sowie repräsentative
-Standalone- und Consumer-Kombinationen mit OrgSuite, Kalender-, Planungs-,
-Urlaubs-, Privacy- und Matrixgrenzen grün zu prüfen. Jede künftige Major wird
-lückenlos mit `verify-nextcloud-future-compatibility` belegt; fehlende oder
-inkompatible optionale Consumer bleiben kontrollierte Vertragszustände.
-
 ## App-lokale Migrationsaufgabe
 
 ### LB-PRIVACY-PILOT-RETIREMENT – LocalBase-Pilot kontrolliert zurückbauen

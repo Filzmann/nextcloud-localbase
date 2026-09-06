@@ -14,8 +14,8 @@ verhindern Eigenmeldungen; ohne Listener bleibt die Konfliktmenge leer.
 
 ## Staging-Kompatibilität
 
-- Nextcloud 34
-- PHP 8.3 oder neuer innerhalb des von Nextcloud 34 unterstützten Bereichs
+- Nextcloud 33 bis 34
+- PHP 8.3 oder neuer innerhalb des von Nextcloud 33 bis 34 unterstützten Bereichs
 - App-ID und Installationsordner: `localbase`
 
 ## Installation

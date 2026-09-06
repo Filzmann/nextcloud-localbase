@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Nextcloud-33-Unterstützung durch Fresh Install auf 33.0.7, Upgrade auf 34.0.2
+  sowie DI-, Job-, API-, Rechte-, Asset- und Consumer-Smokes nachgewiesen.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
 - Planungskonfliktvertrag als additive API Version 1.0 ausgewiesen; anfragende
   und liefernde App-IDs grenzen bidirektionale Eigenmeldungen zentral aus.

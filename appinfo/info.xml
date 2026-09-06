@@ -15,7 +15,7 @@
     <repository type="git">https://github.com/Filzmann/nextcloud-localbase</repository>
     <dependencies>
         <php min-version="8.3"/>
-        <nextcloud min-version="34" max-version="34"/>
+        <nextcloud min-version="33" max-version="34"/>
     </dependencies>
     <background-jobs>
         <job>OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob</job>
@@ -29,8 +29,8 @@
             <id>localbase_privacy</id>
             <name>Datenschutz</name>
             <route>localbase.privacy_page.selfService</route>
-            <order>90</order>
             <icon>privacy.svg</icon>
+            <order>90</order>
             <type>settings</type>
         </navigation>
     </navigations>
