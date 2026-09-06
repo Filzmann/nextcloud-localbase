@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 export function collectJsFiles(root, directory) {
     const path = join(root, directory);
@@ -54,15 +54,27 @@ export function runJavaScriptSuite(options) {
     const commonJsTests = testFiles.filter((file) => file.endsWith('.js'));
     const moduleTests = testFiles.filter((file) => !file.endsWith('.js'));
     if (commonJsTests.length > 0) {
-        const isolatedRoot = mkdtempSync(join(tmpdir(), 'localbase-js-tests.'));
+        const isolatedWorkspace = mkdtempSync(join(tmpdir(), 'localbase-js-tests.'));
+        const isolatedRoot = join(isolatedWorkspace, basename(options.root));
         try {
+            mkdirSync(isolatedRoot, { recursive: true });
             cpSync(join(options.root, 'js'), join(isolatedRoot, 'js'), { recursive: true });
-            cpSync(join(options.root, 'tests', 'js'), join(isolatedRoot, 'tests', 'js'), { recursive: true });
+            cpSync(join(options.root, 'tests'), join(isolatedRoot, 'tests'), { recursive: true });
+
+            const localbaseRoot = join(dirname(options.root), 'localbase');
+            if (localbaseRoot !== options.root && existsSync(localbaseRoot)) {
+                cpSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), { recursive: true });
+                cpSync(
+                    join(localbaseRoot, 'tests', 'js', 'helpers'),
+                    join(isolatedWorkspace, 'localbase', 'tests', 'js', 'helpers'),
+                    { recursive: true },
+                );
+            }
             for (const file of commonJsTests) {
                 runCommand(isolatedRoot, 'node', [file]);
             }
         } finally {
-            rmSync(isolatedRoot, { recursive: true, force: true });
+            rmSync(isolatedWorkspace, { recursive: true, force: true });
         }
     }
 

@@ -17,6 +17,7 @@ runJavaScriptSuite({
         'tests/js/privacy-table-smoke.mjs',
         'tests/js/repository-smoke.js',
         'tests/js/ui-smoke.js',
+        'tests/Support/js-runner-smoke.mjs',
     ],
     successMessage: 'LocalBase JavaScript tests passed',
 });
