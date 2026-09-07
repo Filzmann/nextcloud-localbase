@@ -21,6 +21,8 @@ namespace {
 
     use OCA\LocalBase\Organization\AdOrganizationSettingsService;
     use OCA\LocalBase\Organization\AdOrganizationSnapshotService;
+    use OCA\LocalBase\PublicApi\V1\OrganizationSnapshot;
+    use OCA\LocalBase\PublicApi\V1\OrganizationSnapshotService;
 
     $config = new class implements \OCP\IAppConfig {
         public array $values = [];
@@ -29,6 +31,7 @@ namespace {
     };
     $settings = new AdOrganizationSettingsService($config);
     $snapshots = new AdOrganizationSnapshotService($settings);
+    $publicSnapshots = new OrganizationSnapshotService($snapshots);
 
     $missing = $snapshots->snapshot();
     if ($missing->isValid() || $missing->roleGroupId('staff_hr') !== null || $missing->areaKeys() !== []) {
@@ -52,6 +55,46 @@ namespace {
     $config->values['localbase']['ad_organization_definition'] = '{kaputt';
     if ($snapshots->snapshot()->isValid()) {
         throw new RuntimeException('Ungültige Organisationspersistenz wird als gültiger Snapshot veröffentlicht.');
+    }
+
+    $config->values['localbase']['ad_organization_definition'] = '';
+    $publicMissing = $publicSnapshots->snapshot();
+    if ($publicMissing->contractVersion() !== OrganizationSnapshot::CONTRACT_VERSION
+        || $publicMissing->isValid()
+        || $publicMissing->roles() !== []
+        || $publicMissing->areas() !== []) {
+        throw new RuntimeException('Der öffentliche V1-Vertrag veröffentlicht fehlende Organisationsdaten nicht fail-closed.');
+    }
+
+    $settings->save($settings->definition()->toArray());
+    $publicSnapshot = $publicSnapshots->snapshot();
+    if (!$publicSnapshot->isValid()
+        || $publicSnapshot->definitionVersion() !== 4
+        || $publicSnapshot->roles()['finance']['groupId'] === $publicSnapshot->roles()['payroll']['groupId']
+        || $publicSnapshot->areas()['west']['groupId'] === ''
+        || strlen($publicSnapshot->checksum()) !== 64) {
+        throw new RuntimeException('Der öffentliche V1-Organisationssnapshot ist unvollständig.');
+    }
+    if (isset($publicSnapshot->toArray()['members'])) {
+        throw new RuntimeException('Der öffentliche V1-Vertrag enthält Mitgliederlisten.');
+    }
+
+    try {
+        new OrganizationSnapshot(true, 4, [
+            'finance' => ['groupId' => 'shared-group', 'label' => 'Finanzen'],
+        ], [
+            'west' => ['groupId' => 'shared-group', 'label' => 'West'],
+        ]);
+        throw new RuntimeException('Mehrdeutige öffentliche Gruppenzuordnungen wurden akzeptiert.');
+    } catch (InvalidArgumentException) {
+    }
+
+    try {
+        new OrganizationSnapshot(true, 4, [
+            'finance' => ['groupId' => 'ad-finance', 'label' => ['invalid']],
+        ], []);
+        throw new RuntimeException('Ungültige öffentliche Mappingfelder wurden akzeptiert.');
+    } catch (InvalidArgumentException) {
     }
 
     echo "AdOrganizationSnapshotServiceSmokeTest: OK\n";

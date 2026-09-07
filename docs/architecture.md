@@ -126,12 +126,23 @@ Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
 Bestehende Gruppen-IDs, Anzeigenamen, Reihenfolgen und Rechte bleiben dabei
 unverändert.
 
-`AdOrganizationSnapshotService` veröffentlicht Rollen und Bereiche ohne
-Mitgliederlisten oder Fachrechte. Der unveränderliche Snapshot enthält
-Vertragsversion, Definitionsversion, Gültigkeitsstatus und Prüfsumme. Eine
-fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz erzeugt
-einen ungültigen, leeren Snapshot, aus dem Consumer keine Freigabe ableiten
-dürfen.
+`AdOrganizationSettingsService` und der interne
+`AdOrganizationSnapshotService` bleiben die kanonische Quelle. Der öffentliche
+Kategorie-B-Vertrag `OCA\\LocalBase\\PublicApi\\V1` projiziert diesen Stand über
+`OrganizationSnapshotService` in das unveränderliche DTO
+`OrganizationSnapshot`. Vertragsversion `1.0`, Definitionsversion,
+Gültigkeitsstatus, Rollen, Bereiche und Prüfsumme sind Teil der API;
+Mitgliederlisten und Fachrechte sind ausgeschlossen. Gruppen-IDs müssen über
+Rollen und Bereiche eindeutig sein.
+
+Eine fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz
+erzeugt einen ungültigen, leeren Snapshot. Fehlende oder deaktivierte
+LocalBase-Installationen sowie unbekannte Vertragsversionen sind kontrollierte
+Consumerzustände, aus denen keine Freigabe abgeleitet werden darf. Die
+Berechtigungsmatrix ist der erste Consumer dieser öffentlichen Grenze. Ihre
+Standalone- und Providerkombinationen werden auf realer Nextcloud-Laufzeit
+geprüft; die übrigen internen Organisationsconsumer werden erst in getrennten
+Migrationsschritten umgestellt.
 
 `AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen

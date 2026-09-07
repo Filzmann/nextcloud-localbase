@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Öffentlichen Kategorie-B-Organisationssnapshot unter
+  `OCA\\LocalBase\\PublicApi\\V1` mit unveränderlichem DTO,
+  Versionskennung, eindeutigen Gruppenabbildungen und Prüfsumme eingeführt.
+- Berechtigungsmatrix als ersten Consumer gegen den realen öffentlichen
+  Vertrag sowie per Fresh Install mit und ohne LocalBase nachgewiesen;
+  ungültige oder fehlende Provider liefern keine semantischen Zuordnungen.
 - Nextcloud-33-Unterstützung durch Fresh Install auf 33.0.7, Upgrade auf 34.0.2
   sowie DI-, Job-, API-, Rechte-, Asset- und Consumer-Smokes nachgewiesen.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.

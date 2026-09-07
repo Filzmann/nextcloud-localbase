@@ -2,11 +2,17 @@
 
 Gemeinsame Basisbausteine für die lokalen AD- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den AD-Fachprodukten ausgeliefert.
 
-Der öffentliche AD-Organisationsvertrag Version 4 ergänzt die betriebsweit
-festgelegten Kalenderkürzel für Rollen und Bürobereiche. Fachapps konsumieren
-Rollen und Bürobereiche über
-einen unveränderlichen, datensparsamen Snapshot; fehlende oder ungültige
-Persistenz erteilt keine fachlichen Rechte.
+Der öffentliche Laufzeitvertrag `OCA\\LocalBase\\PublicApi\\V1` stellt Rollen
+und Bürobereiche als unveränderlichen, datensparsamen
+Organisationssnapshot bereit. Vertragsversion, Definitionsversion und
+Prüfsumme machen den Stand überprüfbar. Fehlende, ungültige oder inkompatible
+Snapshots enthalten keine Zuordnungen und erteilen keine fachlichen Rechte.
+Die Berechtigungsmatrix ist der erste migrierte Consumer; weitere Fachapps
+folgen einzeln nach eigenen Contract- und Laufzeitnachweisen.
+
+Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
+festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
+einzige persistierte Quelle, aus der der öffentliche Snapshot erzeugt wird.
 
 Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
 Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
