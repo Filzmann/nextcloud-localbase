@@ -8,6 +8,9 @@
 - Berechtigungsmatrix als ersten Consumer gegen den realen öffentlichen
   Vertrag sowie per Fresh Install mit und ohne LocalBase nachgewiesen;
   ungültige oder fehlende Provider liefern keine semantischen Zuordnungen.
+- Entwicklungsstand auf `0.12.0-dev.2` fortgeschrieben und als In-place-Update
+  vom vorherigen Stand geprüft; der synthetische Organisationszustand bleibt
+  erhalten und der Matrixconsumer bleibt verfügbar.
 - Nextcloud-33-Unterstützung durch Fresh Install auf 33.0.7, Upgrade auf 34.0.2
   sowie DI-, Job-, API-, Rechte-, Asset- und Consumer-Smokes nachgewiesen.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
