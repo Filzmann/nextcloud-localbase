@@ -18,6 +18,12 @@ Root-Zukunftsplan geführt
 - App-eigene persönliche UI-Werte, Demo-Registry und verbliebene
   Pilotprovider vollständig inventarisieren und ihre zulässige Projektion
   beziehungsweise begründete Nichtanwendbarkeit festhalten.
+- Den app-eigenen Processing-Metadata-Katalog erst erstellen, wenn diese
+  Inventur abgeschlossen und der nach dem Pilot-Rückbau verbleibende
+  LocalBase-Zielumfang festgelegt ist. Der Katalog beschreibt ausschließlich
+  dauerhaft verbleibende LocalBase-Verarbeitungen; vorübergehende
+  Self-Service-, Registry- oder Pilotprovider-Komponenten erhalten keine
+  vorsorglichen stabilen `processing_id`-Verträge.
 - Self-Service, Adminoberfläche, Registry und öffentliche Privacy-Klassen
   erst entfernen, wenn alle vorgesehenen Consumer migriert und Installation,
   Update, Deinstallation sowie Rückbau gemeinsam grün sind.
