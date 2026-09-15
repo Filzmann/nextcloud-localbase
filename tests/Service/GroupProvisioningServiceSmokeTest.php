@@ -2,17 +2,9 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IUser::class)) {
-        eval('namespace OCP; interface IUser { public function getUID(); }');
-    }
-    if (!interface_exists(\OCP\IGroup::class)) {
-        eval('namespace OCP; interface IGroup { public function getUsers(); public function inGroup($user); }');
-    }
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function groupExists($gid); public function createGroup($gid); public function get($gid); }');
-    }
+namespace OCP { if (!interface_exists(IUser::class)) { interface IUser { public function getUID(); } } if (!interface_exists(IGroup::class)) { interface IGroup { public function getUsers(); public function inGroup($user); } } if (!interface_exists(IGroupManager::class)) { interface IGroupManager { public function groupExists($gid); public function createGroup($gid); public function get($gid); } } }
 
+namespace {
 
     use OCA\LocalBase\Service\GroupProvisioningService;
     use OCP\IGroup;

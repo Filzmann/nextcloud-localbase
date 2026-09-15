@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-if (!class_exists(\OCP\EventDispatcher\Event::class)) eval('namespace OCP\\EventDispatcher; class Event { public function __construct() {} }');
+namespace OCP\EventDispatcher { if (!class_exists(Event::class)) { class Event { public function __construct() {} } } }
+
+namespace {
 
 use OCA\LocalBase\Calendar\ScheduleConflict;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
@@ -28,3 +30,4 @@ foreach (['INVALID APP', '../adplaner'] as $invalidAppId) {
     }
 }
 echo "ScheduleConflictQueryEventSmokeTest: OK\n";
+}

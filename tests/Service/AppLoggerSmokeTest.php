@@ -2,14 +2,10 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!interface_exists(\OCP\IUserSession::class)) {
-        eval('namespace OCP; interface IUserSession { public function getUser(); }');
-    }
-    if (!interface_exists(\Psr\Log\LoggerInterface::class)) {
-        eval('namespace Psr\Log; interface LoggerInterface { public function emergency($message, array $context = array()); public function alert($message, array $context = array()); public function critical($message, array $context = array()); public function error($message, array $context = array()); public function warning($message, array $context = array()); public function notice($message, array $context = array()); public function info($message, array $context = array()); public function debug($message, array $context = array()); public function log($level, $message, array $context = array()); }');
-    }
+namespace OCP { if (!interface_exists(IUserSession::class)) { interface IUserSession { public function getUser(); } } }
+namespace Psr\Log { if (!interface_exists(LoggerInterface::class)) { interface LoggerInterface { public function emergency($message, array $context = array()); public function alert($message, array $context = array()); public function critical($message, array $context = array()); public function error($message, array $context = array()); public function warning($message, array $context = array()); public function notice($message, array $context = array()); public function info($message, array $context = array()); public function debug($message, array $context = array()); public function log($level, $message, array $context = array()); } } }
 
+namespace {
 
     use OCA\LocalBase\Service\AppLogger;
     use OCP\IUserSession;
