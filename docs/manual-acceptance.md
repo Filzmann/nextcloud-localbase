@@ -86,6 +86,21 @@ Abnahme auf den dokumentierten Ausgangsstand zurückgeführt.
 | E4 | Lokaler Exportweg | Während des Exports Browsernetzwerk und Nextcloud-Dateien prüfen. | Die Erzeugung erfolgt clientseitig als Download; es gibt keine Serverablage und keinen externen Exportdienst. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | E5 | Datensparsame Abnahme | Formular, Screenshots und Exporte prüfen. | Keine Secrets, realen Mitgliederlisten oder unnötigen technischen Kennungen wurden dokumentiert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
+## Automatisierter lokaler Nachweis vom 11.09.2026
+
+Im Rahmen der risikoarmen Luna-Prüfung wurden aus dem Repository-Root nur die
+lokalen, nicht mutierenden Prüfungen ausgeführt:
+
+| Prüfung | Ergebnis | Aussagegrenze |
+|---|---|---|
+| `php tests/run.php` | erfolgreich | PHP-Syntax sowie Privacy-, Organisations-, Kalender-, Capability-, Produktkatalog-, API- und Test-Runner-Verträge sind grün. |
+| `node tests/run-js.mjs` | erfolgreich | JavaScript-Syntax sowie API-, Modell-, Repository-, UI-, Organisations-, Export- und Privacy-Smokes sind grün. |
+| `git diff --check` | erfolgreich | Keine Whitespace-Fehler im aktuellen Arbeitsbaum. |
+
+DDEV, `occ`, Installation, App-Aktivierung, Organisationsdaten und Provider
+wurden nicht verändert. Dieser Nachweis ersetzt weder die offene manuelle
+Abnahme noch die freigabepflichtige Migration des Retention-Piloten.
+
 ## Wiederherstellung
 
 | Feld | Eintrag |
