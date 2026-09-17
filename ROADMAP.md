@@ -31,14 +31,6 @@ Root-Zukunftsplan geführt
   Coverage-Fallback lesen. Fehlende oder inkompatible Provider bleiben
   sichtbar unvollständig.
 
-### LB-L10N – app-lokale LocalBase-Texte lokalisieren
-
-Aktivierung ausschließlich nach Freigabe des systemweiten Root-Vorhabens
-`ZM-06`. Nur von LocalBase selbst gerenderte sichtbare Texte, Datumsnamen,
-Pluralformen und Platzhalter wechseln auf Nextcloud-l10n; konfigurierte
-Eigennamen, technische Schlüssel, API-Werte und Organisationsdaten bleiben
-unverändert.
-
 ## Aktueller Fokus
 
 - Die manuellen Prüfungen werden im ausfüllbaren
@@ -63,3 +55,18 @@ unverändert.
 
 - Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle AD-Struktur sind.
 - Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.
+
+## Bewusst zurückgestellt – niedrigste Priorität
+
+### LB-L10N – app-lokale LocalBase-Texte lokalisieren
+
+Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
+priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des
+Root-Vorhabens `ZM-06`. Neue Funktionen und Codeänderungen berücksichtigen
+die spätere Lokalisierbarkeit an den jeweils berührten Stellen, lösen aber
+keine flächige Umstellung oder Übersetzungsimplementierung aus.
+
+Bei der späteren Umsetzung wechseln nur von LocalBase selbst gerenderte
+sichtbare Texte, Datumsnamen, Pluralformen und Platzhalter auf
+Nextcloud-l10n; konfigurierte Eigennamen, technische Schlüssel, API-Werte
+und Organisationsdaten bleiben unverändert.
