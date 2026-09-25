@@ -20,11 +20,10 @@ LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eig
 Aktuell enthalten:
 
 - Öffentliche Privacy-Verträge für Nextcloud-User-Subjects,
-  `PersonalDataProvider`, feste Provider-Registry-Snapshots, fehlerisolierte
-  Aggregation sowie ausschließlich lesende `RetentionProvider`-Dry-Runs mit
-  `REVIEW`-Kandidaten. Self-Service bindet die Session-UID; Admin-Auskunft und
-  Retention-Preview verlangen die explizit konfigurierte Nextcloud-Gruppe
-  `privacy_admin_group` und bleiben ohne Konfiguration deny by default.
+  `PersonalDataProvider`, feste Provider-Registry-Snapshots und fehlerisolierte
+  Aggregation. Self-Service bindet die Session-UID; die Admin-Auskunft verlangt
+  die explizit konfigurierte Nextcloud-Gruppe `privacy_admin_group` und bleibt
+  ohne Konfiguration deny by default.
 - Die flüchtige Self-Service- und Admin-Grundansicht persistiert keine
   Berichtskopie. Sie weist die Betroffenenrechte einmal im Kopf aus und
   zeigt je App weitere Verarbeitungsangaben vor den Datentabellen und gliedert
@@ -45,8 +44,9 @@ Aktuell enthalten:
   benennt die noch nicht implementierten Datenabrufe. Normale Konten erreichen dieselbe kanonische
   Self-Service-Seite über den `Datenschutz`-Eintrag im rechten
   Nextcloud-Benutzermenü und über den persönlichen Einstellungsbereich.
-  Der Pilot besitzt keine Retention-Ausführung, keine
-  automatische Löschung und keinen Lifecycle-Provider.
+  Der historische Retention-Pilot wurde nach grüner Lifecycle- und
+  Rückbaumatrix entfernt; LocalBase koordiniert keine Retention-Ausführung,
+  automatische Löschung oder Lifecycle-Provider.
 - PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
 - PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
 - PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.

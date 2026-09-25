@@ -98,8 +98,10 @@ lokalen, nicht mutierenden Prüfungen ausgeführt:
 | `git diff --check` | erfolgreich | Keine Whitespace-Fehler im aktuellen Arbeitsbaum. |
 
 DDEV, `occ`, Installation, App-Aktivierung, Organisationsdaten und Provider
-wurden nicht verändert. Dieser Nachweis ersetzt weder die offene manuelle
-Abnahme noch die freigabepflichtige Migration des Retention-Piloten.
+wurden in diesem historischen Nachweis nicht verändert. Die spätere grüne
+Lifecycle-Matrix und der physische Retention-Pilotrückbau sind im Changelog und
+im kanonischen Root-Zukunftsplan dokumentiert; die manuelle Organisationsabnahme
+bleibt davon unberührt.
 
 ## Wiederherstellung
 

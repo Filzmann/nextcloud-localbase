@@ -8,8 +8,6 @@ use OCA\LocalBase\AppInfo\AppId;
 use OCA\LocalBase\Privacy\PersonalDataAggregator;
 use OCA\LocalBase\Privacy\PersonalDataRequest;
 use OCA\LocalBase\Privacy\PersonalDataSubject;
-use OCA\LocalBase\Privacy\RetentionPreviewAggregator;
-use OCA\LocalBase\Privacy\RetentionPreviewRequest;
 use OCA\LocalBase\Service\PrivacyAccessService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -25,7 +23,6 @@ final class PrivacyController extends Controller {
         IRequest $request,
         private IUserSession $session,
         private PersonalDataAggregator $personalData,
-        private RetentionPreviewAggregator $retention,
         private PrivacyAccessService $access,
     ) {
         parent::__construct(AppId::VALUE, $request);
@@ -55,21 +52,6 @@ final class PrivacyController extends Controller {
             ));
             $this->access->logAdminAccess('privacy.admin_report', $subjectUid);
             return new JSONResponse($report);
-        } catch (Throwable) {
-            return new JSONResponse(['message' => 'Subject ist ungültig.'], 400);
-        }
-    }
-
-    #[NoAdminRequired]
-    #[NoCSRFRequired]
-    public function retentionPreview(string $subjectUid): JSONResponse {
-        if (!$this->access->canReadAdminReports()) return new JSONResponse(['message' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
-        try {
-            $preview = $this->retention->preview(new RetentionPreviewRequest(
-                new PersonalDataSubject(PersonalDataSubject::NEXTCLOUD_USER, $subjectUid),
-            ));
-            $this->access->logAdminAccess('privacy.retention_preview', $subjectUid);
-            return new JSONResponse($preview);
         } catch (Throwable) {
             return new JSONResponse(['message' => 'Subject ist ungültig.'], 400);
         }

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Veralteten LocalBase-Retention-Pilot nach grüner Nextcloud-34-Installations-,
+  Update-, Deaktivierungs-, Entfernungs-, Neuinstallations- und Rückbaumatrix
+  einschließlich Registry, DTOs, Aggregator, Endpoint und Dry-Run-UI entfernt;
+  Retention wird ausschließlich durch `filzmann_data_protection` koordiniert.
+
 - Öffentlichen Kategorie-B-Organisationssnapshot unter
   `OCA\\LocalBase\\PublicApi\\V1` mit unveränderlichem DTO,
   Versionskennung, eindeutigen Gruppenabbildungen und Prüfsumme eingeführt.

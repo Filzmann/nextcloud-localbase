@@ -93,42 +93,37 @@
         }
     }
 
-    function render(report, retention = false) {
+    function render(report) {
         apps.replaceChildren(); article15.replaceChildren();
         completeness.replaceChildren(element('p', report.complete ? 'Die beteiligten Apps haben vollständig geantwortet.' : 'Die Auskunft ist unvollständig. Hinweise stehen bei der betroffenen App.'));
-        if (!retention) {
-            downloadableReport = report; download.disabled = false;
-            article15.append(element('p', 'Du kannst insbesondere Berichtigung verlangen sowie – soweit die gesetzlichen Voraussetzungen vorliegen – Löschung, Einschränkung oder Widerspruch. Du kannst dich außerdem bei einer Datenschutzaufsichtsbehörde beschweren.'));
-            article15.append(element('p', report.article15?.contactNote || ''));
-            if (report.coverage) {
-                const coverage = document.createElement('section');
-                coverage.className = 'lb-privacy-coverage';
-                coverage.append(element('h3', 'Umfang dieser Auskunft'));
-                coverage.append(element('p', report.coverage.scopeNotice || ''));
-                coverage.append(element('h4', 'Aktuell noch nicht implementierte Datenabrufe'));
-                const missing = document.createElement('ul');
-                for (const source of report.coverage.notImplemented || []) missing.append(element('li', source));
-                coverage.append(missing);
-                completeness.append(coverage);
-            }
+        downloadableReport = report; download.disabled = false;
+        article15.append(element('p', 'Du kannst insbesondere Berichtigung verlangen sowie – soweit die gesetzlichen Voraussetzungen vorliegen – Löschung, Einschränkung oder Widerspruch. Du kannst dich außerdem bei einer Datenschutzaufsichtsbehörde beschweren.'));
+        article15.append(element('p', report.article15?.contactNote || ''));
+        if (report.coverage) {
+            const coverage = document.createElement('section');
+            coverage.className = 'lb-privacy-coverage';
+            coverage.append(element('h3', 'Umfang dieser Auskunft'));
+            coverage.append(element('p', report.coverage.scopeNotice || ''));
+            coverage.append(element('h4', 'Aktuell noch nicht implementierte Datenabrufe'));
+            const missing = document.createElement('ul');
+            for (const source of report.coverage.notImplemented || []) missing.append(element('li', source));
+            coverage.append(missing);
+            completeness.append(coverage);
         }
         for (const provider of report.providers || []) {
             const card = document.createElement('article');
             card.className = 'lb-privacy-app-card';
             card.append(element('h3', provider.name || provider.appId));
-            if (retention) {
-                const candidates = provider.candidates || [];
-                card.append(element('p', candidates.length === 0 ? 'Keine Datensätze für eine administrative Prüfung vorgemerkt.' : `${candidates.length} Datensatz/Datensätze sind zur administrativen Prüfung vorgemerkt.`));
-            } else { appendProcessing(card, provider.processing); appendItems(card, provider); }
+            appendProcessing(card, provider.processing); appendItems(card, provider);
             apps.append(card);
         }
-        status.textContent = retention ? 'Dry Run geladen; es wurden keine Daten verändert.' : 'Auskunft geladen.';
+        status.textContent = 'Auskunft geladen.';
     }
 
-    async function load(path, retention = false) {
+    async function load(path) {
         status.textContent = 'Daten werden geladen.';
-        if (!retention) { downloadableReport = null; download.disabled = true; }
-        try { render(await client.request(path), retention); }
+        downloadableReport = null; download.disabled = true;
+        try { render(await client.request(path)); }
         catch (error) { apps.replaceChildren(); completeness.replaceChildren(); status.textContent = error?.message || 'Die Auskunft konnte nicht geladen werden.'; status.focus(); }
     }
 
@@ -137,5 +132,4 @@
     const form = document.getElementById('lb-privacy-subject-form');
     const subject = document.getElementById('lb-privacy-subject');
     form.addEventListener('submit', event => { event.preventDefault(); void load(`/api/privacy/admin/${encodeURIComponent(subject.value.trim())}`); });
-    document.getElementById('lb-privacy-retention').addEventListener('click', () => { if (subject.reportValidity()) void load(`/api/privacy/admin/${encodeURIComponent(subject.value.trim())}/retention-preview`, true); });
 }());

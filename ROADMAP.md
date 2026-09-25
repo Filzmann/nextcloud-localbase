@@ -7,29 +7,34 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## App-lokale Migrationsaufgabe
 
-### LB-PRIVACY-PILOT-RETIREMENT – LocalBase-Pilot kontrolliert zurückbauen
+### LB-PERSONAL-DATA-PILOT-RETIREMENT – verbliebenen Art.-15-Piloten kontrolliert zurückbauen
 
-Status: offen; die systemweite Reihenfolge und Freigabe wird im kanonischen
-Root-Zukunftsplan geführt
+Status: Der LocalBase-Retention-Pilot wurde am 24. September 2026 nach grüner
+Nextcloud-34-Lifecycle- und Rückbaumatrix physisch entfernt. Offen bleibt nur
+der getrennte PersonalData-Pilot.
 
-- LocalBase bleibt während der Migration ein charakterisierter, aber nicht
-  parallel kanonischer Rückfallstand. Die dauerhaft öffentliche
-  Privacy-Runtime ist `filzmann_data_protection`.
-- App-eigene persönliche UI-Werte, Demo-Registry und verbliebene
-  Pilotprovider vollständig inventarisieren und ihre zulässige Projektion
-  beziehungsweise begründete Nichtanwendbarkeit festhalten.
-- Den app-eigenen Processing-Metadata-Katalog erst erstellen, wenn diese
-  Inventur abgeschlossen und der nach dem Pilot-Rückbau verbleibende
-  LocalBase-Zielumfang festgelegt ist. Der Katalog beschreibt ausschließlich
-  dauerhaft verbleibende LocalBase-Verarbeitungen; vorübergehende
-  Self-Service-, Registry- oder Pilotprovider-Komponenten erhalten keine
-  vorsorglichen stabilen `processing_id`-Verträge.
-- Self-Service, Adminoberfläche, Registry und öffentliche Privacy-Klassen
-  erst entfernen, wenn alle vorgesehenen Consumer migriert und Installation,
-  Update, Deinstallation sowie Rückbau gemeinsam grün sind.
-- Keine fremden Tabellen, Dateien, AppConfig-Werte oder internen Klassen als
-  Coverage-Fallback lesen. Fehlende oder inkompatible Provider bleiben
-  sichtbar unvollständig.
+Die app-lokale Persistenzinventur ist abgeschlossen:
+
+- `IUserConfig` speichert unter `ad_suite_admin_dashboard_layout` je UID nur
+  Reihenfolge, Einklappzustand und Organigramm-Zoom des gemeinsamen
+  AD-Adminbereichs; Freitext und Drittpersonenwerte sind nicht vorgesehen.
+- `IAppConfig` speichert unter `demo_account_registry` die UIDs synthetischer
+  Demokonten mit Owner-App-ID und Backendklasse. Die nativen Konten und
+  Gruppenmitgliedschaften bleiben Eigentum von Nextcloud; die Registry ist ein
+  eigener personenbezogener LocalBase-Nebenspeicher.
+- Der verbleibende `NextcloudAccountPersonalDataProvider` liest ausschließlich
+  native Kontoprofil- und Gruppendaten und ist keine Projektion der beiden
+  LocalBase-eigenen Speicher. Organisations-, Kalender-, Capability- und
+  Produktkatalogwerte enthalten nach dem Codeinventar keine kopierten
+  Mitgliederlisten. OrgSuite persistiert als Adminadapter keine eigenen
+  Personenwerte.
+
+Vor der Entfernung von Self-Service, Adminoberfläche, PersonalData-Registry und
+öffentlichen PersonalData-Klassen benötigt LocalBase einen lazy registrierten
+Standalone-V1-Provider samt Processing-Metadata-Katalog für Adminlayout und
+Demo-Registry. Rechtsgrundlage, Aufbewahrung, Kontolöschverhalten und Bereinigung
+der Demo-Registry bleiben `PRIVACY-DECISION-REQUIRED`; bis dahin gibt es keine
+automatische Löschung und keinen Datenfallback über fremde Speicher.
 
 ## Aktueller Fokus
 
