@@ -49,6 +49,11 @@ es gibt weiterhin keinen Datenfallback über fremde Speicher.
 
 ## Geplante Erweiterungen
 
+- Die zustandslosen, semantisch gemeinsam benötigten Hilfen werden gemäß
+  Parent-ADR 0001 perspektivisch als app-lokal gebündelte Kategorie-A-Bibliothek
+  ausgeliefert. Die bestehende Kategorie-B-Laufzeitapp wird erst nach
+  kontrollierter Migration ihrer persistierenden Organisations-, Kalender-,
+  Admin- und Jobanteile zurückgebaut.
 - Neue gemeinsame Bausteine werden erst aufgenommen, wenn mindestens zwei Apps dieselbe Semantik und einen gemeinsam testbaren Vertrag benötigen.
 - Die geplante Kalendersynchronisation bleibt zunächst eine AD-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
 - Test-Helper werden nur bei konkret nachgewiesener app-übergreifender Duplizierung ergänzt.
