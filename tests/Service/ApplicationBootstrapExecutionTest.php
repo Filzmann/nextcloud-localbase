@@ -26,6 +26,11 @@ namespace {
 
     use OCA\LocalBase\AppInfo\Application;
     use OCA\LocalBase\Privacy\NextcloudAccountPrivacyProviderListener;
+    use OCA\LocalBase\Privacy\LocalBasePersonalDataProviderListener;
+    use OCA\LocalBase\Privacy\LocalBaseProcessingMetadataProviderListener;
+    use OCA\LocalBase\Listener\DemoAccountRegistryCleanupListener;
+    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
     use OCA\LocalBase\Service\AdProductSuiteService;
     use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
@@ -34,6 +39,7 @@ namespace {
     use OCP\AppFramework\Bootstrap\IBootContext;
     use OCP\AppFramework\Bootstrap\IRegistrationContext;
     use OCP\Settings\IManager;
+    use OCP\User\Events\UserDeletedEvent;
 
     $apps = new class implements IAppManager {
         public function isEnabledForUser($appId, $user = null): bool {
@@ -60,8 +66,13 @@ namespace {
     $application->register($registration);
     $application->boot($boot);
 
-    if ($registration->listeners !== [[PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class]]) {
-        throw new RuntimeException('Nextcloud-Kontodatenprovider wurde nicht registriert.');
+    if ($registration->listeners !== [
+        [PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class],
+        [RegisterPersonalDataProvidersEvent::class, LocalBasePersonalDataProviderListener::class],
+        [RegisterProcessingMetadataProvidersEvent::class, LocalBaseProcessingMetadataProviderListener::class],
+        [UserDeletedEvent::class, DemoAccountRegistryCleanupListener::class],
+    ]) {
+        throw new RuntimeException('LocalBase-Provider oder Kontolöschbereinigung wurden nicht registriert.');
     }
 
     if ($settings->sections !== [[IManager::SETTINGS_ADMIN, StandaloneProductAdminSection::class]]) {

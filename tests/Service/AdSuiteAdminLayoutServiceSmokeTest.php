@@ -6,6 +6,7 @@ namespace OCP\Config {
     interface IUserConfig {
         public function getValueArray(string $userId, string $app, string $key, array $default = [], bool $lazy = false): array;
         public function setValueArray(string $userId, string $app, string $key, array $value, bool $lazy = false, int $flags = 0): bool;
+        public function deleteUserConfig(string $userId, string $app, string $key): void;
     }
 }
 
@@ -26,6 +27,9 @@ namespace {
         public function setValueArray(string $userId, string $app, string $key, array $value, bool $lazy = false, int $flags = 0): bool {
             $this->values[$userId][$app][$key] = $value;
             return true;
+        }
+        public function deleteUserConfig(string $userId, string $app, string $key): void {
+            unset($this->values[$userId][$app][$key]);
         }
     };
     $logger = new class implements LoggerInterface { public array $warnings = []; public function warning(string $message, array $context = []): void { $this->warnings[] = [$message, $context]; } };
@@ -49,6 +53,11 @@ namespace {
     if (($saved['scopes']['main']['order'] ?? []) !== ['permissions', 'directory', 'organization', 'calendar-context'] || ($saved['scopes']['main']['collapsed'] ?? []) !== ['directory']) throw new RuntimeException('Persönliche Hauptansicht wird nicht gespeichert oder erhält den neuen Kalenderblock nicht additiv.');
     if (($saved['scopes']['organization']['order'] ?? []) !== ['hierarchy', 'general', 'role-order', 'areas', 'vacation-views']) throw new RuntimeException('Neue oder ausgelassene Blöcke werden nicht sicher ergänzt.');
     if (($saved['organigram']['zoom'] ?? null) !== 130) throw new RuntimeException('Persönlicher Organigramm-Zoom wird nicht gespeichert.');
+    if ($service->personalDataForUid('admin-a') !== $saved) throw new RuntimeException('Gespeichertes persönliches Layout ist nicht subjectgebunden auskunftsfähig.');
+    if ($service->personalDataForUid('admin-b') !== null) throw new RuntimeException('Ein nicht gespeichertes Standardlayout wurde als Personenwert behauptet.');
+    $service->reset('admin-a');
+    if (isset($config->values['admin-a']['localbase']['ad_suite_admin_dashboard_layout'])) throw new RuntimeException('Persönlicher Reset löscht den nativen UserConfig-Wert nicht vollständig.');
+    if ($service->personalDataForUid('admin-a') !== null) throw new RuntimeException('Gelöschtes Layout bleibt in der Personendatenprojektion sichtbar.');
     if (($service->save('admin-d', ['scopes' => []])['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Bestehende persönliche Layouts erhalten keinen rückwärtskompatiblen Standardzoom.');
     if ($service->layout('admin-b') !== $default) throw new RuntimeException('Layouts verschiedener Admins sind nicht getrennt.');
     $config->values['admin-c']['localbase']['ad_suite_admin_dashboard_layout'] = ['scopes' => ['main' => ['order' => ['unknown'], 'collapsed' => []]]];

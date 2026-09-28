@@ -45,6 +45,21 @@ final class AdSuiteAdminLayoutService {
         return $normalized;
     }
 
+    public function reset(string $userId): array {
+        $this->config->deleteUserConfig($userId, Application::APP_ID, self::CONFIG_KEY);
+        return $this->defaultLayout();
+    }
+
+    public function personalDataForUid(string $userId): ?array {
+        try {
+            $stored = $this->config->getValueArray($userId, Application::APP_ID, self::CONFIG_KEY, [], true);
+            return $stored === [] ? null : $this->normalize($stored);
+        } catch (\Throwable $error) {
+            $this->logger->warning('Persönliches AD-Adminlayout ist ungültig; es wird nicht als Personenwert ausgegeben.', ['exception' => $error]);
+            return null;
+        }
+    }
+
     private function defaultLayout(): array {
         return [
             'version' => self::VERSION,

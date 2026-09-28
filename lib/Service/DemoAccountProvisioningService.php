@@ -70,6 +70,8 @@ final class DemoAccountProvisioningService {
             }
         }
 
+        $registry = $this->withoutOrphans($registry);
+
         $createdGroups = 0;
         foreach ($knownGroups as $groupId => $group) {
             if ($group !== null) continue;
@@ -112,6 +114,13 @@ final class DemoAccountProvisioningService {
         return compact('createdUsers', 'reusedUsers', 'createdGroups');
     }
 
+    public function removeRegistryEntry(string $uid): void {
+        $registry = $this->registry();
+        if (!array_key_exists($uid, $registry)) return;
+        unset($registry[$uid]);
+        $this->saveRegistry($registry);
+    }
+
     /** @return list<array{uid:string,displayName:string,groups:list<string>}> */
     private function normalizeFixtures(array $fixtures): array {
         $result = [];
@@ -147,5 +156,15 @@ final class DemoAccountProvisioningService {
             self::REGISTRY_KEY,
             json_encode($registry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         );
+    }
+
+    /** @param array<string,array{ownerAppId:string,backendClass:string}> $registry */
+    private function withoutOrphans(array $registry): array {
+        $cleaned = $registry;
+        foreach (array_keys($registry) as $uid) {
+            if ($this->users->get($uid) === null) unset($cleaned[$uid]);
+        }
+        if ($cleaned !== $registry) $this->saveRegistry($cleaned);
+        return $cleaned;
     }
 }

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Persönliche Adminlayoutwerte und synthetische Demo-Registrierungen über den
+  Standalone-V1-Datenschutzvertrag samt Processing-Katalog subjectgebunden
+  abgedeckt; Reset, Kontolöschung und sichere Bereinigung verwaister
+  Demo-Registrierungen ergänzt.
+
 - Veralteten LocalBase-Retention-Pilot nach grüner Nextcloud-34-Installations-,
   Update-, Deaktivierungs-, Entfernungs-, Neuinstallations- und Rückbaumatrix
   einschließlich Registry, DTOs, Aggregator, Endpoint und Dry-Run-UI entfernt;

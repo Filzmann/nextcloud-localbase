@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "app_id": "localbase",
+  "processings": [
+    {
+      "processing_id": "personal_admin_layout",
+      "name": "Persönliches Layout des gemeinsamen AD-Adminbereichs",
+      "controller": {
+        "component": "Lokale Nextcloud-Basis",
+        "business_owner": "IKT-Administration"
+      },
+      "data_categories": [
+        "Nextcloud-UID als nativer UserConfig-Schlüssel",
+        "Reihenfolge und Einklappzustand bekannter Adminblöcke",
+        "Persönlicher Organigramm-Zoom"
+      ],
+      "data_subjects": [
+        "Nextcloud-Konten, die den gemeinsamen AD-Adminbereich personalisieren"
+      ],
+      "purposes": [
+        "Geräteübergreifende Wiederherstellung der persönlichen Adminansicht"
+      ],
+      "access_roles": [
+        "Betroffene Person für das eigene Layout",
+        "Technischer Nextcloud-Laufzeitkontext für die UID-gebundene UserConfig-Verarbeitung"
+      ],
+      "recipients": [
+        {
+          "category": "Betroffene Person",
+          "allowed_disclosures": [
+            "Eigenes persönliches Adminlayout"
+          ]
+        }
+      ],
+      "data_sources": [
+        "Eigene Bedienung des gemeinsamen AD-Adminbereichs",
+        "Nextcloud IUserConfig"
+      ],
+      "legal_basis": {
+        "status": "PRIVACY-DECISION-REQUIRED",
+        "affected_data": "UID-gebundene persönliche UI-Präferenzen",
+        "planned_processing": "Speicherung und Wiederherstellung des persönlichen Adminlayouts",
+        "missing_decision": "Anwendbare Rechtsgrundlage und dokumentierte Erforderlichkeit",
+        "reason": "Die Rechtsgrundlage kann nicht aus der technischen Implementierung abgeleitet werden.",
+        "technical_impact": "Keine Rechtsgrundlage wird durch LocalBase behauptet.",
+        "privacy_preserving_alternative": "Standardlayout ohne persönliche Speicherung verwenden oder den persönlichen Reset ausführen.",
+        "responsible_party": "Datenschutzbeauftragte und IKT-Administration",
+        "blocking": false
+      },
+      "retention": {
+        "policy_id": "personal_admin_layout_until_reset_or_account_deletion",
+        "trigger": "Persönlicher Reset oder Löschung des zugehörigen Nextcloud-Kontos",
+        "duration_or_deadline": "Unmittelbar mit dem jeweiligen Trigger",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Vollständige Löschung des nativen UserConfig-Werts ohne anonymisierten oder statistischen Restbestand.",
+          "Die Nextcloud-native Kontolöschung bereinigt den UID-gebundenen UserConfig-Speicher; LocalBase hält keine zweite Kopie."
+        ]
+      },
+      "logging": {
+        "audit_requirements": [
+          "Ungültige Layoutwerte datensparsam diagnostizieren"
+        ],
+        "personal_data_policy": "Keine UID, vollständigen Layoutwerte oder fachlichen Organisationsdaten in technische Standardlogs übernehmen."
+      },
+      "backup": {
+        "relevance": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Native Nextcloud-UserConfig-Werte in betrieblichen Sicherungen",
+          "planned_processing": "Betriebliche Sicherung und Wiederherstellung",
+          "missing_decision": "Backup-Relevanz und maximale Sicherungsdauer",
+          "reason": "LocalBase kennt den betrieblichen Backupzyklus nicht.",
+          "technical_impact": "Eine Löschung in bereits erzeugten Backups wird nicht behauptet.",
+          "privacy_preserving_alternative": "Keine separate LocalBase-Sicherung oder Layoutkopie erzeugen.",
+          "responsible_party": "IKT-Administration und Datenschutzbeauftragte",
+          "blocking": false
+        },
+        "restore_handling": "Wiederhergestellte Layoutwerte bleiben an die native UID gebunden und dürfen weder Konten noch Rechte reaktivieren; nach Kontolöschung greift erneut die native UserConfig-Bereinigung."
+      },
+      "exports_and_reports": {
+        "article_15_relevance": "Der Standalone-V1-PersonalDataProvider gibt ausschließlich das Layout der angefragten UID aus.",
+        "other_outputs": [
+          "Darstellung der persönlichen Adminansicht"
+        ],
+        "minimization": "Es werden nur bekannte Blockschlüssel, Einklappzustände und der Zoom gespeichert; keine Freitexte oder Organisationsmitglieder."
+      },
+      "data_subject_rights": {
+        "article_15": "Subjectgebundene Projektion über den Standalone-V1-PersonalDataProvider.",
+        "rectification": "Eine neue persönliche Anordnung überschreibt den eigenen Wert; ungültige Werte werden nicht ausgegeben.",
+        "restriction": "Der persönliche Reset beendet die Verarbeitung des eigenen Layoutwerts.",
+        "erasure_or_anonymization": "Vollständige Löschung durch persönlichen Reset oder native Nextcloud-Kontolöschung; keine Anonymisierung."
+      },
+      "international_transfers": "LocalBase übermittelt persönliche Layoutwerte selbst nicht an Drittländer; die konkrete Nextcloud-Infrastruktur ist separat zu bewerten.",
+      "automated_decisions": "Das Layout verändert weder fachliche Daten noch Rollen oder Berechtigungen.",
+      "special_safeguards": [
+        "UID-gebundene native IUserConfig-Persistenz",
+        "Serverseitig validierte bekannte Scopes und Blockschlüssel",
+        "Reset ausschließlich für die aktive UID",
+        "Keine zweite Layoutkopie"
+      ],
+      "systems": [
+        "Nextcloud",
+        "Nextcloud IUserConfig",
+        "Lokale Nextcloud-Basis"
+      ]
+    },
+    {
+      "processing_id": "demo_account_registry",
+      "name": "Registry synthetischer lokaler Demokonten",
+      "controller": {
+        "component": "Lokale Nextcloud-Basis",
+        "business_owner": "IKT-Administration"
+      },
+      "data_categories": [
+        "UID eines ausdrücklich synthetischen lokalen Demokontos",
+        "Owner-App-ID des Demo-Packs",
+        "Klassenname des Nextcloud-Benutzerbackends"
+      ],
+      "data_subjects": [
+        "Ausschließlich synthetische lokale Demokonten"
+      ],
+      "purposes": [
+        "Sichere idempotente Wiederholung eines ausdrücklich registrierten Demo-Packs",
+        "Abweisung fremder oder backendseitig veränderter Konten vor jeder Mutation"
+      ],
+      "access_roles": [
+        "Technischer Nextcloud-Laufzeitkontext der lokalen Demo-Provisionierung",
+        "Betroffenes synthetisches Konto für die eigene Datenschutzprojektion"
+      ],
+      "recipients": [
+        {
+          "category": "Technische Administration des lokalen Demosystems",
+          "allowed_disclosures": [
+            "UID, Owner-App-ID und Backendklasse des ausdrücklich registrierten Demo-Packs"
+          ],
+          "conditions": [
+            "Nur lokale Test- und Demokonten, niemals reale oder produktive Konten"
+          ]
+        }
+      ],
+      "data_sources": [
+        "Ausdrücklich beauftragte lokale Demo-Provisionierung",
+        "Native Nextcloud-Benutzerverwaltung",
+        "LocalBase IAppConfig"
+      ],
+      "legal_basis": {
+        "status": "PRIVACY-DECISION-REQUIRED",
+        "affected_data": "Technische Kennung eines synthetischen Kontos und dessen Demo-Pack-Zuordnung",
+        "planned_processing": "Lokale Demo-Provisionierung und Schutz vor Fremdkontomutation",
+        "missing_decision": "Dokumentierte Rechtsgrundlage und Erforderlichkeit für konkrete Testumgebungen",
+        "reason": "Die konkrete Betriebs- und Testumgebung ist außerhalb des App-Codes festzulegen.",
+        "technical_impact": "Die Registry ist technisch auf synthetische lokale Konten begrenzt; keine Rechtsgrundlage wird behauptet.",
+        "privacy_preserving_alternative": "Demo-Pack nicht provisionieren und keine Registry anlegen.",
+        "responsible_party": "IKT-Administration und Datenschutzbeauftragte",
+        "blocking": false
+      },
+      "retention": {
+        "policy_id": "demo_registry_until_synthetic_account_deletion",
+        "trigger": "Löschung des synthetischen Nextcloud-Kontos oder Feststellung eines verwaisten Registry-Eintrags beim nächsten sicheren Provisionierungslauf",
+        "duration_or_deadline": "Unmittelbar mit dem jeweiligen Trigger",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Vollständige Entfernung des UID-genauen Registry-Eintrags ohne Reststatistik.",
+          "Ein Restore darf über einen verwaisten Eintrag weder ein Konto noch Rechte reaktivieren; der nächste sichere Lauf entfernt den Eintrag."
+        ]
+      },
+      "logging": {
+        "audit_requirements": [
+          "Provisionierungsfehler ohne Passwörter oder unnötige Kontodaten diagnostizieren"
+        ],
+        "personal_data_policy": "Keine Demo-Passwörter, Gruppenlisten oder vollständigen Registry-Inhalte in technische Logs übernehmen."
+      },
+      "backup": {
+        "relevance": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Demo-Registry in betrieblichen Sicherungen lokaler Testumgebungen",
+          "planned_processing": "Betriebliche Sicherung und Wiederherstellung",
+          "missing_decision": "Backup-Relevanz und maximale Sicherungsdauer",
+          "reason": "LocalBase kennt den betrieblichen Backupzyklus nicht.",
+          "technical_impact": "Eine Löschung in bereits erzeugten Backups wird nicht behauptet.",
+          "privacy_preserving_alternative": "Wegwerfbare Demo-Umgebung reproduzierbar neu provisionieren statt separat zu sichern.",
+          "responsible_party": "IKT-Administration und Datenschutzbeauftragte",
+          "blocking": false
+        },
+        "restore_handling": "Wiederhergestellte Registry-Einträge reaktivieren keine Konten oder Rechte; verwaiste Einträge werden beim nächsten sicheren Provisionierungslauf entfernt."
+      },
+      "exports_and_reports": {
+        "article_15_relevance": "Der Standalone-V1-PersonalDataProvider gibt nur die Registrierung der angefragten aktiven UID aus.",
+        "other_outputs": [
+          "Technische Demo-Provisionierung"
+        ],
+        "minimization": "Gespeichert werden nur UID als Schlüssel, Owner-App-ID und Backendklasse; keine Passwörter, Anzeigenamen oder Gruppenmitgliedschaften."
+      },
+      "data_subject_rights": {
+        "article_15": "Subjectgebundene Projektion über den Standalone-V1-PersonalDataProvider.",
+        "rectification": "Abweichende Owner- oder Backendzustände werden vor Mutation abgewiesen und nicht still überschrieben.",
+        "restriction": "Ohne gültige Registrierung erfolgt keine Wiederverwendung oder Mutation eines vorhandenen Kontos.",
+        "erasure_or_anonymization": "Vollständige Entfernung bei Kontolöschung beziehungsweise beim nächsten sicheren Lauf nach erkanntem verwaistem Zustand; keine Anonymisierung."
+      },
+      "international_transfers": "LocalBase übermittelt Demo-Registrierungen selbst nicht an Drittländer; die konkrete Nextcloud-Infrastruktur ist separat zu bewerten.",
+      "automated_decisions": "Die Registry autorisiert nur die Wiederholung desselben synthetischen Demo-Packs; fachliche Rechte entstehen ausschließlich über die explizite native Gruppenprovisionierung.",
+      "special_safeguards": [
+        "Ausschließlich ausdrücklich registrierte synthetische lokale Konten",
+        "Owner- und Backendprüfung vor jeder Mutation",
+        "Native Kontolöschung entfernt den UID-genauen Eintrag",
+        "Verwaiste Einträge werden vor einem sicheren Provisionierungslauf bereinigt",
+        "Keine Passwortspeicherung"
+      ],
+      "systems": [
+        "Nextcloud",
+        "Nextcloud-Benutzerverwaltung",
+        "LocalBase IAppConfig",
+        "Lokale Nextcloud-Basis"
+      ]
+    }
+  ]
+}

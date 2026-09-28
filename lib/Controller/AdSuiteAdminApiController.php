@@ -97,6 +97,16 @@ final class AdSuiteAdminApiController extends Controller {
         }
     }
 
+    public function resetLayout(): JSONResponse {
+        if (!$this->isAdmin()) return $this->denied();
+        try {
+            return new JSONResponse(['dashboardLayout' => $this->dashboardLayout->reset($this->session->getUser()->getUID())]);
+        } catch (\Throwable $error) {
+            $this->logger->error('Persönliches AD-Adminlayout konnte nicht zurückgesetzt werden.', ['exception' => $error]);
+            return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht zurückgesetzt werden.'], Http::STATUS_BAD_REQUEST);
+        }
+    }
+
     private function isAdmin(): bool {
         $user = $this->session->getUser();
         return $user !== null && $this->groups->isAdmin($user->getUID());

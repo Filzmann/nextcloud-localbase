@@ -173,6 +173,39 @@ sichtbaren Stand und ohne Serverablage oder externe Exportdienste.
 Zugeordnete Nutzer*innen werden nur nach ausdrücklicher, standardmäßig
 deaktivierter Auswahl aufgenommen.
 
+## Datenverantwortung und lokale Aufbewahrung
+
+LocalBase ist technische Infrastruktur und kein fachlicher Data Owner. Die
+IKT-Administration verantwortet Betrieb und Sicherung, erhält daraus aber
+keinen fachlichen Vollzugriff. Die Datenschutzbeauftragten entscheiden über
+Policies und zulässige Holds; die Fachapps bleiben für ihre Daten und die
+app-lokale Ausführung verantwortlich.
+
+Die persönlichen UI-Präferenzen unter
+`ad_suite_admin_dashboard_layout` bestehen nur solange das jeweilige native
+Konto besteht oder bis zum persönlichen Reset. Reset oder Kontolöschung müssen
+die Werte vollständig löschen; sie werden weder ausgewertet noch exportiert.
+Die Demo-Registry besteht nur solange das
+synthetische Konto besteht; der Demo-Reset löscht Konto und Registryeintrag,
+eine folgende sichere Provisionierung bereinigt verwaiste Einträge. Nach einer
+Wiederherstellung dürfen verwaiste Einträge keine Konten oder Rechte
+reaktivieren und werden beim nächsten sicheren Lauf entfernt. Es entsteht kein
+anonymisierter Restbestand und keine Archivpflicht.
+
+Der Standalone-V1-PersonalDataProvider projiziert beide Speicher strikt für die
+angefragte Nextcloud-UID; der zugehörige Processing-Metadata-Katalog beschreibt
+sie getrennt. Der persönliche Reset löscht ausschließlich den aktiven
+UserConfig-Wert. `UserDeletedEvent` entfernt den UID-genauen Demo-Registry-
+Eintrag, und ein vollständig vorgeprüfter Provisionierungslauf entfernt
+verwaiste Einträge, bevor neue Demoobjekte entstehen. Fremde Events, UIDs und
+Subject-Typen erzeugen keine Ausgabe oder Mutation. Wiederhergestellte verwaiste
+Einträge reaktivieren weder Konten noch Rechte.
+
+Eine globale Beschäftigten-Lifecycle-Löschung wird ohne verlässliche
+Beschäftigtenquelle und getestete App-Verträge nicht eingeführt. Rechtsgrundlage
+und betrieblicher Backupdurchgriff bleiben im Katalog sichtbar fachlich zu
+prüfen.
+
 ## Optionale Integration und Navigation
 
 `IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und

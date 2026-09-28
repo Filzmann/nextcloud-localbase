@@ -11,6 +11,7 @@
 <section id="orgsuite-admin" class="section orgs-admin" aria-labelledby="orgs-admin-heading">
     <h2 id="orgs-admin-heading">AD-Organisation</h2>
     <p>Organisationsweite Einstellungen sind ausschließlich im Nextcloud-Adminbereich änderbar. Bei einer Einzelinstallation erscheinen sie unter der Fachapp, ab zwei AD-Produkten in der OrgSuite.</p>
+    <p><button id="orgs-layout-reset" type="button">Persönliche Anordnung zurücksetzen</button></p>
     <div id="orgs-admin-notice" class="orgs-notice" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
     <p class="orgs-feedback" data-dashboard-feedback role="status" aria-live="polite"></p>

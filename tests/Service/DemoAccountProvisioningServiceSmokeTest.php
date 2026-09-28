@@ -81,6 +81,9 @@ namespace {
         }
     };
 
+    $config->values['localbase']['demo_account_registry'] = json_encode([
+        'orphan-after-restore' => ['ownerAppId' => 'ad-suite-demo', 'backendClass' => 'OC\\User\\Database'],
+    ], JSON_THROW_ON_ERROR);
     $service = new DemoAccountProvisioningService($users, $groups, $config);
     $result = $service->provision('adcalendar', [[
         'uid' => 'adc-demo-office',
@@ -90,6 +93,8 @@ namespace {
     if ($result !== ['createdUsers' => 1, 'reusedUsers' => 0, 'createdGroups' => 2]) throw new RuntimeException('Demo-Provisioning meldet falsche Zähler.');
     if (($users->createdPasswords['adc-demo-office'] ?? null) !== 'adc-demo-office') throw new RuntimeException('Das initiale Passwort entspricht nicht der Demo-UID.');
     if (!isset($groups->groups['ad-Buero']->members['adc-demo-office'])) throw new RuntimeException('Demokonto wurde der Gruppe nicht zugeordnet.');
+    $registryAfterSafeRun = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    if (isset($registryAfterSafeRun['orphan-after-restore'])) throw new RuntimeException('Ein verwaister Demo-Registry-Eintrag wurde beim nächsten sicheren Lauf nicht entfernt.');
 
     $users->users['adc-demo-office']->password = 'abweichend';
     $again = $service->provision('adcalendar', [[
@@ -136,6 +141,10 @@ namespace {
 
     $groups->createGroup('ldap-read-only')->writable = false;
     $beforeUsers = count($users->users);
+    $registryBeforeGroupFailure = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    $registryBeforeGroupFailure['orphan-before-failed-run'] = ['ownerAppId' => 'ad-suite-demo', 'backendClass' => 'OC\\User\\Database'];
+    $config->values['localbase']['demo_account_registry'] = json_encode($registryBeforeGroupFailure, JSON_THROW_ON_ERROR);
+    $registryBeforeGroupFailure = $config->values['localbase']['demo_account_registry'];
     try {
         $service->provision('adcalendar', [[
             'uid' => 'adc-demo-blocked',
@@ -147,6 +156,12 @@ namespace {
         if (!str_contains($error->getMessage(), 'schreibgeschützt')) throw $error;
     }
     if (count($users->users) !== $beforeUsers) throw new RuntimeException('Der Gruppen-Preflight hat vor dem Abbruch ein Konto erzeugt.');
+    if ($config->values['localbase']['demo_account_registry'] !== $registryBeforeGroupFailure) throw new RuntimeException('Der fehlgeschlagene Gruppen-Preflight hat die Demo-Registry verändert.');
+
+    $service->removeRegistryEntry('adc-demo-office');
+    $registryAfterDeletion = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    if (isset($registryAfterDeletion['adc-demo-office'])) throw new RuntimeException('Die native Kontolöschung kann den Demo-Registry-Eintrag nicht vollständig entfernen.');
+    $service->removeRegistryEntry('already-missing');
 
     echo "DemoAccountProvisioningServiceSmokeTest: OK\n";
 }

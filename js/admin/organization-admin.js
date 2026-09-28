@@ -9,6 +9,7 @@
     const organizationForm = document.getElementById('orgs-organization-form');
     const calendarContextForm = document.getElementById('orgs-calendar-context-form');
     const permissionsForm = document.getElementById('orgs-permissions-form');
+    const layoutReset = document.getElementById('orgs-layout-reset');
     const dashboard = new window.LocalBase.components.OrganizationDashboard({
         root: document.getElementById('orgsuite-admin'),
         onChange: saveDashboardLayout,
@@ -133,6 +134,20 @@
             }
         });
     }
+
+    layoutReset.addEventListener('click', async () => {
+        layoutReset.disabled = true;
+        try {
+            await layoutSave;
+            await client.request('/api/ad-suite/admin/layout', { method: 'DELETE' });
+            await load();
+            notice.success('Persönliche Anordnung zurückgesetzt.');
+        } catch (error) {
+            notice.error(error);
+        } finally {
+            layoutReset.disabled = false;
+        }
+    });
 
     permissionsForm.addEventListener('submit', async event => {
         event.preventDefault();

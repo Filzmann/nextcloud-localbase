@@ -29,12 +29,15 @@ Die app-lokale Persistenzinventur ist abgeschlossen:
   Mitgliederlisten. OrgSuite persistiert als Adminadapter keine eigenen
   Personenwerte.
 
-Vor der Entfernung von Self-Service, Adminoberfläche, PersonalData-Registry und
-öffentlichen PersonalData-Klassen benötigt LocalBase einen lazy registrierten
-Standalone-V1-Provider samt Processing-Metadata-Katalog für Adminlayout und
-Demo-Registry. Rechtsgrundlage, Aufbewahrung, Kontolöschverhalten und Bereinigung
-der Demo-Registry bleiben `PRIVACY-DECISION-REQUIRED`; bis dahin gibt es keine
-automatische Löschung und keinen Datenfallback über fremde Speicher.
+Der lazy registrierte Standalone-V1-Provider und der Processing-Metadata-Katalog
+decken Adminlayout und Demo-Registry inzwischen subjectgebunden ab. Persönlicher
+Reset, native UserConfig-Kontobindung, Kontolöschlistener und Bereinigung
+verwaister Demo-Registrierungen sind testgestützt umgesetzt. Rechtsgrundlage und
+betrieblicher Backupdurchgriff bleiben im Katalog sichtbar als
+`PRIVACY-DECISION-REQUIRED` ausgewiesen. Offen ist damit nur noch der getrennt
+zu planende Rückbau der alten LocalBase-Self-Service-/Adminoberfläche und ihrer
+internen PersonalData-Klassen nach einem grünen Runtime- und Rückbaunachweis;
+es gibt weiterhin keinen Datenfallback über fremde Speicher.
 
 ## Aktueller Fokus
 

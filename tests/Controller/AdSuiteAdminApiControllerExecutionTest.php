@@ -67,6 +67,10 @@ namespace OCA\LocalBase\Service {
             if ($this->failure) throw new \RuntimeException('Intern');
             return $this->layouts[$uid] = $layout;
         }
+        public function reset(string $uid): array {
+            unset($this->layouts[$uid]);
+            return $this->layout($uid);
+        }
     }
     class OrganizationDirectoryStatusService {
         public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
@@ -99,7 +103,7 @@ namespace {
     $layout = new AdSuiteAdminLayoutService();
     $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $calendarContext, $directory, $layout, $logger);
     if ($controller->settings()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen lesen.');
-    if ($controller->saveCalendarContext([])->getStatus() !== 403 || $controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
+    if ($controller->saveCalendarContext([])->getStatus() !== 403 || $controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403 || $controller->resetLayout()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
     $data = $controller->settings()->getData();
     if (($data['organization']['roles'][0] ?? '') !== 'buero' || ($data['calendarContext']['subdivisionCode'] ?? '') !== 'DE-BE' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung'] || ($data['dashboardLayout']['version'] ?? null) !== 1) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
@@ -119,6 +123,7 @@ namespace {
     if ($permissions['calendarPeerEditing']['ad-Buero'] !== false || $permissions['vacationPeerApproval']['ad-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht gespeichert.');
     $savedLayout = $controller->saveLayout(['version' => 1, 'scopes' => []])->getData();
     if (($savedLayout['dashboardLayout']['version'] ?? null) !== 1 || !isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht unter dem angemeldeten Admin gespeichert.');
+    if (($controller->resetLayout()->getData()['dashboardLayout']['version'] ?? null) !== 1 || isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht subjectgebunden zurückgesetzt.');
     $layout->invalid = true;
     if ($controller->saveLayout([])->getStatus() !== 400) throw new RuntimeException('Ungültiges Adminlayout erhält keinen Status 400.');
     $layout->invalid = false;

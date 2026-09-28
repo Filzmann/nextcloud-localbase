@@ -18,6 +18,13 @@ Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
 Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
 verhindern Eigenmeldungen; ohne Listener bleibt die Konfliktmenge leer.
 
+Über den öffentlichen Standalone-V1-Datenschutzvertrag projiziert LocalBase
+seine eigenen persönlichen Adminlayoutwerte und die Registrierung synthetischer
+Demokonten ausschließlich für die angefragte Nextcloud-UID. Der app-lokale
+Processing-Katalog beschreibt beide Verarbeitungen; persönlicher Reset,
+Kontolöschung und der nächste sichere Demo-Provisionierungslauf bereinigen die
+jeweils zuständigen nativen beziehungsweise app-lokalen Speicher.
+
 ## Staging-Kompatibilität
 
 - Nextcloud 33 bis 34
