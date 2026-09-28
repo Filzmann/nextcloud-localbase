@@ -9,35 +9,12 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ### LB-PERSONAL-DATA-PILOT-RETIREMENT – verbliebenen Art.-15-Piloten kontrolliert zurückbauen
 
-Status: Der LocalBase-Retention-Pilot wurde am 24. September 2026 nach grüner
-Nextcloud-34-Lifecycle- und Rückbaumatrix physisch entfernt. Offen bleibt nur
-der getrennte PersonalData-Pilot.
-
-Die app-lokale Persistenzinventur ist abgeschlossen:
-
-- `IUserConfig` speichert unter `ad_suite_admin_dashboard_layout` je UID nur
-  Reihenfolge, Einklappzustand und Organigramm-Zoom des gemeinsamen
-  AD-Adminbereichs; Freitext und Drittpersonenwerte sind nicht vorgesehen.
-- `IAppConfig` speichert unter `demo_account_registry` die UIDs synthetischer
-  Demokonten mit Owner-App-ID und Backendklasse. Die nativen Konten und
-  Gruppenmitgliedschaften bleiben Eigentum von Nextcloud; die Registry ist ein
-  eigener personenbezogener LocalBase-Nebenspeicher.
-- Der verbleibende `NextcloudAccountPersonalDataProvider` liest ausschließlich
-  native Kontoprofil- und Gruppendaten und ist keine Projektion der beiden
-  LocalBase-eigenen Speicher. Organisations-, Kalender-, Capability- und
-  Produktkatalogwerte enthalten nach dem Codeinventar keine kopierten
-  Mitgliederlisten. OrgSuite persistiert als Adminadapter keine eigenen
-  Personenwerte.
-
-Der lazy registrierte Standalone-V1-Provider und der Processing-Metadata-Katalog
-decken Adminlayout und Demo-Registry inzwischen subjectgebunden ab. Persönlicher
-Reset, native UserConfig-Kontobindung, Kontolöschlistener und Bereinigung
-verwaister Demo-Registrierungen sind testgestützt umgesetzt. Rechtsgrundlage und
-betrieblicher Backupdurchgriff bleiben im Katalog sichtbar als
-`PRIVACY-DECISION-REQUIRED` ausgewiesen. Offen ist damit nur noch der getrennt
-zu planende Rückbau der alten LocalBase-Self-Service-/Adminoberfläche und ihrer
-internen PersonalData-Klassen nach einem grünen Runtime- und Rückbaunachweis;
-es gibt weiterhin keinen Datenfallback über fremde Speicher.
+- Rückbau der alten LocalBase-Self-Service-/Adminoberfläche und ihrer internen
+  PersonalData-Klassen erst nach einem grünen Runtime- und Rückbaunachweis
+  planen und freigeben. Ein Datenfallback über fremde Speicher bleibt verboten.
+- Die im app-lokalen Processing-Katalog sichtbaren Entscheidungen zu
+  Rechtsgrundlage und betrieblichem Backupdurchgriff benötigen vor einer
+  produktiven Verarbeitung eine fachliche Freigabe.
 
 ## Aktueller Fokus
 
