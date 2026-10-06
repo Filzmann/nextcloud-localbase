@@ -18,6 +18,10 @@
 - Berechtigungsmatrix als ersten Consumer gegen den realen öffentlichen
   Vertrag sowie per Fresh Install mit und ohne LocalBase nachgewiesen;
   ungültige oder fehlende Provider liefern keine semantischen Zuordnungen.
+- AD Recruitment als zweiten Consumer auf die öffentliche Organization-V1-
+  Grenze umgestellt und die fehlenden, deaktivierten, alten, inkompatiblen,
+  ungültigen und fehlerhaften Providerzustände per Consumer-Contract
+  fail-closed belegt; der reale Lifecycle-Nachweis bleibt offen.
 - Entwicklungsstand auf `0.12.0-dev.2` fortgeschrieben und als In-place-Update
   vom vorherigen Stand geprüft; der synthetische Organisationszustand bleibt
   erhalten und der Matrixconsumer bleibt verfügbar.

@@ -139,10 +139,14 @@ Eine fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz
 erzeugt einen ungültigen, leeren Snapshot. Fehlende oder deaktivierte
 LocalBase-Installationen sowie unbekannte Vertragsversionen sind kontrollierte
 Consumerzustände, aus denen keine Freigabe abgeleitet werden darf. Die
-Berechtigungsmatrix ist der erste Consumer dieser öffentlichen Grenze. Ihre
-Standalone- und Providerkombinationen werden auf realer Nextcloud-Laufzeit
-geprüft; die übrigen internen Organisationsconsumer werden erst in getrennten
-Migrationsschritten umgestellt.
+Berechtigungsmatrix ist der erste Consumer dieser öffentlichen Grenze und auf
+realer Nextcloud-Laufzeit geprüft. AD Recruitment konsumiert denselben Vertrag
+als zweiter, app-lokal gekapselter Consumer und unterscheidet fehlend,
+deaktiviert, inkompatibel, ungültig und nicht verfügbar fail-closed. Sein
+Installations-, Update-, Deaktivierungs-, Entfernungs- und Rückbaunachweis auf
+realer Nextcloud-Laufzeit steht noch aus. Die übrigen internen
+Organisationsconsumer werden erst in getrennten Migrationsschritten
+umgestellt.
 
 `AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen

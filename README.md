@@ -7,8 +7,11 @@ und Bürobereiche als unveränderlichen, datensparsamen
 Organisationssnapshot bereit. Vertragsversion, Definitionsversion und
 Prüfsumme machen den Stand überprüfbar. Fehlende, ungültige oder inkompatible
 Snapshots enthalten keine Zuordnungen und erteilen keine fachlichen Rechte.
-Die Berechtigungsmatrix ist der erste migrierte Consumer; weitere Fachapps
-folgen einzeln nach eigenen Contract- und Laufzeitnachweisen.
+Die Berechtigungsmatrix ist der erste migrierte Consumer. AD Recruitment ist
+als zweiter Consumer app-lokal auf die öffentliche V1-Grenze umgestellt; sein
+realer Installations-, Deaktivierungs- und Rückbaunachweis bleibt bis zum
+freigegebenen Runtime-Lauf offen. Weitere Fachapps folgen einzeln nach eigenen
+Contract- und Laufzeitnachweisen.
 
 Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
 festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
