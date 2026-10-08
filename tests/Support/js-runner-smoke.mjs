@@ -27,7 +27,7 @@ try {
         join(localbaseFixture, 'tests', 'js', 'helpers'),
         { recursive: true },
     );
-    writeFileSync(join(consumerRoot, 'js', 'consumer.js'), 'globalThis.ConsumerFixture = true;\n');
+    writeFileSync(join(consumerRoot, 'js', 'consumer.js'), 'globalThis.ConsumerFixture = __filename;\n');
     writeFileSync(join(consumerRoot, 'tests', 'sibling-contract.txt'), 'available\n');
     writeFileSync(
         join(consumerRoot, 'tests', 'js', 'shared-smoke.js'),
@@ -35,6 +35,8 @@ try {
             'global.window = {};',
             "const { readFileSync } = require('node:fs');",
             "const { join } = require('node:path');",
+            "require('../../js/consumer.js');",
+            `if (globalThis.ConsumerFixture !== ${JSON.stringify(join(consumerRoot, 'js', 'consumer.js'))}) throw new Error('App source was not executed from its coverage-attributed path');`,
             "require('../../../localbase/js/ui/ui.js');",
             "const { FakeElement } = require('../../../localbase/tests/js/helpers/fake-dom.js');",
             "if (typeof FakeElement !== 'function') throw new Error('LocalBase helper missing');",

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 
@@ -58,12 +58,15 @@ export function runJavaScriptSuite(options) {
         const isolatedRoot = join(isolatedWorkspace, basename(options.root));
         try {
             mkdirSync(isolatedRoot, { recursive: true });
-            cpSync(join(options.root, 'js'), join(isolatedRoot, 'js'), { recursive: true });
+            // Keep test files isolated while resolving app modules from their original paths.
+            // This preserves C8's source-path attribution for consumer coverage gates.
+            symlinkSync(join(options.root, 'js'), join(isolatedRoot, 'js'), 'dir');
             cpSync(join(options.root, 'tests'), join(isolatedRoot, 'tests'), { recursive: true });
 
             const localbaseRoot = join(dirname(options.root), 'localbase');
             if (localbaseRoot !== options.root && existsSync(localbaseRoot)) {
-                cpSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), { recursive: true });
+                mkdirSync(join(isolatedWorkspace, 'localbase'), { recursive: true });
+                symlinkSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), 'dir');
                 cpSync(
                     join(localbaseRoot, 'tests', 'js', 'helpers'),
                     join(isolatedWorkspace, 'localbase', 'tests', 'js', 'helpers'),
