@@ -1,56 +1,20 @@
 # Roadmap – LocalBase
 
-Diese Datei bündelt geplante Erweiterungen und offene Architekturentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
+Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
+und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
+erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
+`docs/architecture.md`.
 
-## Freigegebene Umsetzungsaufgaben
+## App-lokale Migrationsaufgabe
 
-### LB-BR-GROUPS – Gemeinsamen BR-Gruppenvertrag bereitstellen
+### LB-PERSONAL-DATA-PILOT-RETIREMENT – verbliebenen Art.-15-Piloten kontrolliert zurückbauen
 
-Status: bereit nach Klärung der Mitgliedschaftsinvariante
-
-- Konfigurierbare semantische Schlüssel für BR-Mitglieder, Vorsitz und
-  Stellvertretung bereitstellen; die drei Bedeutungen bleiben getrennt.
-- Bestehende Gruppennamen additiv übernehmen. Der Provider benennt oder
-  löscht keine Gruppen und verändert keine Mitgliedschaften.
-- Fehlende, doppelte oder widersprüchliche Gruppenbezüge sicher ablehnen.
-- Vor Implementierung entscheiden, ob Vorsitz und Stellvertretung zwingend
-  zugleich Mitglieder der allgemeinen BR-Gruppe sein müssen.
-- Provider-, Migrations- und Deny-Tests gemeinsam mit
-  `BRT-BR-GROUPS` und `BRS-BR-GROUPS` abnehmen.
-
-## Zukunftsplanung – nicht freigegeben
-
-### LB-PRIVACY-INSTANCE – Datenauskunft auf die vollständige Nextcloud-Instanz erweitern
-
-Status: vorgemerkt, später; nicht freigegeben
-
-- Den persönlichen Daten-Download schrittweise von den derzeit angebundenen
-  Providern auf sämtliche personenbezogenen Datenquellen der vollständigen
-  Nextcloud-Instanz erweitern.
-- Nextcloud-Core-Daten wie Dateien, Freigaben, Versionen, Papierkorb,
-  Aktivitäten, Anmeldungen, Sitzungen sowie Sicherheits- und Auditprotokolle
-  ebenso einbeziehen wie installierte Core-, Drittanbieter- und lokale Apps.
-- Jede Quelle über einen öffentlichen, subject-gebundenen Providervertrag
-  anbinden; LocalBase liest keine fremden Tabellen oder Dateien direkt.
-- Im Nutzerreport und im PDF bis zur vollständigen Abdeckung die noch nicht
-  implementierten Datenabrufe verständlich und sichtbar ausweisen.
-- Vor Umsetzung Umfang, Drittpersonenschutz, Geheimnisse, große Datenmengen,
-  Dateiinhaltsexporte, Providerfehler und ein reproduzierbares
-  Vollständigkeits-Gate je installierter App entscheiden und testen.
-
-### LB-L10N – LocalBase-Oberflächen vollständig lokalisieren
-
-Status: später, nicht freigegeben; Pilot-App, Reihenfolge und Rohtext-Gate
-werden vor jeder Umsetzung appübergreifend separat freigegeben
-
-- Nur von LocalBase selbst gerenderte sichtbare Texte, Meldungen,
-  Datumsnamen, Pluralformen und Platzhalter auf Nextcloud-l10n umstellen.
-- Konfigurierte Eigennamen, technische Schlüssel, API-Werte und
-  Organisationsdaten unverändert lassen.
-- Deutsche Ausgabe, eine weitere Locale, Fallback, Pluralformen,
-  Platzhalter und Escaping in PHP und JavaScript testen.
-- Erst nach vollständiger Migration einen Rohtext-Check für LocalBase
-  verbindlich schalten.
+- Rückbau der alten LocalBase-Self-Service-/Adminoberfläche und ihrer internen
+  PersonalData-Klassen erst nach einem grünen Runtime- und Rückbaunachweis
+  planen und freigeben. Ein Datenfallback über fremde Speicher bleibt verboten.
+- Die im app-lokalen Processing-Katalog sichtbaren Entscheidungen zu
+  Rechtsgrundlage und betrieblichem Backupdurchgriff benötigen vor einer
+  produktiven Verarbeitung eine fachliche Freigabe.
 
 ## Aktueller Fokus
 
@@ -62,8 +26,13 @@ werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 ## Geplante Erweiterungen
 
+- Die zustandslosen, semantisch gemeinsam benötigten Hilfen werden gemäß
+  Parent-ADR 0001 perspektivisch als app-lokal gebündelte Kategorie-A-Bibliothek
+  ausgeliefert. Die bestehende Kategorie-B-Laufzeitapp wird erst nach
+  kontrollierter Migration ihrer persistierenden Organisations-, Kalender-,
+  Admin- und Jobanteile zurückgebaut.
 - Neue gemeinsame Bausteine werden erst aufgenommen, wenn mindestens zwei Apps dieselbe Semantik und einen gemeinsam testbaren Vertrag benötigen.
-- Die geplante Kalendersynchronisation bleibt zunächst eine AD-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
+- Die geplante Kalendersynchronisation bleibt zunächst eine Filzmann-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
 - Test-Helper werden nur bei konkret nachgewiesener app-übergreifender Duplizierung ergänzt.
 
 ## Vor der Umsetzung zu klären
@@ -74,5 +43,20 @@ werden vor jeder Umsetzung appübergreifend separat freigegeben
 
 ### Vor einem weiteren Ausbau des Organigramms zu klären
 
-- Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle AD-Struktur sind.
+- Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle FLZ-Struktur sind.
 - Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.
+
+## Bewusst zurückgestellt – niedrigste Priorität
+
+### LB-L10N – app-lokale LocalBase-Texte lokalisieren
+
+Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
+priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des
+Root-Vorhabens `ZM-06`. Neue Funktionen und Codeänderungen berücksichtigen
+die spätere Lokalisierbarkeit an den jeweils berührten Stellen, lösen aber
+keine flächige Umstellung oder Übersetzungsimplementierung aus.
+
+Bei der späteren Umsetzung wechseln nur von LocalBase selbst gerenderte
+sichtbare Texte, Datumsnamen, Pluralformen und Platzhalter auf
+Nextcloud-l10n; konfigurierte Eigennamen, technische Schlüssel, API-Werte
+und Organisationsdaten bleiben unverändert.

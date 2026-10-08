@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, dirname, join, relative } from 'node:path';
 
 export function collectJsFiles(root, directory) {
     const path = join(root, directory);
@@ -50,7 +51,37 @@ export function runJavaScriptSuite(options) {
         }
     }
 
-    for (const file of testFiles) {
+    const commonJsTests = testFiles.filter((file) => file.endsWith('.js'));
+    const moduleTests = testFiles.filter((file) => !file.endsWith('.js'));
+    if (commonJsTests.length > 0) {
+        const isolatedWorkspace = mkdtempSync(join(tmpdir(), 'localbase-js-tests.'));
+        const isolatedRoot = join(isolatedWorkspace, basename(options.root));
+        try {
+            mkdirSync(isolatedRoot, { recursive: true });
+            // Keep test files isolated while resolving app modules from their original paths.
+            // This preserves C8's source-path attribution for consumer coverage gates.
+            symlinkSync(join(options.root, 'js'), join(isolatedRoot, 'js'), 'dir');
+            cpSync(join(options.root, 'tests'), join(isolatedRoot, 'tests'), { recursive: true });
+
+            const localbaseRoot = join(dirname(options.root), 'localbase');
+            if (localbaseRoot !== options.root && existsSync(localbaseRoot)) {
+                mkdirSync(join(isolatedWorkspace, 'localbase'), { recursive: true });
+                symlinkSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), 'dir');
+                cpSync(
+                    join(localbaseRoot, 'tests', 'js', 'helpers'),
+                    join(isolatedWorkspace, 'localbase', 'tests', 'js', 'helpers'),
+                    { recursive: true },
+                );
+            }
+            for (const file of commonJsTests) {
+                runCommand(isolatedRoot, 'node', [file]);
+            }
+        } finally {
+            rmSync(isolatedWorkspace, { recursive: true, force: true });
+        }
+    }
+
+    for (const file of moduleTests) {
         runCommand(options.root, 'node', [file]);
     }
 

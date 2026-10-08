@@ -36,4 +36,31 @@ class GroupProvisioningService {
 
         return $created;
     }
+
+    /**
+     * Validates a native Nextcloud group hierarchy without changing it.
+     *
+     * @param array<int, string> $roleGroupNames
+     */
+    public function assertRoleMembersBelongTo(string $requiredGroupName, array $roleGroupNames): void {
+        $requiredGroup = $this->groupManager->get($requiredGroupName);
+        if ($requiredGroup === null) {
+            throw new \RuntimeException('Erforderliche Nextcloud-Gruppe ' . $requiredGroupName . ' fehlt.');
+        }
+
+        foreach (array_values(array_unique($roleGroupNames)) as $roleGroupName) {
+            $roleGroup = $this->groupManager->get($roleGroupName);
+            if ($roleGroup === null) {
+                throw new \RuntimeException('Erforderliche Nextcloud-Gruppe ' . $roleGroupName . ' fehlt.');
+            }
+            foreach ($roleGroup->getUsers() as $user) {
+                if (!$requiredGroup->inGroup($user)) {
+                    throw new \DomainException(
+                        'Alle Mitglieder der Rollengruppe ' . $roleGroupName
+                        . ' müssen zugleich der Gruppe ' . $requiredGroupName . ' angehören.',
+                    );
+                }
+            }
+        }
+    }
 }

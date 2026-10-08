@@ -51,6 +51,9 @@ final class DemoAccountProvisioningService {
                 if ($backend !== $user->getBackendClassName()) {
                     throw new RuntimeException("Das registrierte Demokonto {$fixture['uid']} verwendet inzwischen ein anderes Benutzer-Backend. Es wurde nichts verändert.");
                 }
+                if (!$user->canChangePassword()) {
+                    throw new RuntimeException("Das Passwort des registrierten Demokontos {$fixture['uid']} kann im Benutzer-Backend nicht geändert werden. Es wurde nichts verändert.");
+                }
                 if (!$user->canChangeDisplayName()) {
                     throw new RuntimeException("Das registrierte Demokonto {$fixture['uid']} ist im Benutzer-Backend schreibgeschützt.");
                 }
@@ -66,6 +69,8 @@ final class DemoAccountProvisioningService {
                 $knownGroups[$groupId] = $group;
             }
         }
+
+        $registry = $this->withoutOrphans($registry);
 
         $createdGroups = 0;
         foreach ($knownGroups as $groupId => $group) {
@@ -83,7 +88,7 @@ final class DemoAccountProvisioningService {
         foreach ($fixtures as $fixture) {
             $user = $knownUsers[$fixture['uid']];
             if ($user === null) {
-                $user = $this->users->createUser($fixture['uid'], bin2hex(random_bytes(32)));
+                $user = $this->users->createUser($fixture['uid'], $fixture['uid']);
                 if ($user === null) throw new RuntimeException("Das Demokonto {$fixture['uid']} konnte nicht angelegt werden.");
                 $registry[$fixture['uid']] = [
                     'ownerAppId' => $ownerAppId,
@@ -92,6 +97,9 @@ final class DemoAccountProvisioningService {
                 $this->saveRegistry($registry);
                 $createdUsers++;
             } else {
+                if (!$user->setPassword($fixture['uid'])) {
+                    throw new RuntimeException("Das Passwort des registrierten Demokontos {$fixture['uid']} konnte nicht aktualisiert werden.");
+                }
                 $reusedUsers++;
             }
 
@@ -104,6 +112,13 @@ final class DemoAccountProvisioningService {
         }
 
         return compact('createdUsers', 'reusedUsers', 'createdGroups');
+    }
+
+    public function removeRegistryEntry(string $uid): void {
+        $registry = $this->registry();
+        if (!array_key_exists($uid, $registry)) return;
+        unset($registry[$uid]);
+        $this->saveRegistry($registry);
     }
 
     /** @return list<array{uid:string,displayName:string,groups:list<string>}> */
@@ -141,5 +156,15 @@ final class DemoAccountProvisioningService {
             self::REGISTRY_KEY,
             json_encode($registry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         );
+    }
+
+    /** @param array<string,array{ownerAppId:string,backendClass:string}> $registry */
+    private function withoutOrphans(array $registry): array {
+        $cleaned = $registry;
+        foreach (array_keys($registry) as $uid) {
+            if ($this->users->get($uid) === null) unset($cleaned[$uid]);
+        }
+        if ($cleaned !== $registry) $this->saveRegistry($cleaned);
+        return $cleaned;
     }
 }

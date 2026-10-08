@@ -47,6 +47,9 @@ try {
     if ($failingStatus === 0 || !str_contains($failingOutput, '50.00 % liegt unter 50.01 %')) {
         throw new RuntimeException('PHP-Coverage-Rückgang wird nicht mit Ist- und Sollwert abgelehnt.');
     }
+    if (!str_contains($failingOutput, 'Nicht abgedeckt: /synthetic/example.php:2')) {
+        throw new RuntimeException('PHP-Coverage-Rückgang nennt die nicht abgedeckten Zeilen nicht.');
+    }
 } finally {
     unlink($temporaryBase . '/fixture.xml');
     rmdir($temporaryBase);

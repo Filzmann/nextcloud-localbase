@@ -18,13 +18,13 @@ namespace OCP {
 
 namespace {
 
-    use OCA\LocalBase\Organization\AdOrganizationDefinition;
+    use OCA\LocalBase\Organization\FlzOrganizationDefinition;
     use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
     use OCP\IGroup;
     use OCP\IGroupManager;
     use OCP\IUser;
 
-    $definition = AdOrganizationDefinition::defaults();
+    $definition = FlzOrganizationDefinition::defaults();
     $ids = array_merge($definition->roleGroupIds(), $definition->areaGroupIds());
     $groups = [];
     foreach ($ids as $id) {

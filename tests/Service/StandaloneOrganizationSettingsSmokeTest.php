@@ -9,21 +9,21 @@ namespace OCP\AppFramework\Http { class TemplateResponse { public function __con
 
 namespace {
 
-    use OCA\LocalBase\Service\AdProductSuiteService;
+    use OCA\LocalBase\Service\FlzProductSuiteService;
     use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
     use OCA\LocalBase\Settings\StandaloneProductAdminSection;
     use OCP\App\IAppManager;
     use OCP\IURLGenerator;
 
-    $apps = new class implements IAppManager { public function isEnabledForUser($appId, $user = null): bool { return $appId === 'adurlaub'; } };
-    $suite = new AdProductSuiteService($apps);
+    $apps = new class implements IAppManager { public function isEnabledForUser($appId, $user = null): bool { return $appId === 'flzurlaub'; } };
+    $suite = new FlzProductSuiteService($apps);
     $url = new class implements IURLGenerator { public function imagePath(string $appName, string $file): string { return "$appName/$file"; } };
     $section = new StandaloneProductAdminSection($suite, $url);
-    if ($section->getID() !== 'adurlaub' || $section->getName() !== 'AD Urlaub' || $section->getIcon() !== 'adurlaub/app.svg') throw new RuntimeException('Dynamischer Produktabschnitt ist falsch.');
+    if ($section->getID() !== 'flzurlaub' || $section->getName() !== 'Filzmann Urlaubsplanung' || $section->getIcon() !== 'flzurlaub/app.svg') throw new RuntimeException('Dynamischer Produktabschnitt ist falsch.');
 
     $setting = new StandaloneOrganizationAdmin($suite);
     $form = $setting->getForm();
-    if ($setting->getSection() !== 'adurlaub' || $form->appName !== 'localbase' || $form->templateName !== 'organization-admin') throw new RuntimeException('Standalone-Organisationsformular ist falsch angebunden.');
+    if ($setting->getSection() !== 'flzurlaub' || $form->appName !== 'localbase' || $form->templateName !== 'organization-admin') throw new RuntimeException('Standalone-Organisationsformular ist falsch angebunden.');
 
     echo "StandaloneOrganizationSettingsSmokeTest: OK\n";
 }

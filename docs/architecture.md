@@ -13,6 +13,45 @@ Test-Helper bleiben test-only, fachlich neutral und dependency-arm; der
 `PhpTestRunner` sammelt dependency-arme PHP-Smokes deterministisch und führt
 sie isoliert aus.
 
+`GroupProvisioningService::assertRoleMembersBelongTo()` prüft eine allgemeine
+native Nextcloud-Gruppenhierarchie read-only. Fehlende Gruppen oder Mitglieder
+einer Rollengruppe außerhalb der geforderten Basisgruppe werden abgelehnt;
+die Prüfung legt keine Mitgliedschaften an und nennt in Fehlern keine
+Konto-UIDs.
+
+## BR-Gruppenvertrag
+
+`BrGroupDefinition` und `BrGroupSettingsService` sind die kanonische,
+versionierte Quelle für die drei getrennten semantischen Gruppen `member`,
+`chair` und `deputy`. Technische Nextcloud-Gruppen-IDs bleiben konfigurierbar,
+müssen eindeutig sein und werden zentral in der LocalBase-AppConfig
+persistiert. Ein fehlender oder beschädigter persistierter Vertrag liefert
+nur nicht freigabefähige Defaults; Consumer verwenden ausschließlich
+`validatedDefinition()`.
+
+Vor Initialisierung oder Speicherung müssen alle referenzierten nativen
+Gruppen existieren. Jedes Mitglied von Vorsitz oder Stellvertretung muss
+zugleich Mitglied der allgemeinen BR-Gruppe sein. Widersprüche, fehlende
+Gruppen und veraltete Revisionen werden ohne AppConfig- oder
+Mitgliedschaftsänderung abgelehnt. Die einmalige Übernahme einer bisherigen
+Mitgliedergruppe ist nur zulässig, solange noch kein persistierter Vertrag
+existiert; beschädigte Bestandswerte werden dabei nicht überschrieben.
+
+## Lokale Demokonten
+
+`DemoAccountProvisioningService` ist die kanonische Provisionierung für die
+app-spezifischen FLZ-Demo-Packs. Neu erzeugte lokale Demokonten erhalten ihre
+UID als initiales Passwort; bei einem bereits eindeutig für dasselbe
+Demo-Pack registrierten Konto wird dieser Zustand bei erneuter Provisionierung
+wiederhergestellt. Das ist ein bewusst schwacher, ausschließlich für lokale
+Test- und Demokonten bestimmter Zugang und kein Produktionsvertrag.
+
+Fremde Konten, Konten mit geändertem Benutzer-Backend sowie Konten ohne
+änderbares Passwort oder Anzeigenamen werden im Preflight abgewiesen. Dabei
+werden weder Gruppen angelegt noch Mitgliedschaften oder Passwörter verändert.
+Die Provisionierung übernimmt insbesondere keine LDAP- oder sonstigen
+externen Konten.
+
 ## Kalender- und Abwesenheitsverträge
 
 `AbsenceEmployeeDiscoveryEvent`, `AbsenceQueryEvent` und `AbsenceInterval`
@@ -20,9 +59,18 @@ bilden optionale read-only Abwesenheitsprovider ab. Die Discovery ist an einen
 halboffenen Zeitraum gebunden und aggregiert ausschließlich normalisierte
 Konto-UIDs; leere und nicht-stringförmige Providerwerte werden verworfen, und
 ohne Provider bleibt sie leer. `planned` liefert `U?` ohne Blockade,
-`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert vor genehmigten
-Abwesenheiten read-only Konflikte aus optionalen Planungsapps; Provider
-löschen oder verändern keine Daten.
+`approved` liefert `U` mit Blockade. `ScheduleConflictQueryEvent` liefert
+read-only Konflikte aus optionalen Planungsapps. Der additive Payloadvertrag
+weist über `contractVersion()` die stabile Schema-Version `1.0` aus. Eine
+Abfrage kann ihre validierte `requesterAppId` angeben; jeder Konflikt kann seine validierte
+`sourceAppId` tragen. Das Event schließt Konflikte derselben Source zentral
+aus, damit bidirektionale Provider ihre eigenen Einträge nicht zurückmelden.
+Leere IDs halten bestehende Consumer und Provider rückwärtskompatibel. Typen
+bleiben auf `shift` und `appointment` begrenzt, Zeiträume sind halboffen und
+Labels enthalten ausschließlich knappe, nicht vertrauliche Anzeigenamen.
+Provider löschen oder verändern keine Daten. Ohne registrierten Provider
+bleibt die Konfliktmenge leer; Consumer greifen niemals auf Tabellen oder
+interne Services einer anderen Fachapp zu.
 
 `CalendarContext` und `CalendarContextSettingsService` definieren Land,
 ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,
@@ -30,17 +78,21 @@ ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,
 Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle Anzeigen.
 
 `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als
-validierten read-only Jahresvertrag. `OpenHolidaysClient` ist der einzige
+validierten read-only Jahresvertrag Version 1. Consumer werten neben der
+Vertragsversion zwingend `cacheStatus` aus: `fresh` und `current` sind aktuell,
+`stale` bleibt mit sichtbarer Aktualitätseinschränkung nutzbar und
+`unavailable` darf niemals als leere, konfliktfreie Kalenderlage interpretiert
+werden. `OpenHolidaysClient` ist der einzige
 Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene
 Jahresstände in LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert
 das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein
 vorhandener Stand `stale`; Erstabrufe werden sicher als `unavailable`
 ausgewiesen und nach kurzer Sperrfrist erneut versucht.
 
-## AD-Organisationsvertrag
+## FLZ-Organisationsvertrag
 
-`AdOrganizationDefinition`, `AdOrganizationSettingsService`,
-`AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden
+`FlzOrganizationDefinition`, `FlzOrganizationSettingsService`,
+`FlzOrganizationHierarchy` und `FlzOrganizationPermissionPolicy` bilden
 konfigurierbare Gruppen, Anzeigenamen, Bereiche, Ansichten, Hierarchie und
 Peergrenzen ab. Rollen und Bereiche werden über stabile semantische Schlüssel
 referenziert; konfigurierbare Gruppen-IDs oder Anzeigenamen sind keine
@@ -65,7 +117,7 @@ Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
 anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
 niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
 Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
-`ad-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
+`flz-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
 ausdrücklich niemals die neue `payroll`-Rolle.
 
 Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
@@ -74,14 +126,29 @@ Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
 Bestehende Gruppen-IDs, Anzeigenamen, Reihenfolgen und Rechte bleiben dabei
 unverändert.
 
-`AdOrganizationSnapshotService` veröffentlicht Rollen und Bereiche ohne
-Mitgliederlisten oder Fachrechte. Der unveränderliche Snapshot enthält
-Vertragsversion, Definitionsversion, Gültigkeitsstatus und Prüfsumme. Eine
-fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz erzeugt
-einen ungültigen, leeren Snapshot, aus dem Consumer keine Freigabe ableiten
-dürfen.
+`FlzOrganizationSettingsService` und der interne
+`FlzOrganizationSnapshotService` bleiben die kanonische Quelle. Der öffentliche
+Kategorie-B-Vertrag `OCA\\LocalBase\\PublicApi\\V1` projiziert diesen Stand über
+`OrganizationSnapshotService` in das unveränderliche DTO
+`OrganizationSnapshot`. Vertragsversion `1.0`, Definitionsversion,
+Gültigkeitsstatus, Rollen, Bereiche und Prüfsumme sind Teil der API;
+Mitgliederlisten und Fachrechte sind ausgeschlossen. Gruppen-IDs müssen über
+Rollen und Bereiche eindeutig sein.
 
-`AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
+Eine fehlende, beschädigte oder nur aus Defaults rekonstruierte Persistenz
+erzeugt einen ungültigen, leeren Snapshot. Fehlende oder deaktivierte
+LocalBase-Installationen sowie unbekannte Vertragsversionen sind kontrollierte
+Consumerzustände, aus denen keine Freigabe abgeleitet werden darf. Die
+Berechtigungsmatrix ist der erste Consumer dieser öffentlichen Grenze und auf
+realer Nextcloud-Laufzeit geprüft. Filzmann Recruitment konsumiert denselben Vertrag
+als zweiter, app-lokal gekapselter Consumer und unterscheidet fehlend,
+deaktiviert, inkompatibel, ungültig und nicht verfügbar fail-closed. Sein
+Installations-, Update-, Deaktivierungs-, Entfernungs- und Rückbaunachweis auf
+realer Nextcloud-Laufzeit steht noch aus. Die übrigen internen
+Organisationsconsumer werden erst in getrennten Migrationsschritten
+umgestellt.
+
+`FlzSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen
 zentral in LocalBase-AppConfig. Bei Einzelinstallation erscheinen sie im
 Adminabschnitt des Fachprodukts, ab zwei Produkten im OrgSuite-Adminabschnitt.
@@ -110,15 +177,48 @@ sichtbaren Stand und ohne Serverablage oder externe Exportdienste.
 Zugeordnete Nutzer*innen werden nur nach ausdrücklicher, standardmäßig
 deaktivierter Auswahl aufgenommen.
 
+## Datenverantwortung und lokale Aufbewahrung
+
+LocalBase ist technische Infrastruktur und kein fachlicher Data Owner. Die
+IKT-Administration verantwortet Betrieb und Sicherung, erhält daraus aber
+keinen fachlichen Vollzugriff. Die Datenschutzbeauftragten entscheiden über
+Policies und zulässige Holds; die Fachapps bleiben für ihre Daten und die
+app-lokale Ausführung verantwortlich.
+
+Die persönlichen UI-Präferenzen unter
+`flz_suite_admin_dashboard_layout` bestehen nur solange das jeweilige native
+Konto besteht oder bis zum persönlichen Reset. Reset oder Kontolöschung müssen
+die Werte vollständig löschen; sie werden weder ausgewertet noch exportiert.
+Die Demo-Registry besteht nur solange das
+synthetische Konto besteht; der Demo-Reset löscht Konto und Registryeintrag,
+eine folgende sichere Provisionierung bereinigt verwaiste Einträge. Nach einer
+Wiederherstellung dürfen verwaiste Einträge keine Konten oder Rechte
+reaktivieren und werden beim nächsten sicheren Lauf entfernt. Es entsteht kein
+anonymisierter Restbestand und keine Archivpflicht.
+
+Der Standalone-V1-PersonalDataProvider projiziert beide Speicher strikt für die
+angefragte Nextcloud-UID; der zugehörige Processing-Metadata-Katalog beschreibt
+sie getrennt. Der persönliche Reset löscht ausschließlich den aktiven
+UserConfig-Wert. `UserDeletedEvent` entfernt den UID-genauen Demo-Registry-
+Eintrag, und ein vollständig vorgeprüfter Provisionierungslauf entfernt
+verwaiste Einträge, bevor neue Demoobjekte entstehen. Fremde Events, UIDs und
+Subject-Typen erzeugen keine Ausgabe oder Mutation. Wiederhergestellte verwaiste
+Einträge reaktivieren weder Konten noch Rechte.
+
+Eine globale Beschäftigten-Lifecycle-Löschung wird ohne verlässliche
+Beschäftigtenquelle und getestete App-Verträge nicht eingeführt. Rechtsgrundlage
+und betrieblicher Backupdurchgriff bleiben im Katalog sichtbar fachlich zu
+prüfen.
+
 ## Optionale Integration und Navigation
 
-`IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und
+`IntegrationCapabilityQueryEvent`, `FlzIntegrationCapabilities` und
 `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten.
 Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert keine
 Berechtigungen.
 
 `StandaloneAppNavigationService` registriert Fachapp-Einstiege nur ohne
-aktive OrgSuite. `AdProductSuiteService` und dynamische Settings-Adapter
+aktive OrgSuite. `FlzProductSuiteService` und dynamische Settings-Adapter
 platzieren die gemeinsame Organisationsverwaltung bei Einzelinstallation im
 Fachprodukt. OrgSuite bindet den vollständig in LocalBase liegenden
 Organisationseditor ab zwei Produkten lediglich als Adminadapter ein.

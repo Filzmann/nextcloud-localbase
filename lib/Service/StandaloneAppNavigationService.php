@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Service;
 
-use OCA\LocalBase\Catalog\AdProductCatalog;
+use OCA\LocalBase\Catalog\FlzProductCatalog;
 use InvalidArgumentException;
 use OCP\App\IAppManager;
 use OCP\INavigationManager;
@@ -24,7 +24,7 @@ final class StandaloneAppNavigationService {
         private IAppManager $appManager,
         private INavigationManager $navigation,
         private IURLGenerator $url,
-        private ?AdProductCatalog $catalog = null,
+        private ?FlzProductCatalog $catalog = null,
     ) {
     }
 
@@ -72,7 +72,7 @@ final class StandaloneAppNavigationService {
         ]);
     }
 
-    private function catalog(): AdProductCatalog {
-        return $this->catalog ??= new AdProductCatalog();
+    private function catalog(): FlzProductCatalog {
+        return $this->catalog ??= new FlzProductCatalog();
     }
 }

@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "localbase",
+      "kind": "infrastructure",
+      "suite": null,
+      "order": null,
+      "route": null,
+      "productLabel": null,
+      "navigationLabel": null,
+      "standalone": false,
+      "menu": false,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "orgsuite",
+      "kind": "infrastructure",
+      "suite": null,
+      "order": null,
+      "route": null,
+      "productLabel": null,
+      "navigationLabel": null,
+      "standalone": false,
+      "menu": false,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzcalendar",
+      "kind": "product",
+      "suite": "flz",
+      "order": 80,
+      "route": "flzcalendar.page.index",
+      "productLabel": "Filzmann Kalender",
+      "navigationLabel": "Kalender",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzplaner",
+      "kind": "product",
+      "suite": "flz",
+      "order": 81,
+      "route": "flzplaner.page.index",
+      "productLabel": "Filzmann Assistenzplanung",
+      "navigationLabel": "Assistenzplanung",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzurlaub",
+      "kind": "product",
+      "suite": "flz",
+      "order": 82,
+      "route": "flzurlaub.page.index",
+      "productLabel": "Filzmann Urlaubsplanung",
+      "navigationLabel": "Urlaub",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzroom",
+      "kind": "product",
+      "suite": "flz",
+      "order": 83,
+      "route": "flzroom.page.index",
+      "productLabel": "Filzmann Raumplaner",
+      "navigationLabel": "Räume",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzrecruitment",
+      "kind": "product",
+      "suite": "flz",
+      "order": 84,
+      "route": "flzrecruitment.page.index",
+      "productLabel": "Filzmann Recruitment",
+      "navigationLabel": "Recruitment",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": true,
+      "productBundle": true
+    },
+    {
+      "id": "flzbqplanung",
+      "kind": "product",
+      "suite": "flz",
+      "order": 85,
+      "route": "flzbqplanung.page.index",
+      "productLabel": "Filzmann BQ-Planer",
+      "navigationLabel": "BQ-Planer",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": false,
+      "productBundle": false
+    }
+  ]
+}

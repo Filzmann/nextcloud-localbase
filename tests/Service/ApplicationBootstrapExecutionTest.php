@@ -26,21 +26,27 @@ namespace {
 
     use OCA\LocalBase\AppInfo\Application;
     use OCA\LocalBase\Privacy\NextcloudAccountPrivacyProviderListener;
+    use OCA\LocalBase\Privacy\LocalBasePersonalDataProviderListener;
+    use OCA\LocalBase\Privacy\LocalBaseProcessingMetadataProviderListener;
+    use OCA\LocalBase\Listener\DemoAccountRegistryCleanupListener;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
-    use OCA\LocalBase\Service\AdProductSuiteService;
+    use OCA\LocalBase\Service\FlzProductSuiteService;
     use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
     use OCA\LocalBase\Settings\StandaloneProductAdminSection;
     use OCP\App\IAppManager;
     use OCP\AppFramework\Bootstrap\IBootContext;
     use OCP\AppFramework\Bootstrap\IRegistrationContext;
     use OCP\Settings\IManager;
+    use OCP\User\Events\UserDeletedEvent;
 
     $apps = new class implements IAppManager {
         public function isEnabledForUser($appId, $user = null): bool {
-            return $appId === 'adcalendar';
+            return $appId === 'flzcalendar';
         }
     };
-    $suite = new AdProductSuiteService($apps);
+    $suite = new FlzProductSuiteService($apps);
     $settings = new class implements IManager {
         public array $sections = [];
         public array $settings = [];
@@ -48,7 +54,7 @@ namespace {
         public function registerSetting(string $type, string $setting): void { $this->settings[] = [$type, $setting]; }
     };
     $boot = new class($settings, $suite) implements IBootContext {
-        public function __construct(private IManager $settings, private AdProductSuiteService $suite) {}
+        public function __construct(private IManager $settings, private FlzProductSuiteService $suite) {}
         public function injectFn(callable $fn): void { $fn($this->settings, $this->suite); }
     };
 
@@ -60,8 +66,13 @@ namespace {
     $application->register($registration);
     $application->boot($boot);
 
-    if ($registration->listeners !== [[PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class]]) {
-        throw new RuntimeException('Nextcloud-Kontodatenprovider wurde nicht registriert.');
+    if ($registration->listeners !== [
+        [PersonalDataProviderRegistryEvent::class, NextcloudAccountPrivacyProviderListener::class],
+        [RegisterPersonalDataProvidersEvent::class, LocalBasePersonalDataProviderListener::class],
+        [RegisterProcessingMetadataProvidersEvent::class, LocalBaseProcessingMetadataProviderListener::class],
+        [UserDeletedEvent::class, DemoAccountRegistryCleanupListener::class],
+    ]) {
+        throw new RuntimeException('LocalBase-Provider oder Kontolöschbereinigung wurden nicht registriert.');
     }
 
     if ($settings->sections !== [[IManager::SETTINGS_ADMIN, StandaloneProductAdminSection::class]]) {

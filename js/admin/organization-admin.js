@@ -9,6 +9,7 @@
     const organizationForm = document.getElementById('orgs-organization-form');
     const calendarContextForm = document.getElementById('orgs-calendar-context-form');
     const permissionsForm = document.getElementById('orgs-permissions-form');
+    const layoutReset = document.getElementById('orgs-layout-reset');
     const dashboard = new window.LocalBase.components.OrganizationDashboard({
         root: document.getElementById('orgsuite-admin'),
         onChange: saveDashboardLayout,
@@ -84,7 +85,7 @@
 
     async function load() {
         try {
-            const data = await client.request('/api/ad-suite/admin/settings');
+            const data = await client.request('/api/flz-full-suite/admin/settings');
             renderCalendarContext(data.calendarContext);
             editor.set(data.organization, data.directory?.positions || [], data.dashboardLayout?.organigram?.zoom || 100);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
@@ -103,7 +104,7 @@
     calendarContextForm.addEventListener('submit', async event => {
         event.preventDefault();
         try {
-            const data = await client.request('/api/ad-suite/admin/calendar-context', {
+            const data = await client.request('/api/flz-full-suite/admin/calendar-context', {
                 method: 'PUT',
                 body: JSON.stringify({ calendarContext: collectCalendarContext() }),
             });
@@ -116,9 +117,9 @@
 
     async function saveOrganization(organization) {
         try {
-            await client.request('/api/ad-suite/admin/organization', { method: 'PUT', body: JSON.stringify({ organization }) });
+            await client.request('/api/flz-full-suite/admin/organization', { method: 'PUT', body: JSON.stringify({ organization }) });
             await load();
-            notice.success('AD-Organisation gespeichert.');
+            notice.success('Filzmann-Organisation gespeichert.');
         } catch (error) {
             notice.error(error);
         }
@@ -127,17 +128,31 @@
     function saveDashboardLayout(layout) {
         layoutSave = layoutSave.then(async () => {
             try {
-                await client.request('/api/ad-suite/admin/layout', { method: 'PUT', body: JSON.stringify({ layout }) });
+                await client.request('/api/flz-full-suite/admin/layout', { method: 'PUT', body: JSON.stringify({ layout }) });
             } catch (error) {
                 notice.error(error);
             }
         });
     }
 
+    layoutReset.addEventListener('click', async () => {
+        layoutReset.disabled = true;
+        try {
+            await layoutSave;
+            await client.request('/api/flz-full-suite/admin/layout', { method: 'DELETE' });
+            await load();
+            notice.success('Persönliche Anordnung zurückgesetzt.');
+        } catch (error) {
+            notice.error(error);
+        } finally {
+            layoutReset.disabled = false;
+        }
+    });
+
     permissionsForm.addEventListener('submit', async event => {
         event.preventDefault();
         try {
-            await client.request('/api/ad-suite/admin/permissions', {
+            await client.request('/api/flz-full-suite/admin/permissions', {
                 method: 'PUT',
                 body: JSON.stringify({
                     calendarPeerEditing: collect('orgs-calendar-peer-settings'),

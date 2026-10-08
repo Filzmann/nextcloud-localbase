@@ -10,7 +10,9 @@ namespace OCP {
     interface IUser {
         public function getUID(): string;
         public function getBackendClassName(): string;
+        public function canChangePassword(): bool;
         public function canChangeDisplayName(): bool;
+        public function setPassword(string $password, ?string $recoveryPassword = null): bool;
         public function setDisplayName(string $displayName): bool;
     }
     interface IUserManager {
@@ -44,14 +46,23 @@ namespace {
     };
     $users = new class implements IUserManager {
         public array $users = [];
+        public array $createdPasswords = [];
         public function get(string $uid): ?IUser { return $this->users[$uid] ?? null; }
         public function createUser(string $uid, string $password): ?IUser {
-            return $this->users[$uid] = new class($uid) implements IUser {
+            $this->createdPasswords[$uid] = $password;
+            return $this->users[$uid] = new class($uid, $password) implements IUser {
                 public string $displayName = '';
-                public function __construct(private string $uid, public string $backend = 'OC\\User\\Database') {}
+                public bool $passwordWritable = true;
+                public function __construct(private string $uid, public string $password, public string $backend = 'OC\\User\\Database') {}
                 public function getUID(): string { return $this->uid; }
                 public function getBackendClassName(): string { return $this->backend; }
+                public function canChangePassword(): bool { return $this->passwordWritable; }
                 public function canChangeDisplayName(): bool { return true; }
+                public function setPassword(string $password, ?string $recoveryPassword = null): bool {
+                    if (!$this->passwordWritable) return false;
+                    $this->password = $password;
+                    return true;
+                }
                 public function setDisplayName(string $displayName): bool { $this->displayName = $displayName; return true; }
             };
         }
@@ -70,26 +81,54 @@ namespace {
         }
     };
 
+    $config->values['localbase']['demo_account_registry'] = json_encode([
+        'orphan-after-restore' => ['ownerAppId' => 'flz-full-suite-demo', 'backendClass' => 'OC\\User\\Database'],
+    ], JSON_THROW_ON_ERROR);
     $service = new DemoAccountProvisioningService($users, $groups, $config);
-    $result = $service->provision('adcalendar', [[
-        'uid' => 'adc-demo-office',
+    $result = $service->provision('flzcalendar', [[
+        'uid' => 'flz-calendar-demo-office',
         'displayName' => 'Mara Muster (Büro Nordost)',
-        'groups' => ['ad-Buero', 'ad-Nordost'],
+        'groups' => ['flz-Buero', 'flz-Nordost'],
     ]]);
     if ($result !== ['createdUsers' => 1, 'reusedUsers' => 0, 'createdGroups' => 2]) throw new RuntimeException('Demo-Provisioning meldet falsche Zähler.');
-    if (!isset($groups->groups['ad-Buero']->members['adc-demo-office'])) throw new RuntimeException('Demokonto wurde der Gruppe nicht zugeordnet.');
+    if (($users->createdPasswords['flz-calendar-demo-office'] ?? null) !== 'flz-calendar-demo-office') throw new RuntimeException('Das initiale Passwort entspricht nicht der Demo-UID.');
+    if (!isset($groups->groups['flz-Buero']->members['flz-calendar-demo-office'])) throw new RuntimeException('Demokonto wurde der Gruppe nicht zugeordnet.');
+    $registryAfterSafeRun = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    if (isset($registryAfterSafeRun['orphan-after-restore'])) throw new RuntimeException('Ein verwaister Demo-Registry-Eintrag wurde beim nächsten sicheren Lauf nicht entfernt.');
 
-    $again = $service->provision('adcalendar', [[
-        'uid' => 'adc-demo-office',
+    $users->users['flz-calendar-demo-office']->password = 'abweichend';
+    $again = $service->provision('flzcalendar', [[
+        'uid' => 'flz-calendar-demo-office',
         'displayName' => 'Mara Muster (Büro Nordost)',
-        'groups' => ['ad-Buero'],
+        'groups' => ['flz-Buero'],
     ]]);
     if ($again['createdUsers'] !== 0 || $again['reusedUsers'] !== 1) throw new RuntimeException('Eigene Demokonten werden nicht idempotent wiederverwendet.');
+    if ($users->users['flz-calendar-demo-office']->password !== 'flz-calendar-demo-office') throw new RuntimeException('Ein eigenes wiederverwendetes Demokonto wurde nicht auf UID = Passwort zurückgesetzt.');
+
+    $users->createUser('flz-calendar-demo-read-only', 'unverändert');
+    $users->users['flz-calendar-demo-read-only']->passwordWritable = false;
+    $config->values['localbase']['demo_account_registry'] = json_encode([
+        'flz-calendar-demo-office' => ['ownerAppId' => 'flzcalendar', 'backendClass' => 'OC\\User\\Database'],
+        'flz-calendar-demo-read-only' => ['ownerAppId' => 'flzcalendar', 'backendClass' => 'OC\\User\\Database'],
+    ], JSON_THROW_ON_ERROR);
+    $beforeGroups = count($groups->groups);
+    try {
+        $service->provision('flzcalendar', [[
+            'uid' => 'flz-calendar-demo-read-only',
+            'displayName' => 'Nicht änderbar',
+            'groups' => ['must-not-be-created'],
+        ]]);
+        throw new RuntimeException('Ein nicht passwortänderbares Demokonto wurde akzeptiert.');
+    } catch (RuntimeException $error) {
+        if (!str_contains($error->getMessage(), 'Passwort')) throw $error;
+    }
+    if ($users->users['flz-calendar-demo-read-only']->password !== 'unverändert') throw new RuntimeException('Der fehlgeschlagene Preflight hat das Passwort verändert.');
+    if (count($groups->groups) !== $beforeGroups) throw new RuntimeException('Der Passwort-Preflight hat bereits Gruppen verändert.');
 
     $users->createUser('real-ldap-user', 'unused')->backend = 'OCA\\User_LDAP\\User_Proxy';
     $beforeGroups = count($groups->groups);
     try {
-        $service->provision('adcalendar', [[
+        $service->provision('flzcalendar', [[
             'uid' => 'real-ldap-user',
             'displayName' => 'Nicht ändern',
             'groups' => ['would-be-created'],
@@ -102,9 +141,13 @@ namespace {
 
     $groups->createGroup('ldap-read-only')->writable = false;
     $beforeUsers = count($users->users);
+    $registryBeforeGroupFailure = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    $registryBeforeGroupFailure['orphan-before-failed-run'] = ['ownerAppId' => 'flz-full-suite-demo', 'backendClass' => 'OC\\User\\Database'];
+    $config->values['localbase']['demo_account_registry'] = json_encode($registryBeforeGroupFailure, JSON_THROW_ON_ERROR);
+    $registryBeforeGroupFailure = $config->values['localbase']['demo_account_registry'];
     try {
-        $service->provision('adcalendar', [[
-            'uid' => 'adc-demo-blocked',
+        $service->provision('flzcalendar', [[
+            'uid' => 'flz-calendar-demo-blocked',
             'displayName' => 'Blockiert',
             'groups' => ['ldap-read-only'],
         ]]);
@@ -113,6 +156,12 @@ namespace {
         if (!str_contains($error->getMessage(), 'schreibgeschützt')) throw $error;
     }
     if (count($users->users) !== $beforeUsers) throw new RuntimeException('Der Gruppen-Preflight hat vor dem Abbruch ein Konto erzeugt.');
+    if ($config->values['localbase']['demo_account_registry'] !== $registryBeforeGroupFailure) throw new RuntimeException('Der fehlgeschlagene Gruppen-Preflight hat die Demo-Registry verändert.');
+
+    $service->removeRegistryEntry('flz-calendar-demo-office');
+    $registryAfterDeletion = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
+    if (isset($registryAfterDeletion['flz-calendar-demo-office'])) throw new RuntimeException('Die native Kontolöschung kann den Demo-Registry-Eintrag nicht vollständig entfernen.');
+    $service->removeRegistryEntry('already-missing');
 
     echo "DemoAccountProvisioningServiceSmokeTest: OK\n";
 }

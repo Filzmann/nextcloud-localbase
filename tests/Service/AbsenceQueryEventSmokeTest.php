@@ -1,11 +1,9 @@
 <?php
 
 declare(strict_types=1);
+namespace OCP\EventDispatcher { if (!class_exists(Event::class)) { class Event { public function __construct() {} } } }
 
-
-if (!class_exists(\OCP\EventDispatcher\Event::class)) {
-    eval('namespace OCP\\EventDispatcher; class Event { public function __construct() {} }');
-}
+namespace {
 
 use OCA\LocalBase\Calendar\AbsenceInterval;
 use OCA\LocalBase\Calendar\AbsenceQueryEvent;
@@ -23,3 +21,4 @@ if ($planned['marker'] !== 'U?' || $planned['blocks']) throw new RuntimeExceptio
 if ($approved['marker'] !== 'U' || !$approved['blocks']) throw new RuntimeException('Genehmigter Urlaub muss blockieren.');
 
 echo "AbsenceQueryEventSmokeTest: OK\n";
+}

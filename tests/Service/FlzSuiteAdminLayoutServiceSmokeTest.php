@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCP\Config {
+    interface IUserConfig {
+        public function getValueArray(string $userId, string $app, string $key, array $default = [], bool $lazy = false): array;
+        public function setValueArray(string $userId, string $app, string $key, array $value, bool $lazy = false, int $flags = 0): bool;
+        public function deleteUserConfig(string $userId, string $app, string $key): void;
+    }
+}
+
+namespace OCA\LocalBase\AppInfo { final class Application { public const APP_ID = 'localbase'; } }
+namespace Psr\Log { interface LoggerInterface { public function warning(string $message, array $context = []): void; } }
+
+namespace {
+
+    use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
+    use OCP\Config\IUserConfig;
+    use Psr\Log\LoggerInterface;
+
+    $config = new class implements IUserConfig {
+        public array $values = [];
+        public function getValueArray(string $userId, string $app, string $key, array $default = [], bool $lazy = false): array {
+            return $this->values[$userId][$app][$key] ?? $default;
+        }
+        public function setValueArray(string $userId, string $app, string $key, array $value, bool $lazy = false, int $flags = 0): bool {
+            $this->values[$userId][$app][$key] = $value;
+            return true;
+        }
+        public function deleteUserConfig(string $userId, string $app, string $key): void {
+            unset($this->values[$userId][$app][$key]);
+        }
+    };
+    $logger = new class implements LoggerInterface { public array $warnings = []; public function warning(string $message, array $context = []): void { $this->warnings[] = [$message, $context]; } };
+    $service = new FlzSuiteAdminLayoutService($config, $logger);
+    $default = $service->layout('admin-a');
+    if (($default['version'] ?? null) !== 1) throw new RuntimeException('Persönliches Adminlayout besitzt keine Vertragsversion.');
+    if (($default['scopes']['main']['order'] ?? []) !== ['directory', 'calendar-context', 'organization', 'permissions']) throw new RuntimeException('Hauptblöcke fehlen im Standardlayout.');
+    if (($default['scopes']['organization']['order'] ?? []) !== ['general', 'hierarchy', 'role-order', 'areas', 'vacation-views']) throw new RuntimeException('Organisationsblöcke fehlen im Standardlayout.');
+    if (($default['scopes']['permissions']['order'] ?? []) !== ['calendar-permissions', 'vacation-permissions']) throw new RuntimeException('Rechteblöcke fehlen im Standardlayout.');
+    if (($default['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Das persönliche Standardlayout besitzt keinen neutralen Organigramm-Zoom.');
+
+    $saved = $service->save('admin-a', [
+        'version' => 1,
+        'scopes' => [
+            'main' => ['order' => ['permissions', 'directory', 'organization'], 'collapsed' => ['directory']],
+            'organization' => ['order' => ['hierarchy', 'general'], 'collapsed' => ['general']],
+            'permissions' => ['order' => ['vacation-permissions'], 'collapsed' => []],
+        ],
+        'organigram' => ['zoom' => 130],
+    ]);
+    if (($saved['scopes']['main']['order'] ?? []) !== ['permissions', 'directory', 'organization', 'calendar-context'] || ($saved['scopes']['main']['collapsed'] ?? []) !== ['directory']) throw new RuntimeException('Persönliche Hauptansicht wird nicht gespeichert oder erhält den neuen Kalenderblock nicht additiv.');
+    if (($saved['scopes']['organization']['order'] ?? []) !== ['hierarchy', 'general', 'role-order', 'areas', 'vacation-views']) throw new RuntimeException('Neue oder ausgelassene Blöcke werden nicht sicher ergänzt.');
+    if (($saved['organigram']['zoom'] ?? null) !== 130) throw new RuntimeException('Persönlicher Organigramm-Zoom wird nicht gespeichert.');
+    if ($service->personalDataForUid('admin-a') !== $saved) throw new RuntimeException('Gespeichertes persönliches Layout ist nicht subjectgebunden auskunftsfähig.');
+    if ($service->personalDataForUid('admin-b') !== null) throw new RuntimeException('Ein nicht gespeichertes Standardlayout wurde als Personenwert behauptet.');
+    $service->reset('admin-a');
+    if (isset($config->values['admin-a']['localbase']['flz_suite_admin_dashboard_layout'])) throw new RuntimeException('Persönlicher Reset löscht den nativen UserConfig-Wert nicht vollständig.');
+    if ($service->personalDataForUid('admin-a') !== null) throw new RuntimeException('Gelöschtes Layout bleibt in der Personendatenprojektion sichtbar.');
+    if (($service->save('admin-d', ['scopes' => []])['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Bestehende persönliche Layouts erhalten keinen rückwärtskompatiblen Standardzoom.');
+    if ($service->layout('admin-b') !== $default) throw new RuntimeException('Layouts verschiedener Admins sind nicht getrennt.');
+    $config->values['admin-c']['localbase']['flz_suite_admin_dashboard_layout'] = ['scopes' => ['main' => ['order' => ['unknown'], 'collapsed' => []]]];
+    if ($service->layout('admin-c') !== $default || $logger->warnings === []) throw new RuntimeException('Ungültiges gespeichertes Layout fällt nicht protokolliert auf den Standard zurück.');
+
+    foreach ([
+        ['scopes' => ['unknown' => ['order' => [], 'collapsed' => []]]],
+        ['scopes' => ['main' => ['order' => ['unknown'], 'collapsed' => []]]],
+        ['scopes' => ['main' => ['order' => ['directory', 'directory'], 'collapsed' => []]]],
+        ['scopes' => ['main' => ['order' => [], 'collapsed' => 'directory']]],
+        ['scopes' => [], 'organigram' => ['zoom' => 40]],
+        ['scopes' => [], 'organigram' => ['zoom' => 155]],
+        ['scopes' => [], 'organigram' => ['zoom' => '100']],
+        ['scopes' => [], 'organigram' => ['zoom' => 100, 'position' => [1, 2]]],
+    ] as $invalid) {
+        try {
+            $service->save('admin-a', $invalid);
+            throw new RuntimeException('Ungültiges persönliches Adminlayout wurde gespeichert.');
+        } catch (InvalidArgumentException) {
+        }
+    }
+
+    echo "FlzSuiteAdminLayoutServiceSmokeTest: OK\n";
+}

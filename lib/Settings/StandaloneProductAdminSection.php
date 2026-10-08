@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Settings;
 
-use OCA\LocalBase\Service\AdProductSuiteService;
+use OCA\LocalBase\Service\FlzProductSuiteService;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-/** Zweck: Zeigt die gemeinsame Organisationsverwaltung unter der aktiven einzelnen AD-Fachapp an. */
+/** Zweck: Zeigt die gemeinsame Organisationsverwaltung unter der aktiven einzelnen FLZ-Fachapp an. */
 final class StandaloneProductAdminSection implements IIconSection {
-    public function __construct(private AdProductSuiteService $suite, private IURLGenerator $url) {
+    public function __construct(private FlzProductSuiteService $suite, private IURLGenerator $url) {
     }
 
     public function getIcon(): string {

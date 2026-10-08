@@ -18,7 +18,6 @@ namespace Psr\Log { interface LoggerInterface { public function info(string|\Str
 namespace {
     use OCA\LocalBase\Controller\PrivacyController;
     use OCA\LocalBase\Privacy\PersonalDataAggregator;
-    use OCA\LocalBase\Privacy\RetentionPreviewAggregator;
     use OCA\LocalBase\Service\PrivacyAccessService;
     use OCP\AppFramework\Http;
 
@@ -29,17 +28,15 @@ namespace {
     $events = new class implements OCP\EventDispatcher\IEventDispatcher { public function dispatchTyped(object $event):object{return $event;} };
     $logger = new class implements Psr\Log\LoggerInterface { public array $entries=[]; public function info(string|Stringable $message,array $context=[]):void{$this->entries[]=['message'=>(string)$message,'context'=>$context];} };
     $access = new PrivacyAccessService($session,$groups,$config,$logger);
-    $controller = new PrivacyController(new class implements OCP\IRequest {},$session,new PersonalDataAggregator($events),new RetentionPreviewAggregator($events),$access);
+    $controller = new PrivacyController(new class implements OCP\IRequest {},$session,new PersonalDataAggregator($events),$access);
 
     $self = $controller->selfService();
     if ($self->getStatus() !== 200 || $self->getData()['subject']['id'] !== 'self-user') throw new RuntimeException('Self-Service ist nicht an die Session gebunden.');
     if ($controller->adminReport('target-user')->getStatus() !== Http::STATUS_FORBIDDEN) throw new RuntimeException('Admin-Auskunft ist ohne Datenschutzgruppe erlaubt.');
-    if ($controller->retentionPreview('target-user')->getStatus() !== Http::STATUS_FORBIDDEN) throw new RuntimeException('Retention-Preview ist ohne Datenschutzgruppe erlaubt.');
 
     $groups->allowed = true;
     if ($controller->adminReport('target-user')->getData()['subject']['id'] !== 'target-user') throw new RuntimeException('Berechtigte Admin-Auskunft verwendet nicht das validierte Zielsubject.');
-    if ($controller->retentionPreview('target-user')->getData()['dryRun'] !== true) throw new RuntimeException('Admin-Retention ist kein Dry Run.');
-    if (array_column($logger->entries, 'message') !== ['privacy.admin_report', 'privacy.retention_preview']) throw new RuntimeException('Erfolgreiche Admin-Abrufe werden nicht minimal protokolliert.');
+    if (array_column($logger->entries, 'message') !== ['privacy.admin_report']) throw new RuntimeException('Erfolgreiche Admin-Abrufe werden nicht minimal protokolliert.');
     foreach ($logger->entries as $entry) {
         if ($entry['context'] !== ['actor_uid' => 'self-user', 'subject_uid' => 'target-user']) throw new RuntimeException('Admin-Protokoll enthält falsche oder unnötige Metadaten.');
     }

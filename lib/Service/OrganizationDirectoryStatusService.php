@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Service;
 
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Organization\AdOrganizationSettingsService;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 use OCP\IGroupManager;
 
 /**
- * Zweck: Prüft die konfigurierte AD-Organisation gegen alle in Nextcloud sichtbaren Gruppen-Backends.
+ * Zweck: Prüft die konfigurierte FLZ-Organisation gegen alle in Nextcloud sichtbaren Gruppen-Backends.
  * Zusammenspiel: Admin-API -> OrganizationDirectoryStatusService -> IGroupManager; LDAP bleibt vollständig im Nextcloud-Backend gekapselt.
  * Vertrag: Read-only Gruppen sind für produktive Rechte zulässig, blockieren aber Demo-Packs, die Mitgliedschaften verändern würden.
  */
 final class OrganizationDirectoryStatusService {
     public function __construct(
         private IGroupManager $groups,
-        private ?AdOrganizationSettingsService $organization = null,
+        private ?FlzOrganizationSettingsService $organization = null,
     ) {}
 
     public function status(): array {
-        $definition = $this->organization?->definition() ?? AdOrganizationDefinition::defaults();
+        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
         $result = [];
         foreach ($definition->roles() as $key => $role) {
             $result[] = $this->groupStatus('role', (string)$key, $role['groupId'], $role['label']);
@@ -41,7 +41,7 @@ final class OrganizationDirectoryStatusService {
      * Liefert ausschließlich Anzeigenamen für ausdrücklich konfigurierte Einzelpositionen.
      * Bereichsrollen werden als Schnitt aus Rollen- und Bereichsgruppe aufgelöst.
      */
-    private function positions(AdOrganizationDefinition $definition): array {
+    private function positions(FlzOrganizationDefinition $definition): array {
         $positions = [];
         foreach ($definition->roles() as $roleKey => $role) {
             if (!$role['singleOccupant']) continue;

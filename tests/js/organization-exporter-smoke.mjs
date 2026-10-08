@@ -7,7 +7,7 @@ const exporterSource = readFileSync(new URL('../../js/components/organization-ex
 const editorSource = readFileSync(new URL('../../js/components/organization-editor.js', import.meta.url), 'utf8');
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
 
-for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'application/pdf', 'ad-organigramm.pdf', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'toPdf(', 'nodeTextLayout(']) {
+for (const contract of ['class OrganizationExporter', 'Draw.io', 'PNG', 'PDF', 'Zugeordnete Nutzer*innen einbeziehen', 'data-organization-export-people', 'canvas.toBlob', 'application/pdf', 'flz-organigramm.pdf', 'downloadBlob(', 'toDrawio(', 'toSvg(', 'toPdf(', 'nodeTextLayout(']) {
     if (!exporterSource.includes(contract)) throw new Error(`Organigramm-Exportvertrag fehlt: ${contract}`);
 }
 if (exporterSource.includes('window.open') || exporterSource.includes('printWindow.print()') || exporterSource.includes('printHtml(')) throw new Error('Der PDF-Button verwendet weiterhin ein Druckfenster statt eines direkten Downloads.');
@@ -76,12 +76,12 @@ workflow.container = { querySelector: selector => selector.includes('people') ? 
 workflow.board = { exportSnapshot: includePeople => { snapshotIncludedPeople = includePeople; return anonymousSnapshot; } };
 workflow.downloadBlob = (_blob, filename) => { downloadedFilename = filename; };
 await workflow.onClick({ target: actionButton });
-if (snapshotIncludedPeople !== false || downloadedFilename !== 'ad-organigramm.drawio' || actionButton.disabled || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der Draw.io-Download respektiert den datensparsamen Standard oder den Statusvertrag nicht.');
+if (snapshotIncludedPeople !== false || downloadedFilename !== 'flz-organigramm.drawio' || actionButton.disabled || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der Draw.io-Download respektiert den datensparsamen Standard oder den Statusvertrag nicht.');
 
 actionButton.dataset.action = 'export-pdf';
 downloadedFilename = '';
 await workflow.onClick({ target: actionButton });
-if (downloadedFilename !== 'ad-organigramm.pdf' || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der PDF-Button löst keinen direkten Dateidownload mit verständlichem Status aus.');
+if (downloadedFilename !== 'flz-organigramm.pdf' || feedback.textContent !== 'Das Organigramm wurde exportiert.') throw new Error('Der PDF-Button löst keinen direkten Dateidownload mit verständlichem Status aus.');
 
 let pngFilename = '';
 let revokedSvg = false;
@@ -101,6 +101,6 @@ context.Image = class {
 context.document = { createElement: tag => tag === 'canvas' ? canvas : {}, body: { append() {} } };
 exporter.downloadBlob = (_blob, filename) => { pngFilename = filename; };
 await exporter.exportPng(layout);
-if (pngFilename !== 'ad-organigramm.png' || canvas.width !== layout.width * 2 || canvas.height !== layout.height * 2 || !revokedSvg) throw new Error('Der PNG-Export ist nicht hochauflösend oder räumt seine temporäre URL nicht auf.');
+if (pngFilename !== 'flz-organigramm.png' || canvas.width !== layout.width * 2 || canvas.height !== layout.height * 2 || !revokedSvg) throw new Error('Der PNG-Export ist nicht hochauflösend oder räumt seine temporäre URL nicht auf.');
 
 console.log('LocalBase organization exporter smoke passed');
