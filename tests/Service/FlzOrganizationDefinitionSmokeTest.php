@@ -9,8 +9,23 @@ use OCA\LocalBase\Organization\FlzOrganizationPermissionPolicy;
 
 $definition = FlzOrganizationDefinition::defaults();
 if ($definition->diagramOrder() !== []) throw new RuntimeException('Die visuelle Diagrammordnung muss kompatibel ohne Vorgabe starten.');
+if (count(FlzOrganizationDefinition::get_all([$definition->toArray()])) !== 1) throw new RuntimeException('Mehrere Organisationsdefinitionen werden nicht über den veröffentlichten Modellvertrag geladen.');
+try {
+    $definition->save();
+    throw new RuntimeException('Die read-only Organisationsdefinition wurde direkt persistiert.');
+} catch (LogicException) {
+}
+if ($definition->areaKeysForGroups(['flz-Bereich-West', 'unbekannt']) !== ['west']) throw new RuntimeException('Bereichsgruppen werden nicht sicher auf semantische Schlüssel abgebildet.');
 if ($definition->roleLabelForGroup('flz-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
 if ($definition->areaLabelForGroup('flz-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
+if ($definition->roleLabelForGroup('unbekannte-rolle') !== 'unbekannte-rolle'
+    || $definition->areaLabelForGroup('unbekannter-bereich') !== 'unbekannter-bereich'
+    || $definition->roleShortLabelForGroup('unbekannte-rolle') !== 'unbekannte-rolle'
+    || $definition->areaShortLabelForGroup('unbekannter-bereich') !== 'unbekannter-bereich'
+    || $definition->roleIsAreaScopedByGroup('unbekannte-rolle')
+    || $definition->roleKeyForGroup('flz-Finanzen-Lohn') !== 'finance') {
+    throw new RuntimeException('Unbekannte oder kompatible Gruppenzuordnungen werden nicht sicher aufgelöst.');
+}
 foreach ([
     'flz-Buero' => 'BO',
     'flz-EB' => 'EB',
