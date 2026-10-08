@@ -52,5 +52,14 @@ if ($minimum !== null && round($percent, 2) < $minimum) {
         STDERR,
         sprintf("%s: %.2f %% liegt unter %.2f %%.\n", $appId, $percent, $minimum),
     );
+    ksort($lines);
+    foreach ($lines as $path => $fileLines) {
+        ksort($fileLines);
+        foreach ($fileLines as $number => $count) {
+            if ($count === 0) {
+                fwrite(STDERR, sprintf("Nicht abgedeckt: %s:%d\n", $path, $number));
+            }
+        }
+    }
     exit(1);
 }
