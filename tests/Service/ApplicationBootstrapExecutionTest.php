@@ -29,10 +29,10 @@ namespace {
     use OCA\LocalBase\Privacy\LocalBasePersonalDataProviderListener;
     use OCA\LocalBase\Privacy\LocalBaseProcessingMetadataProviderListener;
     use OCA\LocalBase\Listener\DemoAccountRegistryCleanupListener;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
-    use OCA\LocalBase\Service\AdProductSuiteService;
+    use OCA\LocalBase\Service\FlzProductSuiteService;
     use OCA\LocalBase\Settings\StandaloneOrganizationAdmin;
     use OCA\LocalBase\Settings\StandaloneProductAdminSection;
     use OCP\App\IAppManager;
@@ -43,10 +43,10 @@ namespace {
 
     $apps = new class implements IAppManager {
         public function isEnabledForUser($appId, $user = null): bool {
-            return $appId === 'adcalendar';
+            return $appId === 'flzcalendar';
         }
     };
-    $suite = new AdProductSuiteService($apps);
+    $suite = new FlzProductSuiteService($apps);
     $settings = new class implements IManager {
         public array $sections = [];
         public array $settings = [];
@@ -54,7 +54,7 @@ namespace {
         public function registerSetting(string $type, string $setting): void { $this->settings[] = [$type, $setting]; }
     };
     $boot = new class($settings, $suite) implements IBootContext {
-        public function __construct(private IManager $settings, private AdProductSuiteService $suite) {}
+        public function __construct(private IManager $settings, private FlzProductSuiteService $suite) {}
         public function injectFn(callable $fn): void { $fn($this->settings, $this->suite); }
     };
 

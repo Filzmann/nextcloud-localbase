@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Integration;
 
 /**
- * Zweck: Definiert stabile technische Schlüssel für optionale Integrationen der eigenständigen AD-Fachapps.
+ * Zweck: Definiert stabile technische Schlüssel für optionale Integrationen der eigenständigen FLZ-Fachapps.
  * Vertrag: Die Schlüssel beschreiben Verfügbarkeit, nicht Berechtigung. Schreibrechte prüft immer die anbietende App.
  */
-final class AdIntegrationCapabilities {
+final class FlzIntegrationCapabilities {
     public const ABSENCE_READ = 'absence.read';
     public const SCHEDULE_CONFLICT_READ = 'schedule.conflicts.read';
     public const SCHEDULE_BLOCK_WRITE = 'schedule.block.write';

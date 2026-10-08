@@ -23,7 +23,7 @@ namespace {
     if ((new PersonalDataRequest($subject, 'de', PersonalDataRequest::PURPOSE_SELF_SERVICE))->limit() !== 500) throw new RuntimeException('Self-Service fragt nicht bis zur vertraglichen Obergrenze an.');
 
     $complete = new class implements PersonalDataProvider {
-        public function appId(): string { return 'adroom'; }
+        public function appId(): string { return 'flzroom'; }
         public function supportedSubjectTypes(): array { return [PersonalDataSubject::NEXTCLOUD_USER]; }
         public function collect(PersonalDataRequest $request): PersonalDataReport {
             return new PersonalDataReport([
@@ -71,10 +71,10 @@ namespace {
 
     $result = (new PersonalDataAggregator($dispatcher))->collect($request);
     if ($result['subject'] !== ['type' => 'nextcloud_user', 'id' => 'user-17']) throw new RuntimeException('Subject wurde verändert.');
-    if ($result['complete'] !== false || array_column($result['providers'], 'appId') !== ['adroom', 'broken', 'empty']) throw new RuntimeException('Provider-Snapshot oder Vollständigkeit ist falsch.');
+    if ($result['complete'] !== false || array_column($result['providers'], 'appId') !== ['broken', 'empty', 'flzroom']) throw new RuntimeException('Provider-Snapshot oder Vollständigkeit ist falsch.');
     $providers = array_column($result['providers'], null, 'appId');
-    $roomItem = $providers['adroom']['items'][0];
-    if ($providers['adroom']['status'] !== 'complete' || $roomItem['reference'] !== 'booking:17' || $roomItem['attributes']['Titel'] !== 'Team') throw new RuntimeException('Vollständiger Providerbericht oder stabile Referenz fehlt.');
+    $roomItem = $providers['flzroom']['items'][0];
+    if ($providers['flzroom']['status'] !== 'complete' || $roomItem['reference'] !== 'booking:17' || $roomItem['attributes']['Titel'] !== 'Team') throw new RuntimeException('Vollständiger Providerbericht oder stabile Referenz fehlt.');
     foreach (['Dateien, Freigaben, Versionen und Papierkorb', 'Aktivitäts-, Anmelde-, Sitzungs-, Sicherheits- und Auditprotokolle', 'Talk, Kontakte, Mail, Aufgaben, Deck, Formulare, Notizen und weitere Apps', 'persönliche App-Einstellungen und angebundene Dienste', 'externe Bewerbungsakten ohne sicher authentifizierte Zuordnung zu einer betroffenen Person'] as $missingSource) {
         if (!in_array($missingSource, $result['coverage']['notImplemented'], true)) throw new RuntimeException("Hinweis auf noch nicht implementierten Datenabruf fehlt: {$missingSource}");
     }
@@ -90,9 +90,9 @@ namespace {
         public function dispatchTyped(object $event): object { foreach ($this->providers as $provider) $event->register($provider); return $event; }
     };
     $ordered = (new PersonalDataAggregator($orderingEvents))->collect($request);
-    if (array_column($ordered['providers'], 'appId') !== ['nextcloud_account', 'adroom']) throw new RuntimeException('Nextcloud-Stammdaten stehen nicht unabhängig von der Listener-Reihenfolge am Anfang.');
+    if (array_column($ordered['providers'], 'appId') !== ['nextcloud_account', 'flzroom']) throw new RuntimeException('Nextcloud-Stammdaten stehen nicht unabhängig von der Listener-Reihenfolge am Anfang.');
     foreach (['summary', 'purpose', 'retention', 'sectionTitle', 'dataType'] as $field) if (trim((string)($roomItem[$field] ?? '')) === '') throw new RuntimeException("Menschenlesbare Datensatzangabe fehlt: {$field}");
-    if ($providers['adroom']['processing']['purposes'] !== ['Raumplanung'] || $providers['adroom']['processing']['retentionCriteria'] !== 'Bis zur administrativen Prüfung') throw new RuntimeException('Art.-15-Verarbeitungsangaben fehlen.');
+    if ($providers['flzroom']['processing']['purposes'] !== ['Raumplanung'] || $providers['flzroom']['processing']['retentionCriteria'] !== 'Bis zur administrativen Prüfung') throw new RuntimeException('Art.-15-Verarbeitungsangaben fehlen.');
     foreach (['generatedAt', 'rights', 'contactNote'] as $field) if (!array_key_exists($field, $result['article15'])) throw new RuntimeException("Zentrale Art.-15-Angabe fehlt: {$field}");
     if ($providers['empty']['status'] !== 'not_applicable' || $providers['broken']['status'] !== 'failed') throw new RuntimeException('Leerer oder fehlgeschlagener Provider wird falsch ausgewiesen.');
     if (isset($providers['broken']['error']) || str_contains(json_encode($result, JSON_THROW_ON_ERROR), 'interner Fehler')) throw new RuntimeException('Interne Providerfehler dürfen nicht ausgegeben werden.');

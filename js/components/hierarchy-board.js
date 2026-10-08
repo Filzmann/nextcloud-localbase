@@ -73,7 +73,7 @@
             const levelByRole = new Map();
             this.levels(roleKeys).forEach((roles, level) => roles.forEach(roleKey => levelByRole.set(roleKey, level)));
             return {
-                title: 'AD-Organigramm',
+                title: 'Filzmann-Organigramm',
                 nodes: nodes.map(node => ({
                     id: node.id,
                     roleKey: node.roleKey,
@@ -195,7 +195,7 @@
         }
 
         diagramNodes(roleKeys) {
-            // Spiegelvertrag: lib/Organization/AdOrganizationDefinition.php validiert genau diese Rollen- bzw. Rolle::Bereich-Knoten-IDs.
+            // Spiegelvertrag: lib/Organization/FlzOrganizationDefinition.php validiert genau diese Rollen- bzw. Rolle::Bereich-Knoten-IDs.
             const areas = Object.entries(this.areas).sort(([, a], [, b]) => Number(a.sortOrder) - Number(b.sortOrder));
             return this.orderDiagramNodes(roleKeys.flatMap(roleKey => {
                 const role = this.roles[roleKey];

@@ -19,8 +19,8 @@ namespace OCA\LocalBase\AppInfo {
 
 namespace {
 
-    use OCA\LocalBase\Organization\AdOrganizationSettingsService;
-    use OCA\LocalBase\Organization\AdOrganizationSnapshotService;
+    use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+    use OCA\LocalBase\Organization\FlzOrganizationSnapshotService;
     use OCA\LocalBase\PublicApi\V1\OrganizationSnapshot;
     use OCA\LocalBase\PublicApi\V1\OrganizationSnapshotService;
 
@@ -29,8 +29,8 @@ namespace {
         public function getValueString(string $appId, string $key, string $default = ''): string { return $this->values[$appId][$key] ?? $default; }
         public function setValueString(string $appId, string $key, string $value): void { $this->values[$appId][$key] = $value; }
     };
-    $settings = new AdOrganizationSettingsService($config);
-    $snapshots = new AdOrganizationSnapshotService($settings);
+    $settings = new FlzOrganizationSettingsService($config);
+    $snapshots = new FlzOrganizationSnapshotService($settings);
     $publicSnapshots = new OrganizationSnapshotService($snapshots);
 
     $missing = $snapshots->snapshot();
@@ -52,12 +52,12 @@ namespace {
         throw new RuntimeException('Der Organisationssnapshot enthält personenbezogene Mitgliederlisten.');
     }
 
-    $config->values['localbase']['ad_organization_definition'] = '{kaputt';
+    $config->values['localbase']['flz_organization_definition'] = '{kaputt';
     if ($snapshots->snapshot()->isValid()) {
         throw new RuntimeException('Ungültige Organisationspersistenz wird als gültiger Snapshot veröffentlicht.');
     }
 
-    $config->values['localbase']['ad_organization_definition'] = '';
+    $config->values['localbase']['flz_organization_definition'] = '';
     $publicMissing = $publicSnapshots->snapshot();
     if ($publicMissing->contractVersion() !== OrganizationSnapshot::CONTRACT_VERSION
         || $publicMissing->isValid()
@@ -91,11 +91,11 @@ namespace {
 
     try {
         new OrganizationSnapshot(true, 4, [
-            'finance' => ['groupId' => 'ad-finance', 'label' => ['invalid']],
+            'finance' => ['groupId' => 'flz-finance', 'label' => ['invalid']],
         ], []);
         throw new RuntimeException('Ungültige öffentliche Mappingfelder wurden akzeptiert.');
     } catch (InvalidArgumentException) {
     }
 
-    echo "AdOrganizationSnapshotServiceSmokeTest: OK\n";
+    echo "FlzOrganizationSnapshotServiceSmokeTest: OK\n";
 }

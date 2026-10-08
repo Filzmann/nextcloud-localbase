@@ -36,7 +36,7 @@ namespace OCA\LocalBase\Calendar {
 }
 namespace OCA\LocalBase\Organization {
     class Definition { public function __construct(private array $data) {} public function toArray(): array { return $this->data; } }
-    class AdOrganizationSettingsService {
+    class FlzOrganizationSettingsService {
         public bool $invalid = false;
         public bool $failure = false;
         public function definition(): Definition { return new Definition(['roles' => ['buero']]); }
@@ -46,18 +46,18 @@ namespace OCA\LocalBase\Organization {
             return new Definition($organization);
         }
     }
-    class AdSuiteAdminSettingsService {
-        public function calendarPeerEditing(): array { return ['ad-Buero' => true]; }
-        public function calendarPeerOptions(): array { return ['ad-Buero']; }
-        public function vacationPeerApproval(): array { return ['ad-PFK' => false]; }
-        public function vacationPeerOptions(): array { return ['ad-PFK']; }
+    class FlzSuiteAdminSettingsService {
+        public function calendarPeerEditing(): array { return ['flz-Buero' => true]; }
+        public function calendarPeerOptions(): array { return ['flz-Buero']; }
+        public function vacationPeerApproval(): array { return ['flz-PFK' => false]; }
+        public function vacationPeerOptions(): array { return ['flz-PFK']; }
         public function saveCalendarPeerEditing(array $value): array { return $value; }
         public function saveVacationPeerApproval(array $value): array { return $value; }
     }
 }
 
 namespace OCA\LocalBase\Service {
-    class AdSuiteAdminLayoutService {
+    class FlzSuiteAdminLayoutService {
         public array $layouts = [];
         public bool $invalid = false;
         public bool $failure = false;
@@ -73,17 +73,17 @@ namespace OCA\LocalBase\Service {
         }
     }
     class OrganizationDirectoryStatusService {
-        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'ad-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
+        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'flz-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
     }
 }
 
 namespace {
 
-    use OCA\LocalBase\Organization\AdOrganizationSettingsService;
-    use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
+    use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+    use OCA\LocalBase\Organization\FlzSuiteAdminSettingsService;
     use OCA\LocalBase\Calendar\CalendarContextSettingsService;
-    use OCA\LocalBase\Controller\AdSuiteAdminApiController;
-    use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
+    use OCA\LocalBase\Controller\FlzSuiteAdminApiController;
+    use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
     use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
     use OCP\IGroupManager;
     use OCP\IRequest;
@@ -95,13 +95,13 @@ namespace {
     $user = new class implements IUser { public function getUID(): string { return 'admin'; } };
     $session = new class($user) implements IUserSession { public function __construct(private ?IUser $user) {} public function getUser(): ?IUser { return $this->user; } };
     $groups = new class implements IGroupManager { public bool $admin = false; public function isAdmin(string $uid): bool { return $this->admin; } };
-    $organization = new AdOrganizationSettingsService();
-    $settings = new AdSuiteAdminSettingsService();
+    $organization = new FlzOrganizationSettingsService();
+    $settings = new FlzSuiteAdminSettingsService();
     $calendarContext = new CalendarContextSettingsService();
     $logger = new class implements LoggerInterface { public array $errors = []; public function error(string $message, array $context = []): void { $this->errors[] = [$message, $context]; } };
     $directory = new OrganizationDirectoryStatusService();
-    $layout = new AdSuiteAdminLayoutService();
-    $controller = new AdSuiteAdminApiController($request, $session, $groups, $organization, $settings, $calendarContext, $directory, $layout, $logger);
+    $layout = new FlzSuiteAdminLayoutService();
+    $controller = new FlzSuiteAdminApiController($request, $session, $groups, $organization, $settings, $calendarContext, $directory, $layout, $logger);
     if ($controller->settings()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen lesen.');
     if ($controller->saveCalendarContext([])->getStatus() !== 403 || $controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403 || $controller->resetLayout()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
@@ -119,8 +119,8 @@ namespace {
     $organization->invalid = false;
     $organization->failure = true;
     if ($controller->saveOrganization([])->getStatus() !== 400 || $logger->errors === []) throw new RuntimeException('Interner Fehler wird nicht sicher behandelt.');
-    $permissions = $controller->savePermissions(['ad-Buero' => false], ['ad-PFK' => true])->getData();
-    if ($permissions['calendarPeerEditing']['ad-Buero'] !== false || $permissions['vacationPeerApproval']['ad-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht gespeichert.');
+    $permissions = $controller->savePermissions(['flz-Buero' => false], ['flz-PFK' => true])->getData();
+    if ($permissions['calendarPeerEditing']['flz-Buero'] !== false || $permissions['vacationPeerApproval']['flz-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht gespeichert.');
     $savedLayout = $controller->saveLayout(['version' => 1, 'scopes' => []])->getData();
     if (($savedLayout['dashboardLayout']['version'] ?? null) !== 1 || !isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht unter dem angemeldeten Admin gespeichert.');
     if (($controller->resetLayout()->getData()['dashboardLayout']['version'] ?? null) !== 1 || isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht subjectgebunden zurückgesetzt.');
@@ -131,5 +131,5 @@ namespace {
     $loggedErrors = count($logger->errors);
     if ($controller->saveLayout([])->getStatus() !== 400 || count($logger->errors) <= $loggedErrors) throw new RuntimeException('Interner Layoutfehler wird nicht sicher protokolliert.');
 
-    echo "LocalBase AD-Suite admin controller execution tests passed\n";
+    echo "LocalBase Filzmann Nextcloud Plugins admin controller execution tests passed\n";
 }

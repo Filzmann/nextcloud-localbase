@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Service;
 
-use OCA\LocalBase\Catalog\AdProductCatalog;
+use OCA\LocalBase\Catalog\FlzProductCatalog;
 use OCP\App\IAppManager;
 use OCP\IUser;
 use RuntimeException;
 
 /**
- * Zweck: Beschreibt die installierte AD-Produktzusammensetzung unabhängig von Navigation und Fachrechten.
+ * Zweck: Beschreibt die installierte FLZ-Produktzusammensetzung unabhängig von Navigation und Fachrechten.
  * Zusammenspiel: Produktinstaller aktiviert OrgSuite ab zwei Apps; LocalBase platziert den Adminadapter bei einer Einzelapp.
  */
-final class AdProductSuiteService {
-    public function __construct(private IAppManager $apps, private ?AdProductCatalog $catalog = null) {
+final class FlzProductSuiteService {
+    public function __construct(private IAppManager $apps, private ?FlzProductCatalog $catalog = null) {
     }
 
     /** @return list<string> */
@@ -44,7 +44,7 @@ final class AdProductSuiteService {
         }
     }
 
-    private function catalog(): AdProductCatalog {
-        return $this->catalog ??= new AdProductCatalog();
+    private function catalog(): FlzProductCatalog {
+        return $this->catalog ??= new FlzProductCatalog();
     }
 }

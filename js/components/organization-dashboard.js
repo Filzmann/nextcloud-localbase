@@ -4,7 +4,7 @@
     const clone = value => JSON.parse(JSON.stringify(value));
 
     /**
-     * Zweck: Ordnet und klappt die persönlichen Blöcke der AD-Administration zugänglich ein und aus.
+     * Zweck: Ordnet und klappt die persönlichen Blöcke der FLZ-Administration zugänglich ein und aus.
      * Zusammenspiel: organization-admin.js -> OrganizationDashboard -> persönlicher LocalBase-Layout-Endpunkt.
      * Vertrag: Verschoben werden nur direkte Dashboardkinder innerhalb desselben Scopes; fachliche Reihenfolgen bleiben unberührt.
      */

@@ -90,26 +90,26 @@ jobs:
         with:
           repository: Filzmann/nextcloud-orgsuite
           path: orgsuite
-      - name: AD Kalender auschecken
+      - name: Filzmann Kalender auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-adcalendar
-          path: adcalendar
+          repository: Filzmann/nextcloud-flzcalendar
+          path: flzcalendar
       - name: Assistenzplanung auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-adplaner
-          path: adplaner
-      - name: AD Urlaub auschecken
+          repository: Filzmann/nextcloud-flzplaner
+          path: flzplaner
+      - name: Filzmann Urlaubsplanung auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-adurlaub
-          path: adurlaub
-      - name: AD Raumplaner auschecken
+          repository: Filzmann/nextcloud-flzurlaub
+          path: flzurlaub
+      - name: Filzmann Raumplaner auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-adroom
-          path: adroom
+          repository: Filzmann/nextcloud-flzroom
+          path: flzroom
       - name: BRTop auschecken
         uses: actions/checkout@v7
         with:
@@ -123,13 +123,13 @@ jobs:
       - name: Berechtigungsmatrix auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-filzmann-permission-matrix
-          path: filzmann_permission_matrix
-      - name: AD Recruitment auschecken
+          repository: Filzmann/nextcloud-flz-permission-matrix
+          path: flz_permission_matrix
+      - name: Filzmann Recruitment auschecken
         uses: actions/checkout@v7
         with:
-          repository: Filzmann/nextcloud-recruitment
-          path: adrecruitment
+          repository: Filzmann/nextcloud-flzrecruitment
+          path: flzrecruitment
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
@@ -146,23 +146,23 @@ jobs:
         run: |
           php tests/run.php
           node tests/run-js.mjs
-      - name: AD-Kalender-Vertrag
-        working-directory: adcalendar
+      - name: Filzmann-Kalender-Vertrag
+        working-directory: flzcalendar
         run: |
           php tests/run.php
           node tests/run-js.mjs
       - name: Assistenzplanungs-Vertrag
-        working-directory: adplaner
+        working-directory: flzplaner
         run: |
           php tests/run.php
           node tests/run-js.mjs
-      - name: AD-Urlaubs-Vertrag
-        working-directory: adurlaub
+      - name: Filzmann-Urlaubsplanungs-Vertrag
+        working-directory: flzurlaub
         run: |
           php tests/run.php
           node tests/run-js.mjs
-      - name: AD-Raumplaner-Vertrag
-        working-directory: adroom
+      - name: Filzmann-Raumplaner-Vertrag
+        working-directory: flzroom
         run: |
           php tests/run.php
           node tests/run-js.mjs
@@ -177,12 +177,12 @@ jobs:
           php tests/run.php
           node tests/run-js.mjs
       - name: Berechtigungsmatrix-Vertrag
-        working-directory: filzmann_permission_matrix
+        working-directory: flz_permission_matrix
         run: |
           php tests/run.php
           node tests/run-js.mjs
-      - name: AD-Recruitment-Vertrag
-        working-directory: adrecruitment
+      - name: Filzmann-Recruitment-Vertrag
+        working-directory: flzrecruitment
         run: |
           php tests/run.php
           node tests/run-js.mjs

@@ -11,7 +11,7 @@ namespace OCP {
     interface IUser { public function getUID(): string; public function getBackendClassName(): string; }
     interface IUserManager { public function get(string $uid): ?IUser; }
 }
-namespace OCA\FilzmannDataProtection\PublicApi\V1 {
+namespace OCA\FlzDataProtection\PublicApi\V1 {
     final class DataSubjectRef { public function __construct(private string $type, private string $id) {} public function subjectType(): string { return $this->type; } public function subjectId(): string { return $this->id; } }
     final class ProviderDescriptor { public function __construct(private string $appId, private string $name, private string $version, private array $types, private array $capabilities, private int $limit) {} public function appId(): string { return $this->appId; } public function contractVersion(): string { return $this->version; } }
     final class PersonalDataRequest { public function __construct(private DataSubjectRef $subject, private int $limit = 20, private ?string $cursor = null) {} public function subject(): DataSubjectRef { return $this->subject; } public function pageLimit(): int { return $this->limit; } public function cursor(): ?string { return $this->cursor; } }
@@ -25,7 +25,7 @@ namespace OCA\FilzmannDataProtection\PublicApi\V1 {
     final class RegisterProcessingMetadataProvidersEvent extends \OCP\EventDispatcher\Event { public array $providers = []; public function register(ProcessingMetadataProvider $provider): void { $this->providers[$provider->descriptor()->appId()] = $provider; } }
 }
 namespace OCA\LocalBase\Service {
-    class AdSuiteAdminLayoutService {
+    class FlzSuiteAdminLayoutService {
         public function personalDataForUid(string $uid): ?array {
             return $uid === 'subject' ? ['version' => 1, 'scopes' => ['main' => ['order' => ['directory'], 'collapsed' => []]], 'organigram' => ['zoom' => 120]] : null;
         }
@@ -33,15 +33,15 @@ namespace OCA\LocalBase\Service {
 }
 
 namespace {
-    use OCA\FilzmannDataProtection\PublicApi\V1\DataSubjectRef;
-    use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\DataSubjectRef;
+    use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCA\LocalBase\Privacy\LocalBasePersonalDataProvider;
     use OCA\LocalBase\Privacy\LocalBasePersonalDataProviderListener;
     use OCA\LocalBase\Privacy\LocalBaseProcessingMetadataProvider;
     use OCA\LocalBase\Privacy\LocalBaseProcessingMetadataProviderListener;
-    use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
+    use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
     use OCP\IAppConfig;
     use OCP\IUser;
     use OCP\IUserManager;
@@ -49,8 +49,8 @@ namespace {
     $config = new class implements IAppConfig {
         public string $registry;
         public function __construct() { $this->registry = json_encode([
-            'subject' => ['ownerAppId' => 'ad-suite-demo', 'backendClass' => 'OC\\User\\Database'],
-            'foreign' => ['ownerAppId' => 'ad-suite-demo', 'backendClass' => 'OC\\User\\Database'],
+            'subject' => ['ownerAppId' => 'flz-full-suite-demo', 'backendClass' => 'OC\\User\\Database'],
+            'foreign' => ['ownerAppId' => 'flz-full-suite-demo', 'backendClass' => 'OC\\User\\Database'],
         ], JSON_THROW_ON_ERROR); }
         public function getValueString(string $appId, string $key, string $default = ''): string { return $this->registry; }
     };
@@ -64,11 +64,11 @@ namespace {
             };
         }
     };
-    $provider = new LocalBasePersonalDataProvider(new AdSuiteAdminLayoutService(), $config, $users);
+    $provider = new LocalBasePersonalDataProvider(new FlzSuiteAdminLayoutService(), $config, $users);
     $page = $provider->collect(new PersonalDataRequest(new DataSubjectRef('nextcloud-user', 'subject')));
     if ($page->status() !== 'complete' || array_map(static fn($entry): string => $entry->reference(), $page->entries()) !== ['admin-layout', 'demo-account-registration']) throw new RuntimeException('LocalBase-eigene Personenwerte werden nicht vollständig projiziert.');
     $encoded = json_encode(array_map(static fn($entry): array => $entry->attributes(), $page->entries()), JSON_THROW_ON_ERROR);
-    if (!str_contains($encoded, 'ad-suite-demo') || str_contains($encoded, 'foreign')) throw new RuntimeException('Provider ist nicht strikt an die angefragte UID gebunden.');
+    if (!str_contains($encoded, 'flz-full-suite-demo') || str_contains($encoded, 'foreign')) throw new RuntimeException('Provider ist nicht strikt an die angefragte UID gebunden.');
     $unsupported = $provider->collect(new PersonalDataRequest(new DataSubjectRef('external-applicant', 'subject')));
     if ($unsupported->status() !== 'not_applicable' || $unsupported->entries() !== []) throw new RuntimeException('Nicht unterstützter Subject-Typ erhält LocalBase-Daten.');
     $limited = $provider->collect(new PersonalDataRequest(new DataSubjectRef('nextcloud-user', 'subject'), 1));

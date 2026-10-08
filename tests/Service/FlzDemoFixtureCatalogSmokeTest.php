@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Service\AdDemoFixtureCatalog;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Service\FlzDemoFixtureCatalog;
 
-$fixtures = (new AdDemoFixtureCatalog())->all();
-$definition = AdOrganizationDefinition::defaults();
+$fixtures = (new FlzDemoFixtureCatalog())->all();
+$definition = FlzOrganizationDefinition::defaults();
 $covered = array_fill_keys(array_merge(...array_column($fixtures, 'groups')), true);
 foreach (array_merge($definition->roleGroupIds(), $definition->areaGroupIds()) as $groupId) {
     if (!isset($covered[$groupId])) throw new RuntimeException("Die gemeinsame Demoorganisation deckt {$groupId} nicht ab.");
 }
 foreach ($fixtures as $fixture) {
-    if (!str_starts_with($fixture['uid'], 'ad-demo-')) throw new RuntimeException('Gemeinsame Demo-UID verwendet keinen stabilen Suite-Namensraum.');
+    if (!str_starts_with($fixture['uid'], 'flz-demo-')) throw new RuntimeException('Gemeinsame Demo-UID verwendet keinen stabilen Suite-Namensraum.');
     if (preg_match('/^[^()]+ \([^)]+\)$/', $fixture['displayName']) !== 1) throw new RuntimeException("Demo-Anzeigename ohne Fachgruppe: {$fixture['uid']}");
 }
 
-echo "AdDemoFixtureCatalogSmokeTest: OK\n";
+echo "FlzDemoFixtureCatalogSmokeTest: OK\n";

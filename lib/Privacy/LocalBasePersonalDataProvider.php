@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Privacy;
 
 use InvalidArgumentException;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataEntry;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
-use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataEntry;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataPage;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataProvider;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+use OCA\FlzDataProtection\PublicApi\V1\ProviderDescriptor;
+use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
 use OCP\IAppConfig;
 use OCP\IUserManager;
 
@@ -19,7 +19,7 @@ final class LocalBasePersonalDataProvider implements PersonalDataProvider {
     private const REGISTRY_KEY = 'demo_account_registry';
 
     public function __construct(
-        private AdSuiteAdminLayoutService $layouts,
+        private FlzSuiteAdminLayoutService $layouts,
         private IAppConfig $config,
         private IUserManager $users,
     ) {}
@@ -57,11 +57,11 @@ final class LocalBasePersonalDataProvider implements PersonalDataProvider {
     private function layoutEntry(array $layout): PersonalDataEntry {
         return new PersonalDataEntry(
             categoryId: 'admin-layout',
-            categoryLabel: 'Persönliches AD-Adminlayout',
+            categoryLabel: 'Persönliches Filzmann-Adminlayout',
             reference: 'admin-layout',
-            summary: 'Persönliche Anordnung des gemeinsamen AD-Adminbereichs',
+            summary: 'Persönliche Anordnung des gemeinsamen Filzmann-Adminbereichs',
             purpose: 'Geräteübergreifende Wiederherstellung der persönlichen Adminansicht',
-            source: 'Eigene Bedienung des gemeinsamen AD-Adminbereichs',
+            source: 'Eigene Bedienung des gemeinsamen Filzmann-Adminbereichs',
             recipientCategories: ['Betroffene Person'],
             retention: 'Bis zum persönlichen Reset oder zur Löschung des Nextcloud-Kontos.',
             thirdCountryTransfer: 'LocalBase übermittelt das persönliche Layout nicht an Drittländer.',

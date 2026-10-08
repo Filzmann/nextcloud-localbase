@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Organization;
 
 /** Zweck: Bewertet konfigurierbare Hierarchie-, Bereichs- und freigeschaltete Peer-Rechte ohne Nextcloud-Infrastruktur. */
-class AdOrganizationPermissionPolicy {
-    public function __construct(protected AdOrganizationHierarchy $hierarchy) {}
+class FlzOrganizationPermissionPolicy {
+    public function __construct(protected FlzOrganizationHierarchy $hierarchy) {}
 
     public function canManage(string $actorUid, bool $isAdmin, array $actorGroups, string $targetUid, array $targetGroups, array $peerGroups = [], bool $allowSelf = true): bool {
         if ($isAdmin || ($allowSelf && $actorUid === $targetUid)) return true;

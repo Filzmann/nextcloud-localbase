@@ -10,12 +10,12 @@ use OCP\Config\IUserConfig;
 use Psr\Log\LoggerInterface;
 
 /**
- * Zweck: Speichert die rein persönliche Anordnung der gemeinsamen AD-Adminblöcke und den Organigramm-Zoom je Nextcloud-Konto.
- * Zusammenspiel: AdSuiteAdminApiController -> IUserConfig; fachliche Organisations- und Rechtewerte bleiben unberührt.
+ * Zweck: Speichert die rein persönliche Anordnung der gemeinsamen FLZ-Adminblöcke und den Organigramm-Zoom je Nextcloud-Konto.
+ * Zusammenspiel: FlzSuiteAdminApiController -> IUserConfig; fachliche Organisations- und Rechtewerte bleiben unberührt.
  * Vertrag: Ausschließlich bekannte Scopes, Block-IDs und Zoomstufen werden angenommen; neue Standardblöcke werden vorhandenen Layouts angehängt.
  */
-final class AdSuiteAdminLayoutService {
-    private const CONFIG_KEY = 'ad_suite_admin_dashboard_layout';
+final class FlzSuiteAdminLayoutService {
+    private const CONFIG_KEY = 'flz_suite_admin_dashboard_layout';
     private const VERSION = 1;
     private const BLOCKS = [
         'main' => ['directory', 'calendar-context', 'organization', 'permissions'],
@@ -34,7 +34,7 @@ final class AdSuiteAdminLayoutService {
             $stored = $this->config->getValueArray($userId, Application::APP_ID, self::CONFIG_KEY, [], true);
             return $stored === [] ? $this->defaultLayout() : $this->normalize($stored);
         } catch (\Throwable $error) {
-            $this->logger->warning('Persönliches AD-Adminlayout ist ungültig; Standardlayout wird verwendet.', ['exception' => $error]);
+            $this->logger->warning('Persönliches FLZ-Adminlayout ist ungültig; Standardlayout wird verwendet.', ['exception' => $error]);
             return $this->defaultLayout();
         }
     }
@@ -55,7 +55,7 @@ final class AdSuiteAdminLayoutService {
             $stored = $this->config->getValueArray($userId, Application::APP_ID, self::CONFIG_KEY, [], true);
             return $stored === [] ? null : $this->normalize($stored);
         } catch (\Throwable $error) {
-            $this->logger->warning('Persönliches AD-Adminlayout ist ungültig; es wird nicht als Personenwert ausgegeben.', ['exception' => $error]);
+            $this->logger->warning('Persönliches FLZ-Adminlayout ist ungültig; es wird nicht als Personenwert ausgegeben.', ['exception' => $error]);
             return null;
         }
     }

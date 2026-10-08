@@ -55,9 +55,9 @@
             const layout = this.layout(snapshot);
             button.disabled = true;
             try {
-                if (button.dataset.action === 'export-drawio') this.downloadBlob(new Blob([this.toDrawio(layout)], { type: 'application/vnd.jgraph.mxfile' }), 'ad-organigramm.drawio');
+                if (button.dataset.action === 'export-drawio') this.downloadBlob(new Blob([this.toDrawio(layout)], { type: 'application/vnd.jgraph.mxfile' }), 'flz-organigramm.drawio');
                 if (button.dataset.action === 'export-png') await this.exportPng(layout);
-                if (button.dataset.action === 'export-pdf') this.downloadBlob(new Blob([this.toPdf(layout)], { type: 'application/pdf' }), 'ad-organigramm.pdf');
+                if (button.dataset.action === 'export-pdf') this.downloadBlob(new Blob([this.toPdf(layout)], { type: 'application/pdf' }), 'flz-organigramm.pdf');
                 this.feedback('Das Organigramm wurde exportiert.');
             } catch (error) {
                 this.feedback(error instanceof Error ? error.message : 'Das Organigramm konnte nicht exportiert werden.');
@@ -170,7 +170,7 @@
                 if (!source || !target) return '';
                 return `<mxCell id="edge-${index + 1}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="${source}" target="${target}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
             }).join('');
-            return `<?xml version="1.0" encoding="UTF-8"?><mxfile host="app.diagrams.net" compressed="false"><diagram id="ad-organigramm" name="Organigramm"><mxGraphModel dx="${layout.width}" dy="${layout.height}" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="${layout.width}" pageHeight="${layout.height}"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${vertices}${edges}</root></mxGraphModel></diagram></mxfile>`;
+            return `<?xml version="1.0" encoding="UTF-8"?><mxfile host="app.diagrams.net" compressed="false"><diagram id="flz-organigramm" name="Organigramm"><mxGraphModel dx="${layout.width}" dy="${layout.height}" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="${layout.width}" pageHeight="${layout.height}"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${vertices}${edges}</root></mxGraphModel></diagram></mxfile>`;
         }
 
         toSvg(layout) {
@@ -276,7 +276,7 @@
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(image, 0, 0, canvas.width, canvas.height);
                 const png = await new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Die PNG-Datei konnte nicht erzeugt werden.')), 'image/png'));
-                this.downloadBlob(png, 'ad-organigramm.png');
+                this.downloadBlob(png, 'flz-organigramm.png');
             } finally {
                 URL.revokeObjectURL(svgUrl);
             }

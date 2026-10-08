@@ -26,7 +26,7 @@ const report = {
         notImplemented: ['Dateien und Freigaben', 'Talk und weitere Apps'],
     },
     article15: { rights: [], contactNote: '' },
-    providers: [{ name: 'AD Raumplaner', status: 'complete', processing: {}, items: [
+    providers: [{ name: 'Filzmann Raumplaner', status: 'complete', processing: {}, items: [
         { category:'booking', dataType:'Raumbuchung', label:'Raumbuchung', summary:'12. August', attributes:{Raum:'A',Titel:'Termin 1'}, purpose:'Raumplanung', retention:'Bis 1. September', sectionTitle:'Buchungen' },
         { category:'booking', dataType:'Raumbuchung', label:'Raumbuchung', summary:'13. August', attributes:{Raum:'B',Titel:'Termin 2'}, purpose:'Raumplanung', retention:'Bis 1. September', sectionTitle:'Buchungen' },
     ] }, { name: 'Gemischte App', status: 'complete', processing: {}, items: [
@@ -40,7 +40,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
 
 const flatten = node => [node.textContent, ...node.children.flatMap(flatten)].filter(Boolean);
 const firstCardText = flatten(nodes.get('lb-privacy-apps').children[0]);
-for (const expected of ['AD Raumplaner','Weitere Angaben zur Verarbeitung in dieser App','Grund der Speicherung: Raumplanung','Aufbewahrt bis: Bis 1. September','Raumbuchung','Raum','Titel','A','Termin 1']) {
+for (const expected of ['Filzmann Raumplaner','Weitere Angaben zur Verarbeitung in dieser App','Grund der Speicherung: Raumplanung','Aufbewahrt bis: Bis 1. September','Raumbuchung','Raum','Titel','A','Termin 1']) {
     if (!firstCardText.includes(expected)) throw new Error(`Tabellarische Auskunft fehlt: ${expected}`);
 }
 const pageText = flatten(nodes.get('lb-privacy-completeness'));

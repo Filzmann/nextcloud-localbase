@@ -1,13 +1,13 @@
 # LocalBase
 
-Gemeinsame Basisbausteine für die lokalen AD- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den AD-Fachprodukten ausgeliefert.
+Gemeinsame Basisbausteine für die lokalen FLZ- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den FLZ-Fachprodukten ausgeliefert.
 
 Der öffentliche Laufzeitvertrag `OCA\\LocalBase\\PublicApi\\V1` stellt Rollen
 und Bürobereiche als unveränderlichen, datensparsamen
 Organisationssnapshot bereit. Vertragsversion, Definitionsversion und
 Prüfsumme machen den Stand überprüfbar. Fehlende, ungültige oder inkompatible
 Snapshots enthalten keine Zuordnungen und erteilen keine fachlichen Rechte.
-Die Berechtigungsmatrix ist der erste migrierte Consumer. AD Recruitment ist
+Die Berechtigungsmatrix ist der erste migrierte Consumer. Filzmann Recruitment ist
 als zweiter Consumer app-lokal auf die öffentliche V1-Grenze umgestellt; sein
 realer Installations-, Deaktivierungs- und Rückbaunachweis bleibt bis zum
 freigegebenen Runtime-Lauf offen. Weitere Fachapps folgen einzeln nach eigenen
@@ -44,7 +44,7 @@ im vorgesehenen Runtimekontext aktiviert:
 <RUNTIME-KONTEXT> <CLI-PHP> occ app:enable localbase
 ```
 
-Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt installiert, sondern automatisch durch den geprüften Produktinstaller. Die vollständige Installationsreihenfolge und Prüfschritte stehen im öffentlichen [AD-Suite-Projekt](https://github.com/Filzmann/ad-suite).
+Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt installiert, sondern automatisch durch den geprüften Produktinstaller. Die vollständige Installationsreihenfolge und Prüfschritte stehen im öffentlichen [Filzmann-Full-Suite-Projekt](https://github.com/Filzmann/flz-full-suite).
 
 ## Roadmap
 

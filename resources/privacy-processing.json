@@ -4,7 +4,7 @@
   "processings": [
     {
       "processing_id": "personal_admin_layout",
-      "name": "Persönliches Layout des gemeinsamen AD-Adminbereichs",
+      "name": "Persönliches Layout des gemeinsamen Filzmann-Adminbereichs",
       "controller": {
         "component": "Lokale Nextcloud-Basis",
         "business_owner": "IKT-Administration"
@@ -15,7 +15,7 @@
         "Persönlicher Organigramm-Zoom"
       ],
       "data_subjects": [
-        "Nextcloud-Konten, die den gemeinsamen AD-Adminbereich personalisieren"
+        "Nextcloud-Konten, die den gemeinsamen Filzmann-Adminbereich personalisieren"
       ],
       "purposes": [
         "Geräteübergreifende Wiederherstellung der persönlichen Adminansicht"
@@ -33,7 +33,7 @@
         }
       ],
       "data_sources": [
-        "Eigene Bedienung des gemeinsamen AD-Adminbereichs",
+        "Eigene Bedienung des gemeinsamen Filzmann-Adminbereichs",
         "Nextcloud IUserConfig"
       ],
       "legal_basis": {

@@ -40,7 +40,7 @@ existiert; beschädigte Bestandswerte werden dabei nicht überschrieben.
 ## Lokale Demokonten
 
 `DemoAccountProvisioningService` ist die kanonische Provisionierung für die
-app-spezifischen AD-Demo-Packs. Neu erzeugte lokale Demokonten erhalten ihre
+app-spezifischen FLZ-Demo-Packs. Neu erzeugte lokale Demokonten erhalten ihre
 UID als initiales Passwort; bei einem bereits eindeutig für dasselbe
 Demo-Pack registrierten Konto wird dieser Zustand bei erneuter Provisionierung
 wiederhergestellt. Das ist ein bewusst schwacher, ausschließlich für lokale
@@ -89,10 +89,10 @@ das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein
 vorhandener Stand `stale`; Erstabrufe werden sicher als `unavailable`
 ausgewiesen und nach kurzer Sperrfrist erneut versucht.
 
-## AD-Organisationsvertrag
+## FLZ-Organisationsvertrag
 
-`AdOrganizationDefinition`, `AdOrganizationSettingsService`,
-`AdOrganizationHierarchy` und `AdOrganizationPermissionPolicy` bilden
+`FlzOrganizationDefinition`, `FlzOrganizationSettingsService`,
+`FlzOrganizationHierarchy` und `FlzOrganizationPermissionPolicy` bilden
 konfigurierbare Gruppen, Anzeigenamen, Bereiche, Ansichten, Hierarchie und
 Peergrenzen ab. Rollen und Bereiche werden über stabile semantische Schlüssel
 referenziert; konfigurierbare Gruppen-IDs oder Anzeigenamen sind keine
@@ -117,7 +117,7 @@ Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
 anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
 niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
 Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
-`ad-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
+`flz-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
 ausdrücklich niemals die neue `payroll`-Rolle.
 
 Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
@@ -126,8 +126,8 @@ Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
 Bestehende Gruppen-IDs, Anzeigenamen, Reihenfolgen und Rechte bleiben dabei
 unverändert.
 
-`AdOrganizationSettingsService` und der interne
-`AdOrganizationSnapshotService` bleiben die kanonische Quelle. Der öffentliche
+`FlzOrganizationSettingsService` und der interne
+`FlzOrganizationSnapshotService` bleiben die kanonische Quelle. Der öffentliche
 Kategorie-B-Vertrag `OCA\\LocalBase\\PublicApi\\V1` projiziert diesen Stand über
 `OrganizationSnapshotService` in das unveränderliche DTO
 `OrganizationSnapshot`. Vertragsversion `1.0`, Definitionsversion,
@@ -140,7 +140,7 @@ erzeugt einen ungültigen, leeren Snapshot. Fehlende oder deaktivierte
 LocalBase-Installationen sowie unbekannte Vertragsversionen sind kontrollierte
 Consumerzustände, aus denen keine Freigabe abgeleitet werden darf. Die
 Berechtigungsmatrix ist der erste Consumer dieser öffentlichen Grenze und auf
-realer Nextcloud-Laufzeit geprüft. AD Recruitment konsumiert denselben Vertrag
+realer Nextcloud-Laufzeit geprüft. Filzmann Recruitment konsumiert denselben Vertrag
 als zweiter, app-lokal gekapselter Consumer und unterscheidet fehlend,
 deaktiviert, inkompatibel, ungültig und nicht verfügbar fail-closed. Sein
 Installations-, Update-, Deaktivierungs-, Entfernungs- und Rückbaunachweis auf
@@ -148,7 +148,7 @@ realer Nextcloud-Laufzeit steht noch aus. Die übrigen internen
 Organisationsconsumer werden erst in getrennten Migrationsschritten
 umgestellt.
 
-`AdSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
+`FlzSuiteAdminSettingsService` speichert app-übergreifende Peerfreigaben
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen
 zentral in LocalBase-AppConfig. Bei Einzelinstallation erscheinen sie im
 Adminabschnitt des Fachprodukts, ab zwei Produkten im OrgSuite-Adminabschnitt.
@@ -186,7 +186,7 @@ Policies und zulässige Holds; die Fachapps bleiben für ihre Daten und die
 app-lokale Ausführung verantwortlich.
 
 Die persönlichen UI-Präferenzen unter
-`ad_suite_admin_dashboard_layout` bestehen nur solange das jeweilige native
+`flz_suite_admin_dashboard_layout` bestehen nur solange das jeweilige native
 Konto besteht oder bis zum persönlichen Reset. Reset oder Kontolöschung müssen
 die Werte vollständig löschen; sie werden weder ausgewertet noch exportiert.
 Die Demo-Registry besteht nur solange das
@@ -212,13 +212,13 @@ prüfen.
 
 ## Optionale Integration und Navigation
 
-`IntegrationCapabilityQueryEvent`, `AdIntegrationCapabilities` und
+`IntegrationCapabilityQueryEvent`, `FlzIntegrationCapabilities` und
 `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten.
 Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert keine
 Berechtigungen.
 
 `StandaloneAppNavigationService` registriert Fachapp-Einstiege nur ohne
-aktive OrgSuite. `AdProductSuiteService` und dynamische Settings-Adapter
+aktive OrgSuite. `FlzProductSuiteService` und dynamische Settings-Adapter
 platzieren die gemeinsame Organisationsverwaltung bei Einzelinstallation im
 Fachprodukt. OrgSuite bindet den vollständig in LocalBase liegenden
 Organisationseditor ab zwei Produkten lediglich als Adminadapter ein.

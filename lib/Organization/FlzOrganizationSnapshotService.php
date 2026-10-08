@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Organization;
 
 /** Veröffentlicht ausschließlich validierte semantische Rollen- und Bereichszuordnungen. */
-final class AdOrganizationSnapshotService {
-    public function __construct(private AdOrganizationSettingsService $settings) {}
+final class FlzOrganizationSnapshotService {
+    public function __construct(private FlzOrganizationSettingsService $settings) {}
 
-    public function snapshot(): AdOrganizationSnapshot {
+    public function snapshot(): FlzOrganizationSnapshot {
         $state = $this->settings->state();
         $definition = $state['definition'];
         if (!$state['valid']) {
-            return new AdOrganizationSnapshot(false, (int)$definition->toArray()['version'], [], []);
+            return new FlzOrganizationSnapshot(false, (int)$definition->toArray()['version'], [], []);
         }
 
         $roles = [];
@@ -23,6 +23,6 @@ final class AdOrganizationSnapshotService {
         foreach ($definition->areas() as $key => $area) {
             $areas[$key] = ['groupId' => $area['groupId'], 'label' => $area['label']];
         }
-        return new AdOrganizationSnapshot(true, (int)$definition->toArray()['version'], $roles, $areas);
+        return new FlzOrganizationSnapshot(true, (int)$definition->toArray()['version'], $roles, $areas);
     }
 }

@@ -24,7 +24,7 @@ namespace {
         public function getValueString(string $appId, string $key, string $default = ''): string { return $this->values[$appId][$key] ?? $default; }
         public function setValueString(string $appId, string $key, string $value): void { $this->values[$appId][$key] = $value; }
     };
-    $service = new \OCA\LocalBase\Organization\AdOrganizationSettingsService($config);
+    $service = new \OCA\LocalBase\Organization\FlzOrganizationSettingsService($config);
     $data = $service->definition()->toArray();
     $data['roles']['eb']['groupId'] = 'custom-eb';
     $data['roles']['eb']['label'] = 'Teamkoordination';
@@ -39,12 +39,12 @@ namespace {
     $legacy['organizationTeams'] = array_values(array_filter($legacy['organizationTeams'], static fn(array $team): bool => !in_array($team['id'], ['fleet-management', 'reception'], true)));
     foreach ($legacy['organizationTeams'] as &$team) if ($team['id'] === 'pfk') $team['roles'] = ['pfk'];
     unset($team);
-    $config->values['localbase']['ad_organization_definition'] = json_encode($legacy, JSON_THROW_ON_ERROR);
-    if ($service->definition()->toArray()['version'] !== 4 || !isset($service->definition()->roles()['deputy_pdl'], $service->definition()->roles()['payroll']) || $service->definition()->roleShortLabelForGroup('ad-PFK') !== 'PFK') throw new \RuntimeException('Gespeicherte Organisationsversion 1 wird nicht automatisch ergänzt.');
-    $persistedMigration = json_decode($config->values['localbase']['ad_organization_definition'], true, 64, JSON_THROW_ON_ERROR);
+    $config->values['localbase']['flz_organization_definition'] = json_encode($legacy, JSON_THROW_ON_ERROR);
+    if ($service->definition()->toArray()['version'] !== 4 || !isset($service->definition()->roles()['deputy_pdl'], $service->definition()->roles()['payroll']) || $service->definition()->roleShortLabelForGroup('flz-PFK') !== 'PFK') throw new \RuntimeException('Gespeicherte Organisationsversion 1 wird nicht automatisch ergänzt.');
+    $persistedMigration = json_decode($config->values['localbase']['flz_organization_definition'], true, 64, JSON_THROW_ON_ERROR);
     if (($persistedMigration['version'] ?? null) !== 4 || !isset($persistedMigration['roles']['fleet_management'], $persistedMigration['roles']['payroll']) || ($persistedMigration['areas']['west']['shortLabel'] ?? null) !== 'W') throw new \RuntimeException('Additive Organisationsmigration wird nicht idempotent persistiert.');
 
-    $config->values['localbase']['ad_organization_definition'] = '{kaputt';
-    if ($service->definition()->roleGroupId('eb') !== 'ad-EB') throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf Defaults zurück.');
-    echo "AdOrganizationSettingsServiceSmokeTest: OK\n";
+    $config->values['localbase']['flz_organization_definition'] = '{kaputt';
+    if ($service->definition()->roleGroupId('eb') !== 'flz-EB') throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf Defaults zurück.');
+    echo "FlzOrganizationSettingsServiceSmokeTest: OK\n";
 }

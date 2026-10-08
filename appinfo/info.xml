@@ -2,15 +2,15 @@
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>localbase</id>
-    <name>Lokale Nextcloud-Basis</name>
+    <name>Filzmann Nextcloud Basis</name>
     <summary>Gemeinsame lokale Basisbausteine für eigene Nextcloud-Apps.</summary>
     <description>Stellt kleine, gemeinsam genutzte PHP- und JavaScript-Basisbausteine für eigene lokale Nextcloud-Apps bereit.</description>
     <version>0.12.0-dev.2</version>
     <licence>agpl</licence>
-    <author>Simon</author>
+    <author>Filzmann Software</author>
     <namespace>LocalBase</namespace>
     <category>tools</category>
-    <website>https://github.com/Filzmann/ad-suite</website>
+    <website>https://github.com/Filzmann/flz-full-suite</website>
     <bugs>https://github.com/Filzmann/nextcloud-localbase/issues</bugs>
     <repository type="git">https://github.com/Filzmann/nextcloud-localbase</repository>
     <dependencies>

@@ -15,7 +15,7 @@ namespace Psr\Log { interface LoggerInterface { public function warning(string $
 
 namespace {
 
-    use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
+    use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
     use OCP\Config\IUserConfig;
     use Psr\Log\LoggerInterface;
 
@@ -33,7 +33,7 @@ namespace {
         }
     };
     $logger = new class implements LoggerInterface { public array $warnings = []; public function warning(string $message, array $context = []): void { $this->warnings[] = [$message, $context]; } };
-    $service = new AdSuiteAdminLayoutService($config, $logger);
+    $service = new FlzSuiteAdminLayoutService($config, $logger);
     $default = $service->layout('admin-a');
     if (($default['version'] ?? null) !== 1) throw new RuntimeException('Persönliches Adminlayout besitzt keine Vertragsversion.');
     if (($default['scopes']['main']['order'] ?? []) !== ['directory', 'calendar-context', 'organization', 'permissions']) throw new RuntimeException('Hauptblöcke fehlen im Standardlayout.');
@@ -56,11 +56,11 @@ namespace {
     if ($service->personalDataForUid('admin-a') !== $saved) throw new RuntimeException('Gespeichertes persönliches Layout ist nicht subjectgebunden auskunftsfähig.');
     if ($service->personalDataForUid('admin-b') !== null) throw new RuntimeException('Ein nicht gespeichertes Standardlayout wurde als Personenwert behauptet.');
     $service->reset('admin-a');
-    if (isset($config->values['admin-a']['localbase']['ad_suite_admin_dashboard_layout'])) throw new RuntimeException('Persönlicher Reset löscht den nativen UserConfig-Wert nicht vollständig.');
+    if (isset($config->values['admin-a']['localbase']['flz_suite_admin_dashboard_layout'])) throw new RuntimeException('Persönlicher Reset löscht den nativen UserConfig-Wert nicht vollständig.');
     if ($service->personalDataForUid('admin-a') !== null) throw new RuntimeException('Gelöschtes Layout bleibt in der Personendatenprojektion sichtbar.');
     if (($service->save('admin-d', ['scopes' => []])['organigram']['zoom'] ?? null) !== 100) throw new RuntimeException('Bestehende persönliche Layouts erhalten keinen rückwärtskompatiblen Standardzoom.');
     if ($service->layout('admin-b') !== $default) throw new RuntimeException('Layouts verschiedener Admins sind nicht getrennt.');
-    $config->values['admin-c']['localbase']['ad_suite_admin_dashboard_layout'] = ['scopes' => ['main' => ['order' => ['unknown'], 'collapsed' => []]]];
+    $config->values['admin-c']['localbase']['flz_suite_admin_dashboard_layout'] = ['scopes' => ['main' => ['order' => ['unknown'], 'collapsed' => []]]];
     if ($service->layout('admin-c') !== $default || $logger->warnings === []) throw new RuntimeException('Ungültiges gespeichertes Layout fällt nicht protokolliert auf den Standard zurück.');
 
     foreach ([
@@ -80,5 +80,5 @@ namespace {
         }
     }
 
-    echo "AdSuiteAdminLayoutServiceSmokeTest: OK\n";
+    echo "FlzSuiteAdminLayoutServiceSmokeTest: OK\n";
 }

@@ -8,16 +8,16 @@ use OCA\LocalBase\AppInfo\Application;
 use OCP\IAppConfig;
 
 /**
- * Zweck: Persistiert organisationsweite AD-Freigaben semantisch nach Rollen statt nach veränderlichen Gruppen-IDs.
- * Zusammenspiel: OrgSuite schreibt die Admin-Konfiguration; AD Kalender und AD Urlaub lesen daraus ihre aktiven Peer-Gruppen.
+ * Zweck: Persistiert organisationsweite FLZ-Freigaben semantisch nach Rollen statt nach veränderlichen Gruppen-IDs.
+ * Zusammenspiel: OrgSuite schreibt die Admin-Konfiguration; Filzmann Kalender und Filzmann Urlaubsplanung lesen daraus ihre aktiven Peer-Gruppen.
  * Vertrag: Nur Rollen mit peerEnabled werden ausgeliefert. Technische Gruppen-IDs werden erst beim Lesen aus der aktuellen Organisationsdefinition abgeleitet.
  */
-final class AdSuiteAdminSettingsService {
-    private const KEY = 'ad_suite_admin_settings';
+final class FlzSuiteAdminSettingsService {
+    private const KEY = 'flz_suite_admin_settings';
 
     public function __construct(
         private IAppConfig $config,
-        private AdOrganizationSettingsService $organization,
+        private FlzOrganizationSettingsService $organization,
     ) {}
 
     /** @return array<string,bool> */
@@ -106,7 +106,7 @@ final class AdSuiteAdminSettingsService {
         return array_filter($this->definition()->roles(), static fn(array $role): bool => $role['peerEnabled']);
     }
 
-    private function definition(): AdOrganizationDefinition {
+    private function definition(): FlzOrganizationDefinition {
         return $this->organization->definition();
     }
 

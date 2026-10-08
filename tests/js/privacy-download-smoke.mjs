@@ -32,7 +32,7 @@ const report = {
         contactNote: 'Bitte wende dich an die Datenschutzstelle.',
     },
     providers: [{
-        appId: 'adroom',
+        appId: 'flzroom',
         status: 'complete',
         processing: {
             recipients: ['Keine regelmäßige Weitergabe.'],

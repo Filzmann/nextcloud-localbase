@@ -3,34 +3,34 @@
 declare(strict_types=1);
 
 
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Organization\AdOrganizationHierarchy;
-use OCA\LocalBase\Organization\AdOrganizationPermissionPolicy;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Organization\FlzOrganizationHierarchy;
+use OCA\LocalBase\Organization\FlzOrganizationPermissionPolicy;
 
-$definition = AdOrganizationDefinition::defaults();
+$definition = FlzOrganizationDefinition::defaults();
 if ($definition->diagramOrder() !== []) throw new RuntimeException('Die visuelle Diagrammordnung muss kompatibel ohne Vorgabe starten.');
-if ($definition->roleLabelForGroup('ad-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
-if ($definition->areaLabelForGroup('ad-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
+if ($definition->roleLabelForGroup('flz-Buero') !== 'Büromitarbeiter*innen') throw new RuntimeException('Sichtbarer Rollenname fehlt.');
+if ($definition->areaLabelForGroup('flz-Bereich-Sued') !== 'Süd') throw new RuntimeException('Sichtbarer Bereichsname fehlt.');
 foreach ([
-    'ad-Buero' => 'BO',
-    'ad-EB' => 'EB',
-    'ad-PFK' => 'PFK',
-    'ad-Bueroorganisation-Pflege' => 'BO-Pflege',
-    'ad-IT' => 'IT',
+    'flz-Buero' => 'BO',
+    'flz-EB' => 'EB',
+    'flz-PFK' => 'PFK',
+    'flz-Bueroorganisation-Pflege' => 'BO-Pflege',
+    'flz-IT' => 'IT',
 ] as $groupId => $shortLabel) {
     if ($definition->roleShortLabelForGroup($groupId) !== $shortLabel) throw new RuntimeException("Betriebsweites Rollenkürzel {$shortLabel} fehlt.");
 }
-foreach (['ad-Bereich-Nordost' => 'NO', 'ad-Bereich-West' => 'W', 'ad-Bereich-Sued' => 'S'] as $groupId => $shortLabel) {
+foreach (['flz-Bereich-Nordost' => 'NO', 'flz-Bereich-West' => 'W', 'flz-Bereich-Sued' => 'S'] as $groupId => $shortLabel) {
     if ($definition->areaShortLabelForGroup($groupId) !== $shortLabel) throw new RuntimeException("Betriebsweites Bereichskürzel {$shortLabel} fehlt.");
 }
 $roles = $definition->roles();
 if ($definition->toArray()['version'] !== 4) throw new RuntimeException('Die additive Organisationsmigration verwendet nicht Vertragsversion 4.');
 $financeGroup = $definition->roleGroupId('finance');
 $payrollGroup = $definition->roleGroupId('payroll');
-if ($financeGroup !== 'ad-Finanzen' || $payrollGroup !== 'ad-Lohn' || $financeGroup === $payrollGroup) {
+if ($financeGroup !== 'flz-Finanzen' || $payrollGroup !== 'flz-Lohn' || $financeGroup === $payrollGroup) {
     throw new RuntimeException('Finanzen und Lohn sind nicht als getrennte semantische Rollen vorbelegt.');
 }
-if ($definition->roleKeysForGroups(['ad-Finanzen-Lohn']) !== ['finance']) {
+if ($definition->roleKeysForGroups(['flz-Finanzen-Lohn']) !== ['finance']) {
     throw new RuntimeException('Die bisherige kombinierte Gruppen-ID verliert ihre sichere Finanz-Kompatibilität.');
 }
 foreach (['finance', 'payroll'] as $financeRole) {
@@ -39,10 +39,10 @@ foreach (['finance', 'payroll'] as $financeRole) {
     }
 }
 foreach ([
-    'deputy_pdl' => ['ad-StvPDL', 'Stellvertretende Pflegedienstleitung', true],
-    'care_office' => ['ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', false],
-    'fleet_management' => ['ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', false],
-    'reception' => ['ad-Empfang', 'Empfang', false],
+    'deputy_pdl' => ['flz-StvPDL', 'Stellvertretende Pflegedienstleitung', true],
+    'care_office' => ['flz-Bueroorganisation-Pflege', 'Büroorganisation Pflege', false],
+    'fleet_management' => ['flz-Fahrzeugverwaltung', 'Fahrzeugverwaltung', false],
+    'reception' => ['flz-Empfang', 'Empfang', false],
 ] as $key => [$groupId, $label, $singleOccupant]) {
     $role = $roles[$key] ?? null;
     if ($role === null || $role['groupId'] !== $groupId || $role['label'] !== $label || $role['singleOccupant'] !== $singleOccupant || $role['areaScoped'] || $role['staffBlock'] || !$role['calendarVisible']) {
@@ -76,12 +76,12 @@ foreach ($legacy['roles'] as &$legacyRole) unset($legacyRole['shortLabel']);
 unset($legacyRole);
 foreach ($legacy['areas'] as &$legacyArea) unset($legacyArea['shortLabel']);
 unset($legacyArea);
-$legacyRoles = AdOrganizationDefinition::get($legacy)->roles();
+$legacyRoles = FlzOrganizationDefinition::get($legacy)->roles();
 if (!$legacyRoles['gf_as']['singleOccupant'] || $legacyRoles['office']['singleOccupant']) throw new RuntimeException('Bestehende Organisationsdefinitionen erhalten keine kompatible Einzelpositions-Vorbelegung.');
-$migratedVersionThree = AdOrganizationDefinition::get($legacy);
+$migratedVersionThree = FlzOrganizationDefinition::get($legacy);
 if ($migratedVersionThree->toArray()['version'] !== 4
-    || $migratedVersionThree->roleShortLabelForGroup('ad-Buero') !== 'BO'
-    || $migratedVersionThree->areaShortLabelForGroup('ad-Bereich-Nordost') !== 'NO') {
+    || $migratedVersionThree->roleShortLabelForGroup('flz-Buero') !== 'BO'
+    || $migratedVersionThree->areaShortLabelForGroup('flz-Bereich-Nordost') !== 'NO') {
     throw new RuntimeException('Version 3 erhält die betriebsweiten Kalenderkürzel nicht additiv.');
 }
 $organizationTeams = array_column($definition->organizationTeams(), null, 'id');
@@ -114,16 +114,16 @@ foreach ($versionTwo['organizationTeams'] as &$versionTwoTeam) {
     $versionTwoTeam['roles'] = array_values(array_diff($versionTwoTeam['roles'], ['payroll']));
 }
 unset($versionTwoTeam);
-$migratedVersionTwo = AdOrganizationDefinition::get($versionTwo);
+$migratedVersionTwo = FlzOrganizationDefinition::get($versionTwo);
 if ($migratedVersionTwo->toArray()['version'] !== 4
     || $migratedVersionTwo->roleGroupId('finance') !== 'existing-finance-and-payroll'
-    || $migratedVersionTwo->roleGroupId('payroll') !== 'ad-Lohn'
+    || $migratedVersionTwo->roleGroupId('payroll') !== 'flz-Lohn'
     || $migratedVersionTwo->roleLabel('finance') !== 'Finanzen') {
     throw new RuntimeException('Version 2 wird nicht additiv und mit erhaltener Bestandsgruppe migriert.');
 }
 $customVersionTwo = $versionTwo;
 $customVersionTwo['roles']['finance']['label'] = 'Individuelle Buchhaltung';
-if (AdOrganizationDefinition::get($customVersionTwo)->roleLabel('finance') !== 'Individuelle Buchhaltung') {
+if (FlzOrganizationDefinition::get($customVersionTwo)->roleLabel('finance') !== 'Individuelle Buchhaltung') {
     throw new RuntimeException('Eine individuelle Finanzbezeichnung wird beim Split überschrieben.');
 }
 
@@ -138,16 +138,16 @@ $legacyOrganization['hierarchy']['secretariat'] = [];
 $legacyOrganization['organizationTeams'] = array_values(array_filter($legacyOrganization['organizationTeams'], static fn(array $team): bool => !in_array($team['id'], ['fleet-management', 'reception'], true)));
 foreach ($legacyOrganization['organizationTeams'] as &$team) if ($team['id'] === 'pfk') $team['roles'] = ['pfk'];
 unset($team);
-$migratedOrganization = AdOrganizationDefinition::get($legacyOrganization);
+$migratedOrganization = FlzOrganizationDefinition::get($legacyOrganization);
 if ($migratedOrganization->toArray()['version'] !== 4 || $migratedOrganization->roleLabel('pfk') !== 'Individuelle Pflegebezeichnung' || $migratedOrganization->roles()['pfk']['sortOrder'] !== 777) throw new RuntimeException('Bestehende Organisationswerte werden bei der Migration verändert.');
 if (!in_array('office', $migratedOrganization->hierarchy()['pdl'], true) || !$migratedOrganization->managesRole('deputy_pdl', 'pfk')) throw new RuntimeException('Bestehende Kanten werden nicht bewahrt oder neue Hierarchiekanten fehlen nach der Migration.');
 
 $collidingLegacy = $legacyOrganization;
 $collidingLegacy['roles']['custom_collision'] = $collidingLegacy['roles']['office'];
-$collidingLegacy['roles']['custom_collision']['groupId'] = 'ad-StvPDL';
+$collidingLegacy['roles']['custom_collision']['groupId'] = 'flz-StvPDL';
 $collidingLegacy['roles']['custom_collision']['label'] = 'Kollidierende Testrolle';
 try {
-    AdOrganizationDefinition::get($collidingLegacy);
+    FlzOrganizationDefinition::get($collidingLegacy);
     throw new RuntimeException('Kollidierende Gruppen-ID wurde bei der additiven Migration überschrieben.');
 } catch (InvalidArgumentException) {
 }
@@ -161,18 +161,18 @@ $custom['areas']['south']['groupId'] = 'custom-south';
 $custom['areas']['south']['label'] = 'Südliches Büro';
 $custom['areas']['south']['shortLabel'] = 'SB';
 $custom['diagramOrder'] = ['gf_as', 'bl::west', 'bl::south'];
-$configured = AdOrganizationDefinition::get($custom);
+$configured = FlzOrganizationDefinition::get($custom);
 if ($configured->roleGroupId('office') !== 'custom-office' || $configured->roleShortLabelForGroup('custom-office') !== 'VW' || $configured->areaLabel('south') !== 'Südliches Büro' || $configured->areaShortLabelForGroup('custom-south') !== 'SB' || $configured->roles()['gf_as']['singleOccupant'] || $configured->diagramOrder() !== ['gf_as', 'bl::west', 'bl::south']) throw new RuntimeException('Konfigurierbare Gruppen, Anzeigenamen, Kürzel, Einzelpositionen oder visuelle Diagrammordnung fehlen.');
 $custom['hierarchy']['pdl'] = ['office'];
-$configured = AdOrganizationDefinition::get($custom);
-$policy = new AdOrganizationPermissionPolicy(new AdOrganizationHierarchy(null, $configured));
-if (!$policy->canManage('pdl', false, ['ad-PDL'], 'office', ['custom-office'])) throw new RuntimeException('Konfigurierte Hierarchiekante wird nicht angewendet.');
-if ($policy->canManage('pdl', false, ['ad-PDL'], 'pfk', ['ad-PFK'])) throw new RuntimeException('Entfernte Hierarchiekante bleibt unzulässig aktiv.');
+$configured = FlzOrganizationDefinition::get($custom);
+$policy = new FlzOrganizationPermissionPolicy(new FlzOrganizationHierarchy(null, $configured));
+if (!$policy->canManage('pdl', false, ['flz-PDL'], 'office', ['custom-office'])) throw new RuntimeException('Konfigurierte Hierarchiekante wird nicht angewendet.');
+if ($policy->canManage('pdl', false, ['flz-PDL'], 'pfk', ['flz-PFK'])) throw new RuntimeException('Entfernte Hierarchiekante bleibt unzulässig aktiv.');
 
 $cyclic = $custom;
 $cyclic['hierarchy']['office'] = ['gf_as'];
 try {
-    AdOrganizationDefinition::get($cyclic);
+    FlzOrganizationDefinition::get($cyclic);
     throw new RuntimeException('Zyklische Hierarchie wurde nicht abgelehnt.');
 } catch (InvalidArgumentException) {
 }
@@ -180,7 +180,7 @@ try {
 $unknown = $custom;
 $unknown['hierarchy']['pdl'] = ['nicht_vorhanden'];
 try {
-    AdOrganizationDefinition::get($unknown);
+    FlzOrganizationDefinition::get($unknown);
     throw new RuntimeException('Unbekanntes Hierarchieziel wurde nicht abgelehnt.');
 } catch (InvalidArgumentException) {
 }
@@ -188,7 +188,7 @@ try {
 $unknownDiagramNode = $custom;
 $unknownDiagramNode['diagramOrder'][] = 'bl::unbekannt';
 try {
-    AdOrganizationDefinition::get($unknownDiagramNode);
+    FlzOrganizationDefinition::get($unknownDiagramNode);
     throw new RuntimeException('Unbekannter Diagrammknoten wurde nicht abgelehnt.');
 } catch (InvalidArgumentException) {
 }
@@ -196,9 +196,9 @@ try {
 $duplicateDiagramNode = $custom;
 $duplicateDiagramNode['diagramOrder'][] = 'gf_as';
 try {
-    AdOrganizationDefinition::get($duplicateDiagramNode);
+    FlzOrganizationDefinition::get($duplicateDiagramNode);
     throw new RuntimeException('Doppelter Diagrammknoten wurde nicht abgelehnt.');
 } catch (InvalidArgumentException) {
 }
 
-echo "AdOrganizationDefinitionSmokeTest: OK\n";
+echo "FlzOrganizationDefinitionSmokeTest: OK\n";

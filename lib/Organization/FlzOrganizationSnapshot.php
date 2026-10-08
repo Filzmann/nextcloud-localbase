@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Organization;
 
 /** Datensparsamer, unveränderlicher Consumervertrag ohne Mitgliederlisten. */
-final class AdOrganizationSnapshot {
+final class FlzOrganizationSnapshot {
     private const CONTRACT_VERSION = 1;
 
     /** @param array<string, array{groupId: string, label: string}> $roles

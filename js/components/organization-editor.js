@@ -5,7 +5,7 @@
     const clone = value => JSON.parse(JSON.stringify(value));
 
     /**
-     * Zweck: Bearbeitet allgemeine AD-Organisationsfelder, Rollen, Bereiche und Urlaubsansichten.
+     * Zweck: Bearbeitet allgemeine FLZ-Organisationsfelder, Rollen, Bereiche und Urlaubsansichten.
      * Zusammenspiel: admin.js -> OrganizationEditor -> HierarchyBoard; LocalBase validiert den gesammelten Payload serverseitig.
      */
     class OrganizationEditor {

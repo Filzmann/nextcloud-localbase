@@ -7,9 +7,9 @@ namespace OCA\LocalBase\Controller;
 use InvalidArgumentException;
 use OCA\LocalBase\AppInfo\Application;
 use OCA\LocalBase\Calendar\CalendarContextSettingsService;
-use OCA\LocalBase\Organization\AdOrganizationSettingsService;
-use OCA\LocalBase\Organization\AdSuiteAdminSettingsService;
-use OCA\LocalBase\Service\AdSuiteAdminLayoutService;
+use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+use OCA\LocalBase\Organization\FlzSuiteAdminSettingsService;
+use OCA\LocalBase\Service\FlzSuiteAdminLayoutService;
 use OCA\LocalBase\Service\OrganizationDirectoryStatusService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -21,19 +21,19 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Zweck: Stellt die organisationsweiten Suite-Einstellungen ausschließlich Nextcloud-Admins bereit.
- * Zusammenspiel: Admin-UI -> AdSuiteAdminApiController -> LocalBase-Organisations- und Freigabeservices.
+ * Zusammenspiel: Admin-UI -> FlzSuiteAdminApiController -> LocalBase-Organisations- und Freigabeservices.
  * Vertrag: Keine Methode trägt NoAdminRequired; zusätzlich verweigert der Controller direkte Aufrufe ohne aktive Admin-Sitzung.
  */
-final class AdSuiteAdminApiController extends Controller {
+final class FlzSuiteAdminApiController extends Controller {
     public function __construct(
         IRequest $request,
         private IUserSession $session,
         private IGroupManager $groups,
-        private AdOrganizationSettingsService $organization,
-        private AdSuiteAdminSettingsService $adminSettings,
+        private FlzOrganizationSettingsService $organization,
+        private FlzSuiteAdminSettingsService $adminSettings,
         private CalendarContextSettingsService $calendarContext,
         private OrganizationDirectoryStatusService $directoryStatus,
-        private AdSuiteAdminLayoutService $dashboardLayout,
+        private FlzSuiteAdminLayoutService $dashboardLayout,
         private LoggerInterface $logger,
     ) {
         parent::__construct(Application::APP_ID, $request);
@@ -72,8 +72,8 @@ final class AdSuiteAdminApiController extends Controller {
         } catch (InvalidArgumentException $error) {
             return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $error) {
-            $this->logger->error('AD-Organisation konnte nicht gespeichert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Die AD-Organisation konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+            $this->logger->error('Filzmann-Organisation konnte nicht gespeichert werden.', ['exception' => $error]);
+            return new JSONResponse(['error' => 'Die Filzmann-Organisation konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
         }
     }
 
@@ -92,7 +92,7 @@ final class AdSuiteAdminApiController extends Controller {
         } catch (InvalidArgumentException $error) {
             return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $error) {
-            $this->logger->error('Persönliches AD-Adminlayout konnte nicht gespeichert werden.', ['exception' => $error]);
+            $this->logger->error('Persönliches Filzmann-Adminlayout konnte nicht gespeichert werden.', ['exception' => $error]);
             return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
         }
     }
@@ -102,7 +102,7 @@ final class AdSuiteAdminApiController extends Controller {
         try {
             return new JSONResponse(['dashboardLayout' => $this->dashboardLayout->reset($this->session->getUser()->getUID())]);
         } catch (\Throwable $error) {
-            $this->logger->error('Persönliches AD-Adminlayout konnte nicht zurückgesetzt werden.', ['exception' => $error]);
+            $this->logger->error('Persönliches Filzmann-Adminlayout konnte nicht zurückgesetzt werden.', ['exception' => $error]);
             return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht zurückgesetzt werden.'], Http::STATUS_BAD_REQUEST);
         }
     }

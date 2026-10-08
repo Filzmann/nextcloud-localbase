@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Organization;
 
 /**
- * Zweck: Bewertet die konfigurierbare, transitive AD-Weisungshierarchie für lokale Fachapps.
+ * Zweck: Bewertet die konfigurierbare, transitive FLZ-Weisungshierarchie für lokale Fachapps.
  * Zusammenspiel: SettingsService -> Definition -> Hierarchy -> PermissionPolicy.
  * Vertrag: Bereichsgebundene Leitungsrechte werden erst in der PermissionPolicy auf gemeinsame Bereiche begrenzt.
  */
-class AdOrganizationHierarchy {
-    protected AdOrganizationDefinition $definition;
+class FlzOrganizationHierarchy {
+    protected FlzOrganizationDefinition $definition;
 
-    public function __construct(?AdOrganizationSettingsService $settings = null, ?AdOrganizationDefinition $definition = null) {
-        $this->definition = $settings?->definition() ?? $definition ?? AdOrganizationDefinition::defaults();
+    public function __construct(?FlzOrganizationSettingsService $settings = null, ?FlzOrganizationDefinition $definition = null) {
+        $this->definition = $settings?->definition() ?? $definition ?? FlzOrganizationDefinition::defaults();
     }
 
-    public function definition(): AdOrganizationDefinition { return $this->definition; }
+    public function definition(): FlzOrganizationDefinition { return $this->definition; }
 
     public function manages(array $actorGroups, array $targetGroups): bool {
         foreach ($this->definition->roleKeysForGroups($actorGroups) as $actorRole) {

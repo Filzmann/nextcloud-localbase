@@ -2,45 +2,45 @@
 
 declare(strict_types=1);
 
-$class = __DIR__ . '/../../lib/Catalog/AdProductCatalog.php';
-$catalogFile = __DIR__ . '/../../resources/ad-product-catalog.json';
+$class = __DIR__ . '/../../lib/Catalog/FlzProductCatalog.php';
+$catalogFile = __DIR__ . '/../../resources/flz-product-catalog.json';
 
 if (!is_file($class) || !is_file($catalogFile)) {
-    throw new RuntimeException('Der kanonische AD-Produktkatalog fehlt.');
+    throw new RuntimeException('Der kanonische FLZ-Produktkatalog fehlt.');
 }
 
-use OCA\LocalBase\Catalog\AdProductCatalog;
+use OCA\LocalBase\Catalog\FlzProductCatalog;
 
-$catalog = new AdProductCatalog($catalogFile);
+$catalog = new FlzProductCatalog($catalogFile);
 if ($catalog->version() !== 1) {
     throw new RuntimeException('Die Katalogversion ist nicht stabil auf Version 1 festgelegt.');
 }
 
 $productIds = array_column($catalog->products(), 'id');
-$expectedProducts = ['adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment', 'adbqplanung'];
+$expectedProducts = ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flzbqplanung'];
 if ($productIds !== $expectedProducts) {
-    throw new RuntimeException('AD-Fachprodukte oder ihre Reihenfolge weichen vom Vertrag ab.');
+    throw new RuntimeException('FLZ-Fachprodukte oder ihre Reihenfolge weichen vom Vertrag ab.');
 }
 
-$menuIds = array_column($catalog->menuProducts('ad'), 'id');
+$menuIds = array_column($catalog->menuProducts('flz'), 'id');
 if ($menuIds !== $expectedProducts) {
-    throw new RuntimeException('Das AD-Menü wird nicht vollständig aus dem Katalog abgeleitet.');
+    throw new RuntimeException('Das FLZ-Menü wird nicht vollständig aus dem Katalog abgeleitet.');
 }
 
 $fullSuite = $catalog->fullSuiteAppIds();
-if ($fullSuite !== ['localbase', 'orgsuite', 'adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
-    throw new RuntimeException('Das vollständige Suite-Bundle enthält nicht Infrastruktur und alle AD-Produkte.');
+if ($fullSuite !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
+    throw new RuntimeException('Das vollständige Suite-Bundle enthält nicht Infrastruktur und alle FLZ-Produkte.');
 }
-if (array_column($catalog->bundleProducts(), 'id') !== ['adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
+if (array_column($catalog->bundleProducts(), 'id') !== ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
     throw new RuntimeException('Nicht freigegebene Entwicklungsprodukte gelangen in Einzelproduktbundles.');
 }
 
-if ($catalog->productBundleAppIds('adrecruitment') !== ['localbase', 'orgsuite', 'adrecruitment']) {
+if ($catalog->productBundleAppIds('flzrecruitment') !== ['localbase', 'orgsuite', 'flzrecruitment']) {
     throw new RuntimeException('Das Recruitment-Produktbundle ist nicht eigenständig zusammengesetzt.');
 }
 
-$recruitment = $catalog->product('adrecruitment');
-if ($recruitment['route'] !== 'adrecruitment.page.index'
+$recruitment = $catalog->product('flzrecruitment');
+if ($recruitment['route'] !== 'flzrecruitment.page.index'
     || $recruitment['standalone'] !== true
     || $recruitment['menu'] !== true
     || $recruitment['fullSuiteBundle'] !== true
@@ -48,8 +48,8 @@ if ($recruitment['route'] !== 'adrecruitment.page.index'
     throw new RuntimeException('Der Recruitment-Katalogeintrag erfüllt den Suite-Vertrag nicht.');
 }
 
-$bqPlanning = $catalog->product('adbqplanung');
-if ($bqPlanning['route'] !== 'adbqplanung.page.index'
+$bqPlanning = $catalog->product('flzbqplanung');
+if ($bqPlanning['route'] !== 'flzbqplanung.page.index'
     || $bqPlanning['standalone'] !== true
     || $bqPlanning['menu'] !== true
     || $bqPlanning['fullSuiteBundle'] !== false
@@ -66,7 +66,7 @@ try {
 $invalid = json_decode((string)file_get_contents($catalogFile), true, flags: JSON_THROW_ON_ERROR);
 $invalid['entries'][] = $invalid['entries'][2];
 try {
-    AdProductCatalog::validate($invalid);
+    FlzProductCatalog::validate($invalid);
     throw new RuntimeException('Eine doppelte Produkt-ID wurde akzeptiert.');
 } catch (UnexpectedValueException) {
 }
@@ -74,7 +74,7 @@ try {
 $invalid = json_decode((string)file_get_contents($catalogFile), true, flags: JSON_THROW_ON_ERROR);
 $invalid['entries'][2]['route'] = 'foreign.page.index';
 try {
-    AdProductCatalog::validate($invalid);
+    FlzProductCatalog::validate($invalid);
     throw new RuntimeException('Eine fremde technische Einstiegsroute wurde akzeptiert.');
 } catch (UnexpectedValueException) {
 }
@@ -82,7 +82,7 @@ try {
 $definition = json_decode((string)file_get_contents($catalogFile), true, flags: JSON_THROW_ON_ERROR);
 $assertInvalid = static function (array $candidate, string $message): void {
     try {
-        AdProductCatalog::validate($candidate);
+        FlzProductCatalog::validate($candidate);
         throw new RuntimeException($message);
     } catch (UnexpectedValueException) {
     }
@@ -103,17 +103,17 @@ $candidate = $definition; array_splice($candidate['entries'], 1, 1);
 $assertInvalid($candidate, 'Fehlende verbindliche Infrastruktur wurde akzeptiert.');
 $candidate = $definition;
 $candidate['entries'][0] = array_replace($candidate['entries'][0], [
-    'kind' => 'product', 'suite' => 'ad', 'order' => 999, 'route' => 'localbase.page.index',
+    'kind' => 'product', 'suite' => 'flz', 'order' => 999, 'route' => 'localbase.page.index',
     'productLabel' => 'LocalBase', 'navigationLabel' => 'LocalBase',
 ]);
 $assertInvalid($candidate, 'Falsch klassifizierte verbindliche Infrastruktur wurde akzeptiert.');
 
 $assertUnreadableCatalog = static function (string $contents, string $message): void {
-    $file = tempnam(sys_get_temp_dir(), 'ad-product-catalog-invalid-');
+    $file = tempnam(sys_get_temp_dir(), 'flz-product-catalog-invalid-');
     if ($file === false) throw new RuntimeException('Temporärer Fehlerkatalog konnte nicht angelegt werden.');
     try {
         file_put_contents($file, $contents);
-        (new AdProductCatalog($file))->entries();
+        (new FlzProductCatalog($file))->entries();
         throw new RuntimeException($message);
     } catch (UnexpectedValueException) {
     } finally {
@@ -125,19 +125,19 @@ $assertUnreadableCatalog('[]', 'Eine Katalogliste wurde als Objektwurzel akzepti
 
 $reordered = json_decode((string)file_get_contents($catalogFile), true, flags: JSON_THROW_ON_ERROR);
 $reordered['entries'] = array_reverse($reordered['entries']);
-$temporaryCatalog = tempnam(sys_get_temp_dir(), 'ad-product-catalog-');
+$temporaryCatalog = tempnam(sys_get_temp_dir(), 'flz-product-catalog-');
 if ($temporaryCatalog === false) {
     throw new RuntimeException('Temporärer Katalog konnte nicht angelegt werden.');
 }
 try {
     file_put_contents($temporaryCatalog, json_encode($reordered, JSON_THROW_ON_ERROR));
-    $reorderedCatalog = new AdProductCatalog($temporaryCatalog);
+    $reorderedCatalog = new FlzProductCatalog($temporaryCatalog);
     if (array_column($reorderedCatalog->products(), 'id') !== $expectedProducts
-        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', 'adcalendar', 'adplaner', 'adurlaub', 'adroom', 'adrecruitment']) {
+        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
         throw new RuntimeException('Katalogreihenfolge hängt von der JSON-Dateireihenfolge statt vom Vertrag ab.');
     }
 } finally {
     @unlink($temporaryCatalog);
 }
 
-echo "AdProductCatalogSmokeTest: OK\n";
+echo "FlzProductCatalogSmokeTest: OK\n";

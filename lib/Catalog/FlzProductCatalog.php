@@ -9,10 +9,10 @@ use JsonException;
 use UnexpectedValueException;
 
 /**
- * Kanonischer, versionierter Vertrag für AD-Produkte, Navigation und Bundles.
+ * Kanonischer, versionierter Vertrag für FLZ-Produkte, Navigation und Bundles.
  * Sichtbare Bezeichnungen bleiben Übersetzungsquellen der jeweiligen Fachapp.
  */
-final class AdProductCatalog {
+final class FlzProductCatalog {
     public const VERSION = 1;
     private const REQUIRED_INFRASTRUCTURE = ['localbase', 'orgsuite'];
 
@@ -68,7 +68,7 @@ final class AdProductCatalog {
             }
         }
 
-        throw new InvalidArgumentException("Unbekanntes AD-Produkt: {$appId}");
+        throw new InvalidArgumentException("Unbekanntes FLZ-Produkt: {$appId}");
     }
 
     /** @return list<string> */
@@ -193,18 +193,18 @@ final class AdProductCatalog {
             return $this->catalog;
         }
 
-        $file = $this->catalogFile ?? dirname(__DIR__, 2) . '/resources/ad-product-catalog.json';
+        $file = $this->catalogFile ?? dirname(__DIR__, 2) . '/resources/flz-product-catalog.json';
         $contents = @file_get_contents($file);
         if ($contents === false) {
-            throw new UnexpectedValueException('AD-Produktkatalog ist nicht verfügbar.');
+            throw new UnexpectedValueException('FLZ-Produktkatalog ist nicht verfügbar.');
         }
         try {
             $decoded = json_decode($contents, true, flags: JSON_THROW_ON_ERROR);
         } catch (JsonException $error) {
-            throw new UnexpectedValueException('AD-Produktkatalog enthält ungültiges JSON.', previous: $error);
+            throw new UnexpectedValueException('FLZ-Produktkatalog enthält ungültiges JSON.', previous: $error);
         }
         if (!is_array($decoded)) {
-            throw new UnexpectedValueException('AD-Produktkatalog besitzt kein Objekt als Wurzel.');
+            throw new UnexpectedValueException('FLZ-Produktkatalog besitzt kein Objekt als Wurzel.');
         }
 
         return $this->catalog = self::validate($decoded);

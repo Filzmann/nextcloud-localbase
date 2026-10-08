@@ -13,7 +13,7 @@ for (const contract of ['class OrganizationEditor', 'Direkte Hierarchie', 'Fachl
 if (editorSource.includes('Fachrollen und Nextcloud-Gruppen') || editorSource.includes('columnHeader(') || editorSource.includes('roleRow(')) throw new Error('Die breite Rollen-Einstellungstabelle ist weiterhin vorhanden.');
 for (const contract of ['class HierarchyBoard', 'onEditRole', 'onZoomChange', 'data-action="edit-role"', 'data-action="zoom-in"', 'data-action="zoom-out"', 'data-action="zoom-reset"', 'data-organigram-viewport', 'tabindex="0"', 'startPan(', 'movePan(', 'finishPan(', 'normalizeZoom(', 'setZoom(', 'draggable="true"', 'data-position-node', 'data-diagram-level-list', 'data-action="move-node-left"', 'data-action="move-node-right"', 'getDiagramOrder()', 'insertionTarget(', 'applyDiagramOrderMove(', 'addEdge(manager, target)', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.', 'levels(roleKeys)', 'diagramNodes(roleKeys)', 'diagramEdges(nodes)', 'positionText(roleKey, areaKey)', 'data-hierarchy-links', 'drawConnections()', "createElementNS('http://www.w3.org/2000/svg', 'path')", 'orgs-connection-list', 'orgs-card-person']) if (!hierarchySource.includes(contract)) throw new Error(`Organigramm-Vertrag fehlt: ${contract}`);
 if (hierarchySource.includes('Keine direkt unterstellte Rolle') || hierarchySource.includes('class="orgs-edges"')) throw new Error('Unterstellte Rollen stehen weiterhin textlastig innerhalb der Diagrammknoten.');
-for (const contract of ['/api/ad-suite/admin/settings', '/api/ad-suite/admin/calendar-context', '/api/ad-suite/admin/organization', '/api/ad-suite/admin/permissions', '/api/ad-suite/admin/layout', 'DELETE', 'orgs-layout-reset', 'calendarContext', 'renderCalendarContext', 'collectCalendarContext', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []', 'setOrganigramZoom', 'data.dashboardLayout?.organigram?.zoom']) {
+for (const contract of ['/api/flz-full-suite/admin/settings', '/api/flz-full-suite/admin/calendar-context', '/api/flz-full-suite/admin/organization', '/api/flz-full-suite/admin/permissions', '/api/flz-full-suite/admin/layout', 'DELETE', 'orgs-layout-reset', 'calendarContext', 'renderCalendarContext', 'collectCalendarContext', 'calendarPeerEditing', 'vacationPeerApproval', 'renderDirectoryStatus', 'orgs-directory-groups', 'data.directory?.positions || []', 'setOrganigramZoom', 'data.dashboardLayout?.organigram?.zoom']) {
     if (!adminSource.includes(contract)) throw new Error(`Admin-Frontendvertrag fehlt: ${contract}`);
 }
 const template = readFileSync(new URL('../../templates/organization-admin.php', import.meta.url), 'utf8');
@@ -86,21 +86,21 @@ if (positionedGap?.card !== rightCard || positionedGap?.targetId !== 'right' || 
 const editor = Object.create(context.window.LocalBase.components.OrganizationEditor.prototype);
 editor.definition = {
     roles: {
-        first: { label: 'Erste Rolle', groupId: 'ad-Erste', sortOrder: 20, calendarVisible: true, areaScoped: false, managementAreaScoped: false, peerEnabled: true, staffBlock: false, singleOccupant: false },
-        second: { label: 'Zweite Rolle', groupId: 'ad-Zweite', sortOrder: 10, calendarVisible: true, areaScoped: true, managementAreaScoped: true, peerEnabled: false, staffBlock: false, singleOccupant: true },
+        first: { label: 'Erste Rolle', groupId: 'flz-Erste', sortOrder: 20, calendarVisible: true, areaScoped: false, managementAreaScoped: false, peerEnabled: true, staffBlock: false, singleOccupant: false },
+        second: { label: 'Zweite Rolle', groupId: 'flz-Zweite', sortOrder: 10, calendarVisible: true, areaScoped: true, managementAreaScoped: true, peerEnabled: false, staffBlock: false, singleOccupant: true },
     },
-    areas: { west: { label: 'West', groupId: 'ad-West', sortOrder: 20 }, east: { label: 'Ost', groupId: 'ad-Ost', sortOrder: 10 } },
+    areas: { west: { label: 'West', groupId: 'flz-West', sortOrder: 20 }, east: { label: 'Ost', groupId: 'flz-Ost', sortOrder: 10 } },
 };
 editor.applyOrder('roles', ['first', 'second']);
 editor.applyOrder('areas', ['west', 'east']);
 if (editor.definition.roles.first.sortOrder !== 10 || editor.definition.roles.second.sortOrder !== 20) throw new Error('Rollenreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
 if (editor.definition.areas.west.sortOrder !== 10 || editor.definition.areas.east.sortOrder !== 20) throw new Error('Bereichsreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
 const rolePanel = editor.roleEditorMarkup('second');
-if (!rolePanel.includes('Zweite Rolle') || !rolePanel.includes('ad-Zweite') || !rolePanel.includes('Technische Zuordnung') || !rolePanel.includes('gilt für alle Karten dieser Rolle')) throw new Error('Das seitliche Rollenpanel enthält nicht alle globalen Rolleninformationen.');
+if (!rolePanel.includes('Zweite Rolle') || !rolePanel.includes('flz-Zweite') || !rolePanel.includes('Technische Zuordnung') || !rolePanel.includes('gilt für alle Karten dieser Rolle')) throw new Error('Das seitliche Rollenpanel enthält nicht alle globalen Rolleninformationen.');
 const roleOrder = editor.roleOrderItem('first', editor.definition.roles.first);
 if (!roleOrder.includes('data-sort-kind="roles"') || !roleOrder.includes('Erste Rolle') || roleOrder.includes('data-field="groupId"')) throw new Error('Die kompakte fachliche Reihenfolge vermischt Sortierung und Rolleneinstellungen.');
 const areaCard = editor.areaCard('west', editor.definition.areas.west);
-if (!areaCard.includes('data-setting-card') || !areaCard.includes('data-action="toggle-card"') || !areaCard.includes('ad-West')) throw new Error('Bereiche werden nicht als kompakte aufklappbare Karten dargestellt.');
+if (!areaCard.includes('data-setting-card') || !areaCard.includes('data-action="toggle-card"') || !areaCard.includes('flz-West')) throw new Error('Bereiche werden nicht als kompakte aufklappbare Karten dargestellt.');
 const teamCard = editor.teamCard({ id: 'pflege', label: 'Pflege', roles: ['first'], areas: [], sortOrder: 10 });
 if (!teamCard.includes('data-organization-team') || !teamCard.includes('data-action="toggle-card"') || !teamCard.includes('Pflege')) throw new Error('Urlaubsansichten werden nicht als kompakte aufklappbare Karten dargestellt.');
 let boardRefreshed = false;

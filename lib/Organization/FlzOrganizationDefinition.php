@@ -7,11 +7,11 @@ namespace OCA\LocalBase\Organization;
 use InvalidArgumentException;
 
 /**
- * Zweck: Hält den validierten, app-übergreifenden Vertrag der AD-Organisation.
- * Zusammenspiel: AdOrganizationSettingsService persistiert die Definition; Hierarchie, Rechte und Fachapps lesen denselben Snapshot.
+ * Zweck: Hält den validierten, app-übergreifenden Vertrag der FLZ-Organisation.
+ * Zusammenspiel: FlzOrganizationSettingsService persistiert die Definition; Hierarchie, Rechte und Fachapps lesen denselben Snapshot.
  * Vertrag: Technische Rollenschlüssel bleiben stabil, während Gruppen-IDs, Anzeigenamen, Bereiche, Teams und Hierarchiekanten konfigurierbar sind.
  */
-final class AdOrganizationDefinition {
+final class FlzOrganizationDefinition {
     private const DEFAULT_SINGLE_OCCUPANT_ROLES = ['gf_as', 'pdl', 'deputy_pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'];
 
     private function __construct(private array $data) {}
@@ -28,36 +28,36 @@ final class AdOrganizationDefinition {
     public static function defaults(): self {
         return self::get([
             'version' => 4,
-            'teamGroupPrefix' => 'ad-ASN-',
+            'teamGroupPrefix' => 'flz-ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
             'staffBlockLabel' => 'Geschäftsführung, Leitungen und Stabsstellen',
             'roles' => [
-                'gf_as' => self::role('ad-GF-AS', 'Geschäftsführung Assistenz', 10, staffBlock: true, singleOccupant: true),
-                'pdl' => self::role('ad-PDL', 'Pflegedienstleitung', 20, staffBlock: true, singleOccupant: true),
-                'staff_hr' => self::role('ad-Stab-HR', 'Stabsstelle HR', 30, peerEnabled: true, staffBlock: true),
-                'staff_qmb' => self::role('ad-Stab-QMB', 'Stabsstelle Qualitätsmanagement', 40, peerEnabled: true, staffBlock: true),
-                'gf_digi' => self::role('ad-GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true, singleOccupant: true),
-                'assistant_gf_digi' => self::role('ad-AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true, singleOccupant: true),
-                'finance_lead' => self::role('ad-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
-                'finance' => self::role('ad-Finanzen', 'Finanzen', 80, peerEnabled: true, staffBlock: true),
-                'payroll' => self::role('ad-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true),
-                'it' => self::role('ad-IT', 'IT', 90, peerEnabled: true, staffBlock: true, shortLabel: 'IT'),
-                'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
-                'secretariat' => self::role('ad-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
-                'reception' => self::role('ad-Empfang', 'Empfang', 105),
-                'bl' => self::role('ad-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
-                'deputy_bl' => self::role('ad-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
-                'office' => self::role('ad-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true, shortLabel: 'BO'),
-                'deputy_pdl' => self::role('ad-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
-                'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237, shortLabel: 'BO-Pflege'),
-                'eb' => self::role('ad-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true, shortLabel: 'EB'),
-                'pfk' => self::role('ad-PFK', 'Pflegefachkraft', 240, peerEnabled: true, shortLabel: 'PFK'),
+                'gf_as' => self::role('flz-GF-AS', 'Geschäftsführung Assistenz', 10, staffBlock: true, singleOccupant: true),
+                'pdl' => self::role('flz-PDL', 'Pflegedienstleitung', 20, staffBlock: true, singleOccupant: true),
+                'staff_hr' => self::role('flz-Stab-HR', 'Stabsstelle HR', 30, peerEnabled: true, staffBlock: true),
+                'staff_qmb' => self::role('flz-Stab-QMB', 'Stabsstelle Qualitätsmanagement', 40, peerEnabled: true, staffBlock: true),
+                'gf_digi' => self::role('flz-GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true, singleOccupant: true),
+                'assistant_gf_digi' => self::role('flz-AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true, singleOccupant: true),
+                'finance_lead' => self::role('flz-Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
+                'finance' => self::role('flz-Finanzen', 'Finanzen', 80, peerEnabled: true, staffBlock: true),
+                'payroll' => self::role('flz-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true),
+                'it' => self::role('flz-IT', 'IT', 90, peerEnabled: true, staffBlock: true, shortLabel: 'IT'),
+                'fleet_management' => self::role('flz-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
+                'secretariat' => self::role('flz-Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
+                'reception' => self::role('flz-Empfang', 'Empfang', 105),
+                'bl' => self::role('flz-BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
+                'deputy_bl' => self::role('flz-StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
+                'office' => self::role('flz-Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true, shortLabel: 'BO'),
+                'deputy_pdl' => self::role('flz-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
+                'care_office' => self::role('flz-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237, shortLabel: 'BO-Pflege'),
+                'eb' => self::role('flz-EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true, shortLabel: 'EB'),
+                'pfk' => self::role('flz-PFK', 'Pflegefachkraft', 240, peerEnabled: true, shortLabel: 'PFK'),
             ],
             'areas' => [
-                'northeast' => ['groupId' => 'ad-Bereich-Nordost', 'label' => 'Nordost', 'shortLabel' => 'NO', 'sortOrder' => 10],
-                'west' => ['groupId' => 'ad-Bereich-West', 'label' => 'West', 'shortLabel' => 'W', 'sortOrder' => 20],
-                'south' => ['groupId' => 'ad-Bereich-Sued', 'label' => 'Süd', 'shortLabel' => 'S', 'sortOrder' => 30],
+                'northeast' => ['groupId' => 'flz-Bereich-Nordost', 'label' => 'Nordost', 'shortLabel' => 'NO', 'sortOrder' => 10],
+                'west' => ['groupId' => 'flz-Bereich-West', 'label' => 'West', 'shortLabel' => 'W', 'sortOrder' => 20],
+                'south' => ['groupId' => 'flz-Bereich-Sued', 'label' => 'Süd', 'shortLabel' => 'S', 'sortOrder' => 30],
             ],
             'hierarchy' => [
                 'gf_as' => ['pdl', 'bl', 'staff_hr', 'staff_qmb', 'secretariat'],
@@ -128,8 +128,8 @@ final class AdOrganizationDefinition {
         $lookup = array_fill_keys(array_map('strval', $groupIds), true);
         $result = [];
         foreach ($this->roles() as $key => $role) if (isset($lookup[$role['groupId']])) $result[] = $key;
-        if (isset($lookup['ad-Finanzen-Lohn'])
-            && $this->roleKeyForExactGroup('ad-Finanzen-Lohn') === null
+        if (isset($lookup['flz-Finanzen-Lohn'])
+            && $this->roleKeyForExactGroup('flz-Finanzen-Lohn') === null
             && isset($this->roles()['finance'])) {
             $result[] = 'finance';
         }
@@ -179,7 +179,7 @@ final class AdOrganizationDefinition {
     public function roleKeyForGroup(string $groupId): ?string {
         $exact = $this->roleKeyForExactGroup($groupId);
         if ($exact !== null) return $exact;
-        return $groupId === 'ad-Finanzen-Lohn' && isset($this->roles()['finance']) ? 'finance' : null;
+        return $groupId === 'flz-Finanzen-Lohn' && isset($this->roles()['finance']) ? 'finance' : null;
     }
 
     private function roleKeyForExactGroup(string $groupId): ?string {
@@ -230,7 +230,7 @@ final class AdOrganizationDefinition {
             if (($data['roles']['finance']['label'] ?? null) === 'Finanzen und Lohn') {
                 $data['roles']['finance']['label'] = 'Finanzen';
             }
-            if (!isset($data['roles']['payroll'])) $data['roles']['payroll'] = self::role('ad-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true);
+            if (!isset($data['roles']['payroll'])) $data['roles']['payroll'] = self::role('flz-Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true);
             self::appendHierarchyTargets($data['hierarchy'], ['finance_lead' => ['finance', 'payroll']]);
             self::migrateOrganizationTeam($data['organizationTeams'], 'staff', 'Geschäftsführung, Leitungen und Stabsstellen', ['payroll'], 60);
             $version = 3;
@@ -264,10 +264,10 @@ final class AdOrganizationDefinition {
 
     private static function versionTwoRoles(): array {
         return [
-            'deputy_pdl' => self::role('ad-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
-            'care_office' => self::role('ad-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
-            'fleet_management' => self::role('ad-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
-            'reception' => self::role('ad-Empfang', 'Empfang', 105),
+            'deputy_pdl' => self::role('flz-StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
+            'care_office' => self::role('flz-Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
+            'fleet_management' => self::role('flz-Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
+            'reception' => self::role('flz-Empfang', 'Empfang', 105),
         ];
     }
 

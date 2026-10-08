@@ -32,7 +32,7 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
   kontrollierter Migration ihrer persistierenden Organisations-, Kalender-,
   Admin- und Jobanteile zurückgebaut.
 - Neue gemeinsame Bausteine werden erst aufgenommen, wenn mindestens zwei Apps dieselbe Semantik und einen gemeinsam testbaren Vertrag benötigen.
-- Die geplante Kalendersynchronisation bleibt zunächst eine AD-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
+- Die geplante Kalendersynchronisation bleibt zunächst eine Filzmann-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
 - Test-Helper werden nur bei konkret nachgewiesener app-übergreifender Duplizierung ergänzt.
 
 ## Vor der Umsetzung zu klären
@@ -43,7 +43,7 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ### Vor einem weiteren Ausbau des Organigramms zu klären
 
-- Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle AD-Struktur sind.
+- Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle FLZ-Struktur sind.
 - Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.
 
 ## Bewusst zurückgestellt – niedrigste Priorität
