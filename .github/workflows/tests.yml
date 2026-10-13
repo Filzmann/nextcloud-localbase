@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'candidate/WO-*']
   pull_request:
 
 permissions:
@@ -218,12 +218,3 @@ jobs:
         run: |
           php tests/run.php
           node tests/run-js.mjs
-
-  deploy-staging:
-    name: Staging-Deployment
-    if: github.event_name == 'push'
-    needs: [php, javascript, consumer-contracts]
-    uses: Filzmann/br-nextcloud-apps/.github/workflows/deploy-staging.yml@main
-    with:
-      app-id: localbase
-    secrets: inherit
