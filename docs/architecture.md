@@ -152,6 +152,13 @@ umgestellt.
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen
 zentral in LocalBase-AppConfig. Bei Einzelinstallation erscheinen sie im
 Adminabschnitt des Fachprodukts, ab zwei Produkten im OrgSuite-Adminabschnitt.
+Ohne gespeicherte Einzelentscheidung ist die Kalender-Peerbearbeitung nur für
+die semantischen Rollen `office`, `eb` und `pfk` aktiv. Alle übrigen
+freigabefähigen Rollen sind standardmäßig deaktiviert, können aber einzeln
+aktiviert werden. Ein explizit gespeichertes `false` hat Vorrang vor dem
+Default. Urlaubs-Peerfreigaben einschließlich ASN-Peers sind standardmäßig
+vollständig deaktiviert. Beschädigte Persistenz fällt für beide Verträge
+fail-closed auf deaktivierte Freigaben zurück.
 
 ## Organisationseditor und persönliche Darstellung
 

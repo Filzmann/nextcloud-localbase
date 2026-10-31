@@ -14,6 +14,7 @@ use OCP\IAppConfig;
  */
 final class FlzSuiteAdminSettingsService {
     private const KEY = 'flz_suite_admin_settings';
+    private const CALENDAR_PEER_DEFAULT_ROLES = ['office', 'eb', 'pfk'];
 
     public function __construct(
         private IAppConfig $config,
@@ -32,7 +33,8 @@ final class FlzSuiteAdminSettingsService {
 
     /** @return array<string,bool> */
     public function vacationPeerApproval(): array {
-        return [$this->asnPeerGroup() => (bool)($this->data()['vacationAsnPeerApproval'] ?? false)]
+        $data = $this->data();
+        return [$this->asnPeerGroup() => (bool)($data['vacationAsnPeerApproval'] ?? false)]
             + $this->roleValues('vacationPeerApproval');
     }
 
@@ -56,7 +58,7 @@ final class FlzSuiteAdminSettingsService {
 
     /** @return array<string,bool> */
     public function saveCalendarPeerEditing(array $values): array {
-        $data = $this->data();
+        $data = $this->data() ?? [];
         $data['calendarPeerEditing'] = $this->semanticRoleValues($values);
         $this->save($data);
         return $this->calendarPeerEditing();
@@ -64,7 +66,7 @@ final class FlzSuiteAdminSettingsService {
 
     /** @return array<string,bool> */
     public function saveVacationPeerApproval(array $values): array {
-        $data = $this->data();
+        $data = $this->data() ?? [];
         $data['vacationAsnPeerApproval'] = filter_var($values[$this->asnPeerGroup()] ?? false, FILTER_VALIDATE_BOOL);
         $data['vacationPeerApproval'] = $this->semanticRoleValues($values);
         $this->save($data);
@@ -77,10 +79,17 @@ final class FlzSuiteAdminSettingsService {
 
     /** @return array<string,bool> */
     private function roleValues(string $key): array {
-        $stored = $this->data()[$key] ?? [];
+        $data = $this->data();
+        $stored = $data[$key] ?? [];
+        if (!is_array($stored)) {
+            $data = null;
+            $stored = [];
+        }
         $result = [];
         foreach ($this->peerRoles() as $roleKey => $role) {
-            $result[$role['groupId']] = (bool)($stored[$roleKey] ?? false);
+            $result[$role['groupId']] = $data !== null && array_key_exists($roleKey, $stored)
+                ? (bool)$stored[$roleKey]
+                : $data !== null && $key === 'calendarPeerEditing' && in_array($roleKey, self::CALENDAR_PEER_DEFAULT_ROLES, true);
         }
         return $result;
     }
@@ -110,15 +119,15 @@ final class FlzSuiteAdminSettingsService {
         return $this->organization->definition();
     }
 
-    /** @return array<string,mixed> */
-    private function data(): array {
+    /** @return array<string,mixed>|null Null kennzeichnet beschädigte Persistenz und bleibt fail-closed. */
+    private function data(): ?array {
         $raw = $this->config->getValueString(Application::APP_ID, self::KEY, '');
         if ($raw === '') return [];
         try {
             $data = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-            return is_array($data) ? $data : [];
+            return is_array($data) ? $data : null;
         } catch (\Throwable) {
-            return [];
+            return null;
         }
     }
 
