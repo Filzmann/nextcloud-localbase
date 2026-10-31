@@ -37,6 +37,26 @@ Mitgliedschaftsänderung abgelehnt. Die einmalige Übernahme einer bisherigen
 Mitgliedergruppe ist nur zulässig, solange noch kein persistierter Vertrag
 existiert; beschädigte Bestandswerte werden dabei nicht überschrieben.
 
+Der öffentliche Kategorie-B-Vertrag
+`OCA\\LocalBase\\PublicApi\\V1\\BrMembershipSnapshotService` projiziert daraus
+ausschließlich die kanonische BR-Mitgliedergruppe. Das unveränderliche DTO
+`BrMembershipSnapshot` enthält Vertragsversion `1.0`, Definitionsversion und
+-revision, Gültigkeitsstatus, Gruppen-ID und Prüfsumme; Mitgliederlisten,
+Vorsitz und Stellvertretung bleiben ausgeschlossen. Die Projektion bezeichnet
+eine Organisationsidentität und erteilt selbst keine App-Berechtigung.
+
+Consumer prüfen zuerst über Nextclouds App-Manager, dass `localbase` aktiv
+ist, und lösen erst danach die öffentliche Klasse über den Nextcloud-Container
+auf. Fehlende oder deaktivierte Provider, eine nicht vorhandene öffentliche
+Klasse, eine unbekannte Vertragsversion, Auflösungsfehler, ungültige Snapshots
+und nicht mehr vorhandene native Gruppen sind kontrollierte deny-by-default-
+Zustände. Erst ein gültiger Snapshot der exakt unterstützten Vertragsversion
+und eine native Mitgliedschaft in `memberGroupId` belegen die BR-Identität;
+die Fachapp entscheidet davon getrennt über ihre Berechtigungen. Die feste
+native Nextcloud-Gruppe `Datenschutzbeauftragte` bleibt die Ausnahme des
+Admin-/Datenschutzvertrags und wird nicht als Organigramm- oder BR-Rolle in
+diese API aufgenommen.
+
 ## Lokale Demokonten
 
 `DemoAccountProvisioningService` ist die kanonische Provisionierung für die

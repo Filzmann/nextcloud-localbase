@@ -13,6 +13,14 @@ realer Installations-, Deaktivierungs- und Rückbaunachweis bleibt bis zum
 freigegebenen Runtime-Lauf offen. Weitere Fachapps folgen einzeln nach eigenen
 Contract- und Laufzeitnachweisen.
 
+Dieselbe öffentliche V1-Grenze stellt die kanonische BR-Mitgliedergruppe über
+`BrMembershipSnapshotService` als eigene read-only Identitätsprojektion
+bereit. Sie enthält keine Mitgliederliste und keine Fachberechtigung. Fehlt
+LocalBase, ist der Vertrag inkompatibel oder ist die BR-Gruppendefinition
+ungültig beziehungsweise nativ widersprüchlich, bleibt die Projektion leer und
+ungültig. Die feste Gruppe `Datenschutzbeauftragte` bleibt davon getrennt und
+ist keine Organigrammrolle.
+
 Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
 festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
 einzige persistierte Quelle, aus der der öffentliche Snapshot erzeugt wird.

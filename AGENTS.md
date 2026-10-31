@@ -61,6 +61,12 @@ Aktuell enthalten:
   hinsichtlich der nativen Nextcloud-Mitgliedschaften widersprüchlicher
   Vertrag ist für Consumer nicht freigabefähig. Vorsitz und Stellvertretung
   müssen immer auch der Mitgliedergruppe angehören.
+- `PublicApi\\V1\\BrMembershipSnapshotService` projiziert daraus ausschließlich
+  die kanonische BR-Mitgliedergruppe als versionierte, read-only
+  Organisationsidentität. Sie erteilt keine App-Berechtigung und bleibt bei
+  fehlender oder widersprüchlicher Quelle leer und ungültig. Die feste native
+  Gruppe `Datenschutzbeauftragte` ist ausdrücklich kein Teil dieses
+  Organisationsvertrags.
 - `DemoAccountProvisioningService` erzeugt ausschließlich explizit
   registrierte lokale Test- und Demokonten. Für diese Konten gilt
   Benutzername = Passwort; eine erneute Provisionierung stellt diesen Zustand
