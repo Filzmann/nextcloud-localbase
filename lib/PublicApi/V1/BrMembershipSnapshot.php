@@ -6,7 +6,7 @@ namespace OCA\LocalBase\PublicApi\V1;
 
 use InvalidArgumentException;
 
-/** Datensparsame, unveränderliche V1-Projektion der kanonischen BR-Mitgliedergruppe. */
+/** Datensparsame, unveränderliche V1-Projektion der kanonischen BR-Gruppenidentitäten. */
 final class BrMembershipSnapshot {
     public const CONTRACT_VERSION = '1.0';
 
@@ -15,6 +15,8 @@ final class BrMembershipSnapshot {
         private int $definitionVersion,
         private int $definitionRevision,
         private ?string $memberGroupId,
+        private ?string $chairGroupId = null,
+        private ?string $deputyGroupId = null,
     ) {
         if ($definitionVersion < 1) {
             throw new InvalidArgumentException('Invalid BR definition version.');
@@ -22,23 +24,26 @@ final class BrMembershipSnapshot {
         if (!$valid) {
             $this->definitionRevision = 0;
             $this->memberGroupId = null;
+            $this->chairGroupId = null;
+            $this->deputyGroupId = null;
             return;
         }
         if ($definitionRevision < 1) {
             throw new InvalidArgumentException('A valid BR identity requires a persisted definition revision.');
         }
-        if (!is_string($memberGroupId)) {
-            throw new InvalidArgumentException('Invalid BR member group identity.');
+        $memberGroupId = $this->validatedGroupId($memberGroupId);
+        if ($chairGroupId === null && $deputyGroupId === null) {
+            $this->memberGroupId = $memberGroupId;
+            return;
         }
-        $memberGroupId = trim($memberGroupId);
-        $characters = preg_match_all('/./us', $memberGroupId, $matches);
-        if ($memberGroupId === ''
-            || $characters === false
-            || $characters > 64
-            || preg_match('/[\x00-\x1F\x7F]/u', $memberGroupId) === 1) {
-            throw new InvalidArgumentException('Invalid BR member group identity.');
+        if ($chairGroupId === null || $deputyGroupId === null) {
+            throw new InvalidArgumentException('BR chair and deputy identities must be projected together.');
         }
-        $this->memberGroupId = $memberGroupId;
+        $groupIds = [$memberGroupId, $this->validatedGroupId($chairGroupId), $this->validatedGroupId($deputyGroupId)];
+        if (count(array_unique($groupIds)) !== count($groupIds)) {
+            throw new InvalidArgumentException('BR role group identities must be distinct.');
+        }
+        [$this->memberGroupId, $this->chairGroupId, $this->deputyGroupId] = $groupIds;
     }
 
     public function contractVersion(): string { return self::CONTRACT_VERSION; }
@@ -46,17 +51,19 @@ final class BrMembershipSnapshot {
     public function definitionVersion(): int { return $this->definitionVersion; }
     public function definitionRevision(): int { return $this->definitionRevision; }
     public function memberGroupId(): ?string { return $this->memberGroupId; }
+    public function chairGroupId(): ?string { return $this->chairGroupId; }
+    public function deputyGroupId(): ?string { return $this->deputyGroupId; }
 
     public function checksum(): string {
         return hash('sha256', json_encode($this->payload(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
     }
 
-    /** @return array{contractVersion:string,valid:bool,definitionVersion:int,definitionRevision:int,memberGroupId:?string,checksum:string} */
+    /** @return array{contractVersion:string,valid:bool,definitionVersion:int,definitionRevision:int,memberGroupId:?string,chairGroupId:?string,deputyGroupId:?string,checksum:string} */
     public function toArray(): array {
         return [...$this->payload(), 'checksum' => $this->checksum()];
     }
 
-    /** @return array{contractVersion:string,valid:bool,definitionVersion:int,definitionRevision:int,memberGroupId:?string} */
+    /** @return array{contractVersion:string,valid:bool,definitionVersion:int,definitionRevision:int,memberGroupId:?string,chairGroupId:?string,deputyGroupId:?string} */
     private function payload(): array {
         return [
             'contractVersion' => self::CONTRACT_VERSION,
@@ -64,6 +71,23 @@ final class BrMembershipSnapshot {
             'definitionVersion' => $this->definitionVersion,
             'definitionRevision' => $this->definitionRevision,
             'memberGroupId' => $this->memberGroupId,
+            'chairGroupId' => $this->chairGroupId,
+            'deputyGroupId' => $this->deputyGroupId,
         ];
+    }
+
+    private function validatedGroupId(?string $groupId): string {
+        if (!is_string($groupId)) {
+            throw new InvalidArgumentException('Invalid BR group identity.');
+        }
+        $groupId = trim($groupId);
+        $characters = preg_match_all('/./us', $groupId, $matches);
+        if ($groupId === ''
+            || $characters === false
+            || $characters > 64
+            || preg_match('/[\x00-\x1F\x7F]/u', $groupId) === 1) {
+            throw new InvalidArgumentException('Invalid BR group identity.');
+        }
+        return $groupId;
     }
 }

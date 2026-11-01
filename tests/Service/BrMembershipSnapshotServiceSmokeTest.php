@@ -78,6 +78,8 @@ namespace {
     assertSameValue(BrMembershipSnapshot::CONTRACT_VERSION, $missing->contractVersion(), 'The public BR contract must expose its version.');
     assertSameValue(false, $missing->isValid(), 'A missing canonical BR definition must fail closed.');
     assertSameValue(null, $missing->memberGroupId(), 'A missing BR definition must not expose fallback group identities.');
+    assertSameValue(null, $missing->chairGroupId(), 'A missing BR definition must not expose a chair identity.');
+    assertSameValue(null, $missing->deputyGroupId(), 'A missing BR definition must not expose a deputy identity.');
 
     $saved = $settings->save([
         BrGroupDefinition::MEMBER => 'BR-Mitglieder',
@@ -88,17 +90,25 @@ namespace {
     assertSameValue(true, $snapshot->isValid(), 'A persisted and consistent BR definition must be consumable.');
     assertSameValue(BrGroupDefinition::VERSION, $snapshot->definitionVersion(), 'The source definition version must remain observable.');
     assertSameValue($saved->revision(), $snapshot->definitionRevision(), 'The source revision must remain observable.');
-    assertSameValue('BR-Mitglieder', $snapshot->memberGroupId(), 'Only the canonical BR member identity may be projected.');
+    assertSameValue('BR-Mitglieder', $snapshot->memberGroupId(), 'The existing canonical BR member identity must remain compatible.');
+    assertSameValue('BR-Vorsitz', $snapshot->chairGroupId(), 'The canonical BR chair identity must be projected.');
+    assertSameValue('BR-Stellvertretung', $snapshot->deputyGroupId(), 'The canonical BR deputy identity must be projected.');
     assertSameValue(64, strlen($snapshot->checksum()), 'The immutable payload must provide a checksum.');
     $payload = $snapshot->toArray();
-    if (isset($payload['members']) || isset($payload['chairGroupId']) || isset($payload['deputyGroupId'])) {
-        throw new RuntimeException('The minimal public identity projection leaked members or unrelated BR roles.');
+    assertSameValue($snapshot->checksum(), $payload['checksum'], 'The serialized checksum must cover the complete public payload.');
+    assertSameValue('1.0', $payload['contractVersion'], 'The additive role projection must remain compatible with the V1 contract.');
+    assertSameValue('BR-Vorsitz', $payload['chairGroupId'], 'The serialized snapshot must expose the canonical chair identity.');
+    assertSameValue('BR-Stellvertretung', $payload['deputyGroupId'], 'The serialized snapshot must expose the canonical deputy identity.');
+    if (isset($payload['members']) || isset($payload['permissions'])) {
+        throw new RuntimeException('The minimal public identity projection leaked memberships or permissions.');
     }
 
     $config->values['localbase']['br_group_definition'] = '{broken';
     $broken = $provider->snapshot();
     assertSameValue(false, $broken->isValid(), 'Broken BR persistence must fail closed.');
     assertSameValue(null, $broken->memberGroupId(), 'Broken BR persistence must not expose defaults.');
+    assertSameValue(null, $broken->chairGroupId(), 'Broken BR persistence must not expose a chair default.');
+    assertSameValue(null, $broken->deputyGroupId(), 'Broken BR persistence must not expose a deputy default.');
 
     $settings->save([
         BrGroupDefinition::MEMBER => 'BR-Mitglieder',
@@ -109,17 +119,32 @@ namespace {
     $contradictory = $provider->snapshot();
     assertSameValue(false, $contradictory->isValid(), 'Contradictory native memberships must fail closed.');
     assertSameValue(null, $contradictory->memberGroupId(), 'Contradictory native memberships must not authorize consumers.');
+    assertSameValue(null, $contradictory->chairGroupId(), 'Contradictory native memberships must not expose chair identity.');
+    assertSameValue(null, $contradictory->deputyGroupId(), 'Contradictory native memberships must not expose deputy identity.');
 
     assertThrows(
-        static fn() => new BrMembershipSnapshot(true, 1, 1, ''),
+        static fn() => new BrMembershipSnapshot(true, 1, 1, '', 'BR-Vorsitz', 'BR-Stellvertretung'),
         InvalidArgumentException::class,
         'A valid public BR snapshot must reject an empty member identity.',
     );
     assertThrows(
-        static fn() => new BrMembershipSnapshot(true, 1, 0, 'BR-Mitglieder'),
+        static fn() => new BrMembershipSnapshot(true, 1, 0, 'BR-Mitglieder', 'BR-Vorsitz', 'BR-Stellvertretung'),
         InvalidArgumentException::class,
         'A valid public BR snapshot must originate from a persisted revision.',
     );
+    assertThrows(
+        static fn() => new BrMembershipSnapshot(true, 1, 1, 'BR-Mitglieder', 'BR-Mitglieder', 'BR-Stellvertretung'),
+        InvalidArgumentException::class,
+        'A valid public BR snapshot must reject duplicate semantic group identities.',
+    );
+
+    $legacyMemberOnly = new BrMembershipSnapshot(true, 1, 1, 'BR-Mitglieder');
+    assertSameValue('BR-Mitglieder', $legacyMemberOnly->memberGroupId(), 'The existing member-only DTO construction must remain compatible.');
+    assertSameValue(null, $legacyMemberOnly->chairGroupId(), 'A legacy member-only DTO must not invent a chair identity.');
+    assertSameValue(null, $legacyMemberOnly->deputyGroupId(), 'A legacy member-only DTO must not invent a deputy identity.');
+    if ($legacyMemberOnly->checksum() === $snapshot->checksum()) {
+        throw new RuntimeException('The checksum must detect the additive chair and deputy projection.');
+    }
 
     echo "BrMembershipSnapshotServiceSmokeTest: OK\n";
 }

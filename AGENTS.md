@@ -62,8 +62,9 @@ Aktuell enthalten:
   Vertrag ist für Consumer nicht freigabefähig. Vorsitz und Stellvertretung
   müssen immer auch der Mitgliedergruppe angehören.
 - `PublicApi\\V1\\BrMembershipSnapshotService` projiziert daraus ausschließlich
-  die kanonische BR-Mitgliedergruppe als versionierte, read-only
-  Organisationsidentität. Sie erteilt keine App-Berechtigung und bleibt bei
+  die kanonischen Gruppen-IDs für BR-Mitgliedschaft, Vorsitz und
+  Stellvertretung als versionierte, read-only Organisationsidentitäten. Sie
+  enthält weder Mitgliederlisten noch App-Berechtigungen und bleibt bei
   fehlender oder widersprüchlicher Quelle leer und ungültig. Die feste native
   Gruppe `Datenschutzbeauftragte` ist ausdrücklich kein Teil dieses
   Organisationsvertrags.

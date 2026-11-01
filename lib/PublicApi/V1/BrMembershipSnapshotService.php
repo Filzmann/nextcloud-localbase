@@ -22,9 +22,11 @@ final class BrMembershipSnapshotService {
                 BrGroupDefinition::VERSION,
                 $definition->revision(),
                 $definition->groupId(BrGroupDefinition::MEMBER),
+                $definition->groupId(BrGroupDefinition::CHAIR),
+                $definition->groupId(BrGroupDefinition::DEPUTY),
             );
         } catch (Throwable) {
-            return new BrMembershipSnapshot(false, BrGroupDefinition::VERSION, 0, null);
+            return new BrMembershipSnapshot(false, BrGroupDefinition::VERSION, 0, null, null, null);
         }
     }
 }
