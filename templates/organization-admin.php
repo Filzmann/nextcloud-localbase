@@ -69,7 +69,15 @@
                         </section>
                         <section class="orgs-dashboard-widget" data-dashboard-widget data-widget-id="vacation-permissions" aria-labelledby="orgs-vacation-permissions-heading">
                             <header class="orgs-dashboard-header"><h4 id="orgs-vacation-permissions-heading" data-dashboard-title>Filzmann Urlaubsplanung</h4><div class="orgs-dashboard-actions"><button type="button" data-dashboard-move="-1" aria-label="Filzmann Urlaubsplanung eine Position zurück verschieben">↑</button><button type="button" data-dashboard-handle draggable="true" aria-label="Filzmann Urlaubsplanung per Drag-and-drop verschieben">⠿</button><button type="button" data-dashboard-move="1" aria-label="Filzmann Urlaubsplanung eine Position weiter verschieben">↓</button><button type="button" data-dashboard-toggle aria-expanded="true" aria-controls="orgs-vacation-permissions-content" aria-label="Filzmann Urlaubsplanung ein- oder ausklappen"><span aria-hidden="true">▾</span></button></div></header>
-                            <div id="orgs-vacation-permissions-content" class="orgs-dashboard-content" data-dashboard-content><p>Aktivierte Kolleg*innen dürfen innerhalb derselben Fachgruppe geplante Urlaube genehmigen. Eigene Genehmigungen bleiben gesperrt.</p><div id="orgs-vacation-peer-settings" class="orgs-checkbox-grid"></div></div>
+                            <div id="orgs-vacation-permissions-content" class="orgs-dashboard-content" data-dashboard-content>
+                                <p>Bearbeitung und Genehmigung sind getrennte Rechte. Ohne ausdrückliche Auswahl bleiben beide deaktiviert.</p>
+                                <h5>Geplante Urlaube anderer bearbeiten</h5>
+                                <p>Aktivierte Kolleg*innen dürfen Planungsdaten innerhalb derselben Fachgruppe bearbeiten.</p>
+                                <div id="orgs-vacation-peer-editing-settings" class="orgs-checkbox-grid"></div>
+                                <h5>Urlaube anderer genehmigen</h5>
+                                <p>Aktivierte Kolleg*innen dürfen innerhalb derselben Fachgruppe genehmigen. Eigene Genehmigungen bleiben gesperrt.</p>
+                                <div id="orgs-vacation-peer-approval-settings" class="orgs-checkbox-grid"></div>
+                            </div>
                         </section>
                     </div>
                     <button type="submit" class="primary">Rechte speichern</button>

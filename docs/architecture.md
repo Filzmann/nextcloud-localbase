@@ -176,9 +176,25 @@ Ohne gespeicherte Einzelentscheidung ist die Kalender-Peerbearbeitung nur für
 die semantischen Rollen `office`, `eb` und `pfk` aktiv. Alle übrigen
 freigabefähigen Rollen sind standardmäßig deaktiviert, können aber einzeln
 aktiviert werden. Ein explizit gespeichertes `false` hat Vorrang vor dem
-Default. Urlaubs-Peerfreigaben einschließlich ASN-Peers sind standardmäßig
-vollständig deaktiviert. Beschädigte Persistenz fällt für beide Verträge
+Default. Urlaubs-Peerbearbeitung und Urlaubs-Peergenehmigung sind getrennte
+Einstellungen. Beide bleiben einschließlich ASN-Peers standardmäßig
+vollständig deaktiviert und können unabhängig voneinander je Rolle aktiviert
+werden. Beschädigte oder typfremde Persistenz fällt für alle Verträge
 fail-closed auf deaktivierte Freigaben zurück.
+
+Der öffentliche Kategorie-B-Vertrag
+`OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService`
+projiziert diese beiden Urlaubsfreigaben in das unveränderliche DTO
+`VacationAuthorizationSnapshot`. Derselbe Snapshot enthält je konfiguriertem
+Büro einen EB-Ansichtsdeskriptor mit stabilen semantischen Rollen- und
+Bereichsschlüsseln sowie den aktuell zugeordneten Gruppen-IDs. Diese
+Deskriptoren werden ausschließlich aus der validierten Organisationsdefinition
+abgeleitet; Consumer führen keine zweite Büro- oder EB-Zuordnung. Fehlende,
+beschädigte oder widersprüchliche Organisations- beziehungsweise
+Freigabeeinstellungen sowie eine nicht bereichsgebundene EB-Rolle ergeben
+einen ungültigen Snapshot ohne Freigaben und Ansichten. Der neue Vertrag ist
+additiv; der bestehende öffentliche `OrganizationSnapshot` Version `1.0`
+bleibt unverändert.
 
 ## Organisationseditor und persönliche Darstellung
 

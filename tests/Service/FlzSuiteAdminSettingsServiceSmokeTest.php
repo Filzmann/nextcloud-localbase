@@ -52,8 +52,17 @@ namespace {
     }
 
     $asnPeerGroup = $service->asnPeerGroup();
+    if (array_filter($service->vacationPeerEditing()) !== []) {
+        throw new \RuntimeException('Urlaubs-Peerbearbeitung ist entgegen dem Default aktiv.');
+    }
     if (array_filter($service->vacationPeerApproval()) !== []) {
         throw new \RuntimeException('Urlaubs-Peerrechte sind entgegen dem Default aktiv.');
+    }
+    $editing = $service->saveVacationPeerEditing([$asnPeerGroup => true, 'flz-Buero' => true]);
+    if (($editing[$asnPeerGroup] ?? false) !== true
+        || ($editing['flz-Buero'] ?? false) !== true
+        || array_filter($service->vacationPeerApproval()) !== []) {
+        throw new \RuntimeException('Urlaubs-Peerbearbeitung ist nicht unabhängig von der Genehmigung konfigurierbar.');
     }
     $vacation = $service->saveVacationPeerApproval([$asnPeerGroup => true, 'flz-PFK' => true]);
     if (($vacation[$asnPeerGroup] ?? false) !== true || !in_array('flz-PFK', $service->enabledVacationPeerGroups(), true)) throw new \RuntimeException('Urlaubs-Peerrechte werden nicht korrekt gespeichert.');
@@ -65,5 +74,16 @@ namespace {
 
     $config->values['localbase']['flz_suite_admin_settings'] = '{kaputt';
     if (array_filter($service->calendarPeerEditing()) !== []) throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf deaktivierte Rechte zurück.');
+    if (array_filter($service->vacationPeerEditing()) !== [] || array_filter($service->vacationPeerApproval()) !== [] || $service->isValid()) {
+        throw new \RuntimeException('Ungültige Urlaubsfreigaben fallen nicht vollständig fail-closed aus.');
+    }
+    $config->values['localbase']['flz_suite_admin_settings'] = json_encode([
+        'version' => 1,
+        'vacationAsnPeerEditing' => ['manipuliert'],
+        'vacationPeerEditing' => ['office' => 'false'],
+    ], JSON_THROW_ON_ERROR);
+    if (array_filter($service->vacationPeerEditing()) !== [] || $service->isValid()) {
+        throw new \RuntimeException('Typfremde Urlaubsfreigaben können Rechte aktivieren.');
+    }
     echo "FlzSuiteAdminSettingsServiceSmokeTest: OK\n";
 }

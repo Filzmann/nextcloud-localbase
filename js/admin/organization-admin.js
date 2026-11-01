@@ -89,7 +89,8 @@
             renderCalendarContext(data.calendarContext);
             editor.set(data.organization, data.directory?.positions || [], data.dashboardLayout?.organigram?.zoom || 100);
             renderCheckboxes('orgs-calendar-peer-settings', data.calendarPeerEditing, data.calendarPeerOptions);
-            renderCheckboxes('orgs-vacation-peer-settings', data.vacationPeerApproval, data.vacationPeerOptions);
+            renderCheckboxes('orgs-vacation-peer-editing-settings', data.vacationPeerEditing, data.vacationPeerOptions);
+            renderCheckboxes('orgs-vacation-peer-approval-settings', data.vacationPeerApproval, data.vacationPeerOptions);
             renderDirectoryStatus(data.directory);
             dashboard.set(data.dashboardLayout);
             notice.clear();
@@ -156,7 +157,8 @@
                 method: 'PUT',
                 body: JSON.stringify({
                     calendarPeerEditing: collect('orgs-calendar-peer-settings'),
-                    vacationPeerApproval: collect('orgs-vacation-peer-settings'),
+                    vacationPeerEditing: collect('orgs-vacation-peer-editing-settings'),
+                    vacationPeerApproval: collect('orgs-vacation-peer-approval-settings'),
                 }),
             });
             await load();

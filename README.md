@@ -25,6 +25,14 @@ Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
 festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
 einzige persistierte Quelle, aus der der öffentliche Snapshot erzeugt wird.
 
+Für Filzmann Urlaubsplanung stellt
+`OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService` einen
+eigenen read-only Vertrag bereit. Er trennt die ausdrücklich konfigurierten
+Peerrechte zum Bearbeiten und Genehmigen und leitet EB-Ansichten je Büro aus
+derselben Organisationsdefinition ab. Beide Rechte sind standardmäßig aus;
+fehlende, typfremde oder widersprüchliche Quellen liefern einen ungültigen,
+leeren Snapshot.
+
 Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
 Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
 verhindern Eigenmeldungen; ohne Listener bleibt die Konfliktmenge leer.

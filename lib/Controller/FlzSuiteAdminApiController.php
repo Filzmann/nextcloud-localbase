@@ -46,6 +46,7 @@ final class FlzSuiteAdminApiController extends Controller {
             'calendarContext' => $this->calendarContext->context()->toArray(),
             'calendarPeerEditing' => $this->adminSettings->calendarPeerEditing(),
             'calendarPeerOptions' => $this->adminSettings->calendarPeerOptions(),
+            'vacationPeerEditing' => $this->adminSettings->vacationPeerEditing(),
             'vacationPeerApproval' => $this->adminSettings->vacationPeerApproval(),
             'vacationPeerOptions' => $this->adminSettings->vacationPeerOptions(),
             'directory' => $this->directoryStatus->status(),
@@ -77,10 +78,11 @@ final class FlzSuiteAdminApiController extends Controller {
         }
     }
 
-    public function savePermissions(array $calendarPeerEditing, array $vacationPeerApproval): JSONResponse {
+    public function savePermissions(array $calendarPeerEditing, array $vacationPeerApproval, array $vacationPeerEditing = []): JSONResponse {
         if (!$this->isAdmin()) return $this->denied();
         return new JSONResponse([
             'calendarPeerEditing' => $this->adminSettings->saveCalendarPeerEditing($calendarPeerEditing),
+            'vacationPeerEditing' => $this->adminSettings->saveVacationPeerEditing($vacationPeerEditing),
             'vacationPeerApproval' => $this->adminSettings->saveVacationPeerApproval($vacationPeerApproval),
         ]);
     }

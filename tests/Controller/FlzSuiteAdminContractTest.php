@@ -7,8 +7,9 @@ $routes = file_get_contents($root . '/appinfo/routes.php');
 $application = file_get_contents($root . '/lib/AppInfo/Application.php');
 $controller = file_get_contents($root . '/lib/Controller/FlzSuiteAdminApiController.php');
 $template = file_get_contents($root . '/templates/organization-admin.php');
+$script = file_get_contents($root . '/js/admin/organization-admin.js');
 $info = simplexml_load_file($root . '/appinfo/info.xml');
-foreach ([$routes, $application, $controller, $template, $info] as $source) if ($source === false) throw new RuntimeException('Organisationsvertrag konnte nicht gelesen werden.');
+foreach ([$routes, $application, $controller, $template, $script, $info] as $source) if ($source === false) throw new RuntimeException('Organisationsvertrag konnte nicht gelesen werden.');
 if (in_array((string)$info->version, ['0.7.0-rc.2', '0.7.0-rc.3', '0.7.0-rc.4', '0.7.0-rc.5', '0.7.0-rc.6'], true)) throw new RuntimeException('Geänderte Admin-Assets verwenden weiterhin einen bereits langfristig gecachten App-Versionsschlüssel.');
 
 foreach (['/api/flz-full-suite/admin/settings', '/api/flz-full-suite/admin/calendar-context', '/api/flz-full-suite/admin/organization', '/api/flz-full-suite/admin/permissions', '/api/flz-full-suite/admin/layout'] as $contract) if (!str_contains($routes, $contract)) throw new RuntimeException("Admin-Route fehlt: {$contract}");
@@ -17,6 +18,8 @@ if (preg_match('/#\[[^\]]*NoCSRFRequired[^\]]*\]\s+public function save/', $cont
 foreach (['private function isAdmin()', '$this->groups->isAdmin(', 'Http::STATUS_FORBIDDEN', 'saveCalendarContext', 'saveOrganization', 'savePermissions', 'saveLayout', 'calendarContext', 'dashboardLayout'] as $contract) if (!str_contains($controller, $contract)) throw new RuntimeException("Serverseitiger Admin-Vertrag fehlt: {$contract}");
 foreach (['registerSection(IManager::SETTINGS_ADMIN', 'StandaloneProductAdminSection::class', 'StandaloneOrganizationAdmin::class'] as $contract) if (!str_contains($application, $contract)) throw new RuntimeException("Dynamische Adminregistrierung fehlt: {$contract}");
 foreach (['id="orgsuite-admin"', 'id="orgs-calendar-context-form"', 'id="orgs-calendar-country"', 'id="orgs-calendar-subdivision"', 'id="orgs-calendar-timezone"', 'id="orgs-organization-form"', 'id="orgs-permissions-form"', 'Bei einer Einzelinstallation'] as $contract) if (!str_contains($template, $contract)) throw new RuntimeException("Admin-UI-Vertrag fehlt: {$contract}");
+foreach (['id="orgs-vacation-peer-editing-settings"', 'id="orgs-vacation-peer-approval-settings"', 'Geplante Urlaube anderer bearbeiten', 'Urlaube anderer genehmigen'] as $contract) if (!str_contains($template, $contract)) throw new RuntimeException("Getrennter Urlaubsrechtevertrag fehlt: {$contract}");
+foreach (['vacationPeerEditing', "collect('orgs-vacation-peer-editing-settings')", "collect('orgs-vacation-peer-approval-settings')"] as $contract) if (!str_contains($script, $contract)) throw new RuntimeException("Getrennter Urlaubsrechte-Clientvertrag fehlt: {$contract}");
 if (!str_contains($template, 'Filzmann-Organisation') || str_contains($template, 'FLZ-Organisation')) throw new RuntimeException('Der öffentliche Organisationsname verwendet nicht durchgängig Filzmann.');
 foreach (["addScript('localbase', 'components/hierarchy-board')", "addScript('localbase', 'components/organization-editor')", "addScript('localbase', 'components/organization-dashboard')", "addStyle('localbase', 'organization-admin')"] as $contract) if (!str_contains($template, $contract)) throw new RuntimeException("Admin-Assetvertrag fehlt: {$contract}");
 

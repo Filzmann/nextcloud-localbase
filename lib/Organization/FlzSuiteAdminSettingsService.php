@@ -32,6 +32,18 @@ final class FlzSuiteAdminSettingsService {
     }
 
     /** @return array<string,bool> */
+    public function vacationPeerEditing(): array {
+        $data = $this->data();
+        return [$this->asnPeerGroup() => (bool)($data['vacationAsnPeerEditing'] ?? false)]
+            + $this->roleValues('vacationPeerEditing');
+    }
+
+    /** @return list<string> */
+    public function enabledVacationPeerEditingGroups(): array {
+        return array_keys(array_filter($this->vacationPeerEditing()));
+    }
+
+    /** @return array<string,bool> */
     public function vacationPeerApproval(): array {
         $data = $this->data();
         return [$this->asnPeerGroup() => (bool)($data['vacationAsnPeerApproval'] ?? false)]
@@ -65,6 +77,15 @@ final class FlzSuiteAdminSettingsService {
     }
 
     /** @return array<string,bool> */
+    public function saveVacationPeerEditing(array $values): array {
+        $data = $this->data() ?? [];
+        $data['vacationAsnPeerEditing'] = filter_var($values[$this->asnPeerGroup()] ?? false, FILTER_VALIDATE_BOOL);
+        $data['vacationPeerEditing'] = $this->semanticRoleValues($values);
+        $this->save($data);
+        return $this->vacationPeerEditing();
+    }
+
+    /** @return array<string,bool> */
     public function saveVacationPeerApproval(array $values): array {
         $data = $this->data() ?? [];
         $data['vacationAsnPeerApproval'] = filter_var($values[$this->asnPeerGroup()] ?? false, FILTER_VALIDATE_BOOL);
@@ -75,6 +96,10 @@ final class FlzSuiteAdminSettingsService {
 
     public function asnPeerGroup(): string {
         return $this->definition()->teamGroupPrefix() . '*';
+    }
+
+    public function isValid(): bool {
+        return $this->data() !== null;
     }
 
     /** @return array<string,bool> */
@@ -125,10 +150,27 @@ final class FlzSuiteAdminSettingsService {
         if ($raw === '') return [];
         try {
             $data = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-            return is_array($data) ? $data : null;
+            if (!is_array($data) || !$this->hasValidSchema($data)) return null;
+            return $data;
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /** @param array<string,mixed> $data */
+    private function hasValidSchema(array $data): bool {
+        if (array_key_exists('version', $data) && $data['version'] !== 1) return false;
+        foreach (['vacationAsnPeerEditing', 'vacationAsnPeerApproval'] as $key) {
+            if (array_key_exists($key, $data) && !is_bool($data[$key])) return false;
+        }
+        foreach (['calendarPeerEditing', 'vacationPeerEditing', 'vacationPeerApproval'] as $key) {
+            if (!array_key_exists($key, $data)) continue;
+            if (!is_array($data[$key])) return false;
+            foreach ($data[$key] as $roleKey => $enabled) {
+                if (!is_string($roleKey) || trim($roleKey) === '' || !is_bool($enabled)) return false;
+            }
+        }
+        return true;
     }
 
     /** @param array<string,mixed> $data */

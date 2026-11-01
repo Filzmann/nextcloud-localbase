@@ -49,9 +49,11 @@ namespace OCA\LocalBase\Organization {
     class FlzSuiteAdminSettingsService {
         public function calendarPeerEditing(): array { return ['flz-Buero' => true]; }
         public function calendarPeerOptions(): array { return ['flz-Buero']; }
+        public function vacationPeerEditing(): array { return ['flz-Buero' => false]; }
         public function vacationPeerApproval(): array { return ['flz-PFK' => false]; }
         public function vacationPeerOptions(): array { return ['flz-PFK']; }
         public function saveCalendarPeerEditing(array $value): array { return $value; }
+        public function saveVacationPeerEditing(array $value): array { return $value; }
         public function saveVacationPeerApproval(array $value): array { return $value; }
     }
 }
@@ -103,10 +105,10 @@ namespace {
     $layout = new FlzSuiteAdminLayoutService();
     $controller = new FlzSuiteAdminApiController($request, $session, $groups, $organization, $settings, $calendarContext, $directory, $layout, $logger);
     if ($controller->settings()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen lesen.');
-    if ($controller->saveCalendarContext([])->getStatus() !== 403 || $controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403 || $controller->resetLayout()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
+    if ($controller->saveCalendarContext([])->getStatus() !== 403 || $controller->saveOrganization([])->getStatus() !== 403 || $controller->savePermissions([], [], [])->getStatus() !== 403 || $controller->saveLayout([])->getStatus() !== 403 || $controller->resetLayout()->getStatus() !== 403) throw new RuntimeException('Nicht-Admin kann Einstellungen schreiben.');
     $groups->admin = true;
     $data = $controller->settings()->getData();
-    if (($data['organization']['roles'][0] ?? '') !== 'buero' || ($data['calendarContext']['subdivisionCode'] ?? '') !== 'DE-BE' || !isset($data['calendarPeerOptions'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung'] || ($data['dashboardLayout']['version'] ?? null) !== 1) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
+    if (($data['organization']['roles'][0] ?? '') !== 'buero' || ($data['calendarContext']['subdivisionCode'] ?? '') !== 'DE-BE' || !isset($data['calendarPeerOptions'], $data['vacationPeerEditing'], $data['vacationPeerOptions']) || ($data['directory']['compatible'] ?? null) !== true || ($data['directory']['positions'][0]['displayNames'] ?? []) !== ['Gina Führung'] || ($data['dashboardLayout']['version'] ?? null) !== 1) throw new RuntimeException('Admin-Einstellungen sind unvollständig.');
     if ($controller->saveCalendarContext(['countryCode' => 'FR', 'subdivisionCode' => 'FR-IDF', 'timezone' => 'Europe/Paris'])->getData()['calendarContext']['timezone'] !== 'Europe/Paris') throw new RuntimeException('Kalenderkontext wird nicht gespeichert.');
     $calendarContext->invalid = true;
     if ($controller->saveCalendarContext([])->getStatus() !== 400) throw new RuntimeException('Ungültiger Kalenderkontext erhält keinen Status 400.');
@@ -119,8 +121,8 @@ namespace {
     $organization->invalid = false;
     $organization->failure = true;
     if ($controller->saveOrganization([])->getStatus() !== 400 || $logger->errors === []) throw new RuntimeException('Interner Fehler wird nicht sicher behandelt.');
-    $permissions = $controller->savePermissions(['flz-Buero' => false], ['flz-PFK' => true])->getData();
-    if ($permissions['calendarPeerEditing']['flz-Buero'] !== false || $permissions['vacationPeerApproval']['flz-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht gespeichert.');
+    $permissions = $controller->savePermissions(['flz-Buero' => false], ['flz-PFK' => true], ['flz-Buero' => true])->getData();
+    if ($permissions['calendarPeerEditing']['flz-Buero'] !== false || $permissions['vacationPeerEditing']['flz-Buero'] !== true || $permissions['vacationPeerApproval']['flz-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht getrennt gespeichert.');
     $savedLayout = $controller->saveLayout(['version' => 1, 'scopes' => []])->getData();
     if (($savedLayout['dashboardLayout']['version'] ?? null) !== 1 || !isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht unter dem angemeldeten Admin gespeichert.');
     if (($controller->resetLayout()->getData()['dashboardLayout']['version'] ?? null) !== 1 || isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht subjectgebunden zurückgesetzt.');
