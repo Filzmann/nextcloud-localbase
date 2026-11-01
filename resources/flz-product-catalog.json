@@ -104,6 +104,19 @@
       "menu": true,
       "fullSuiteBundle": false,
       "productBundle": false
+    },
+    {
+      "id": "flz_akut",
+      "kind": "product",
+      "suite": "flz",
+      "order": 86,
+      "route": "flz_akut.page.index",
+      "productLabel": "Akutschichtvermittlung",
+      "navigationLabel": "Akut",
+      "standalone": true,
+      "menu": true,
+      "fullSuiteBundle": false,
+      "productBundle": false
     }
   ]
 }

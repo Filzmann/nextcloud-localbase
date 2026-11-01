@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Akutschichtvermittlung als navigierbares Standalone- und OrgSuite-Ziel in
+  den kanonischen Produktkatalog aufgenommen; die Bundle-Freigabe bleibt
+  weiterhin deaktiviert.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35

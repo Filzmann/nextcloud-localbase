@@ -17,7 +17,7 @@ if ($catalog->version() !== 1) {
 }
 
 $productIds = array_column($catalog->products(), 'id');
-$expectedProducts = ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flzbqplanung'];
+$expectedProducts = ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flzbqplanung', 'flz_akut'];
 if ($productIds !== $expectedProducts) {
     throw new RuntimeException('FLZ-Fachprodukte oder ihre Reihenfolge weichen vom Vertrag ab.');
 }
@@ -55,6 +55,15 @@ if ($bqPlanning['route'] !== 'flzbqplanung.page.index'
     || $bqPlanning['fullSuiteBundle'] !== false
     || $bqPlanning['productBundle'] !== false) {
     throw new RuntimeException('Der BQ-Planer ist nicht korrekt als Entwicklungsprodukt eingeordnet.');
+}
+
+$acute = $catalog->product('flz_akut');
+if ($acute['route'] !== 'flz_akut.page.index'
+    || $acute['standalone'] !== true
+    || $acute['menu'] !== true
+    || $acute['fullSuiteBundle'] !== false
+    || $acute['productBundle'] !== false) {
+    throw new RuntimeException('Die Akutschichtvermittlung ist nicht korrekt als navigierbares Entwicklungsprodukt eingeordnet.');
 }
 
 try {
