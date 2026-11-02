@@ -7,17 +7,16 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## App-lokale Migrationsaufgabe
 
-### LB-PREFIXLESS-GROUP-DEFAULTS – präfixlose Organisationsdefaults vollständig ausrollen
+### LB-PREFIXLESS-GROUP-STAGING – präfixlose Organisationsgruppen auf Staging migrieren
 
-- Der lokale DDEV-Zustand ist kontrolliert auf präfixlose Rollen-, Bereichs-
-  und ASN-Teamgruppen migriert. Nachweis und späterer Staging-Ablauf stehen in
+- Der lokale DDEV-Zustand, die ausführbaren Standarddefinitionen, Demofixtures,
+  Providerprojektionen und Tests verwenden bereits präfixlose Rollen-,
+  Bereichs- und ASN-Teamgruppen. Nachweis und späterer Staging-Ablauf stehen in
   [`docs/prefixless-organization-group-migration.md`](docs/prefixless-organization-group-migration.md).
-- Vor einem Staging-Lauf müssen Standarddefinition, Demofixtures,
-  Übergangsaliase und betroffene Tests testgetrieben auf denselben Zielvertrag
-  umgestellt sein. Anschließend sind Provider- und Consumer-Contract-Tests
-  sowie ein Fresh-Install-Nachweis erforderlich.
-- Der Staging-Lauf braucht eine eigene ausdrückliche Freigabe. Die lokale
-  Regel `Benutzername = Passwort` für synthetische Konten ist dort verboten.
+- Offen bleiben der Fresh-Install-/Consumer-Nachweis im vollständigen
+  Staging-Zielkontext und die kontrollierte Instanzmigration nach Runbook.
+  Dieser Lauf braucht eine eigene ausdrückliche Freigabe. Die lokale Regel
+  `Benutzername = Passwort` für synthetische Konten ist dort verboten.
 
 ### LB-PERSONAL-DATA-PILOT-RETIREMENT – verbliebenen Art.-15-Piloten kontrolliert zurückbauen
 

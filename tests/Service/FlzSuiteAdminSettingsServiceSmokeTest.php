@@ -28,26 +28,26 @@ namespace {
     $service = new \OCA\LocalBase\Organization\FlzSuiteAdminSettingsService($config, $organization);
 
     $calendarDefaults = $service->calendarPeerEditing();
-    foreach (['flz-Buero', 'flz-EB', 'flz-PFK'] as $defaultGroup) {
+    foreach (['Buero', 'EB', 'PFK'] as $defaultGroup) {
         if (($calendarDefaults[$defaultGroup] ?? false) !== true) {
             throw new \RuntimeException('Der Kalender-Peerdefault fehlt für ' . $defaultGroup . '.');
         }
     }
-    foreach (['flz-Stab-HR', 'flz-Stab-QMB', 'flz-Finanzen'] as $disabledGroup) {
+    foreach (['Stab-HR', 'Stab-QMB', 'Finanzen'] as $disabledGroup) {
         if (($calendarDefaults[$disabledGroup] ?? true) !== false) {
             throw new \RuntimeException('Ein nicht freigegebener Kalender-Peerdefault ist aktiv: ' . $disabledGroup . '.');
         }
     }
 
     $calendar = $service->saveCalendarPeerEditing([
-        'flz-Buero' => false,
-        'flz-EB' => true,
-        'flz-PFK' => true,
-        'flz-Stab-HR' => true,
+        'Buero' => false,
+        'EB' => true,
+        'PFK' => true,
+        'Stab-HR' => true,
     ]);
-    if (($calendar['flz-Buero'] ?? true) !== false
-        || ($calendar['flz-Stab-HR'] ?? false) !== true
-        || in_array('flz-Buero', $service->enabledCalendarPeerGroups(), true)) {
+    if (($calendar['Buero'] ?? true) !== false
+        || ($calendar['Stab-HR'] ?? false) !== true
+        || in_array('Buero', $service->enabledCalendarPeerGroups(), true)) {
         throw new \RuntimeException('Explizite Kalender-Peerentscheidungen überschreiben die Defaults nicht.');
     }
 
@@ -58,19 +58,19 @@ namespace {
     if (array_filter($service->vacationPeerApproval()) !== []) {
         throw new \RuntimeException('Urlaubs-Peerrechte sind entgegen dem Default aktiv.');
     }
-    $editing = $service->saveVacationPeerEditing([$asnPeerGroup => true, 'flz-Buero' => true]);
+    $editing = $service->saveVacationPeerEditing([$asnPeerGroup => true, 'Buero' => true]);
     if (($editing[$asnPeerGroup] ?? false) !== true
-        || ($editing['flz-Buero'] ?? false) !== true
+        || ($editing['Buero'] ?? false) !== true
         || array_filter($service->vacationPeerApproval()) !== []) {
         throw new \RuntimeException('Urlaubs-Peerbearbeitung ist nicht unabhängig von der Genehmigung konfigurierbar.');
     }
-    $vacation = $service->saveVacationPeerApproval([$asnPeerGroup => true, 'flz-PFK' => true]);
-    if (($vacation[$asnPeerGroup] ?? false) !== true || !in_array('flz-PFK', $service->enabledVacationPeerGroups(), true)) throw new \RuntimeException('Urlaubs-Peerrechte werden nicht korrekt gespeichert.');
+    $vacation = $service->saveVacationPeerApproval([$asnPeerGroup => true, 'PFK' => true]);
+    if (($vacation[$asnPeerGroup] ?? false) !== true || !in_array('PFK', $service->enabledVacationPeerGroups(), true)) throw new \RuntimeException('Urlaubs-Peerrechte werden nicht korrekt gespeichert.');
 
     $definition = $organization->definition()->toArray();
-    $definition['roles']['office']['groupId'] = 'flz-Neues-Büro';
+    $definition['roles']['office']['groupId'] = 'Neues-Buero';
     $organization->save($definition);
-    if (($service->calendarPeerEditing()['flz-Neues-Büro'] ?? true) !== false) throw new \RuntimeException('Explizit deaktivierte Peerrechte folgen nicht dem semantischen Rollenschlüssel.');
+    if (($service->calendarPeerEditing()['Neues-Buero'] ?? true) !== false) throw new \RuntimeException('Explizit deaktivierte Peerrechte folgen nicht dem semantischen Rollenschlüssel.');
 
     $config->values['localbase']['flz_suite_admin_settings'] = '{kaputt';
     if (array_filter($service->calendarPeerEditing()) !== []) throw new \RuntimeException('Ungültige Persistenz fällt nicht sicher auf deaktivierte Rechte zurück.');

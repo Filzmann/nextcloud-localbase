@@ -47,11 +47,11 @@ namespace OCA\LocalBase\Organization {
         }
     }
     class FlzSuiteAdminSettingsService {
-        public function calendarPeerEditing(): array { return ['flz-Buero' => true]; }
-        public function calendarPeerOptions(): array { return ['flz-Buero']; }
-        public function vacationPeerEditing(): array { return ['flz-Buero' => false]; }
-        public function vacationPeerApproval(): array { return ['flz-PFK' => false]; }
-        public function vacationPeerOptions(): array { return ['flz-PFK']; }
+        public function calendarPeerEditing(): array { return ['Buero' => true]; }
+        public function calendarPeerOptions(): array { return ['Buero']; }
+        public function vacationPeerEditing(): array { return ['Buero' => false]; }
+        public function vacationPeerApproval(): array { return ['PFK' => false]; }
+        public function vacationPeerOptions(): array { return ['PFK']; }
         public function saveCalendarPeerEditing(array $value): array { return $value; }
         public function saveVacationPeerEditing(array $value): array { return $value; }
         public function saveVacationPeerApproval(array $value): array { return $value; }
@@ -75,7 +75,7 @@ namespace OCA\LocalBase\Service {
         }
     }
     class OrganizationDirectoryStatusService {
-        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'flz-Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
+        public function status(): array { return ['compatible' => true, 'demoWritable' => false, 'groups' => [['groupId' => 'Buero', 'exists' => true]], 'positions' => [['roleKey' => 'gf_as', 'areaKey' => null, 'displayNames' => ['Gina Führung']]]]; }
     }
 }
 
@@ -121,8 +121,8 @@ namespace {
     $organization->invalid = false;
     $organization->failure = true;
     if ($controller->saveOrganization([])->getStatus() !== 400 || $logger->errors === []) throw new RuntimeException('Interner Fehler wird nicht sicher behandelt.');
-    $permissions = $controller->savePermissions(['flz-Buero' => false], ['flz-PFK' => true], ['flz-Buero' => true])->getData();
-    if ($permissions['calendarPeerEditing']['flz-Buero'] !== false || $permissions['vacationPeerEditing']['flz-Buero'] !== true || $permissions['vacationPeerApproval']['flz-PFK'] !== true) throw new RuntimeException('Freigaben werden nicht getrennt gespeichert.');
+    $permissions = $controller->savePermissions(['Buero' => false], ['PFK' => true], ['Buero' => true])->getData();
+    if ($permissions['calendarPeerEditing']['Buero'] !== false || $permissions['vacationPeerEditing']['Buero'] !== true || $permissions['vacationPeerApproval']['PFK'] !== true) throw new RuntimeException('Freigaben werden nicht getrennt gespeichert.');
     $savedLayout = $controller->saveLayout(['version' => 1, 'scopes' => []])->getData();
     if (($savedLayout['dashboardLayout']['version'] ?? null) !== 1 || !isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht unter dem angemeldeten Admin gespeichert.');
     if (($controller->resetLayout()->getData()['dashboardLayout']['version'] ?? null) !== 1 || isset($layout->layouts['admin'])) throw new RuntimeException('Persönliches Adminlayout wird nicht subjectgebunden zurückgesetzt.');

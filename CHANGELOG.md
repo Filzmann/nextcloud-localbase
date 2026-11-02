@@ -5,6 +5,10 @@
 - Lokalen DDEV-Organisationsstand kontrolliert auf präfixlose Rollen-,
   Bereichs- und ASN-Teamgruppen migriert und den späteren Staging-Lauf mit
   Preflight-, Validierungs-, Stop- und Rückbauvertrag dokumentiert.
+- Organisationsdefaults, ASN-Teampräfix, Demofixtures, Peerfreigaben und
+  öffentliche Snapshots auf dieselbe präfixlose kanonische Definition
+  umgestellt; den historischen kombinierten Finanz-/Lohn-Gruppenalias aus
+  der ausführbaren Rollenauflösung entfernt.
 
 - Akutschichtvermittlung als navigierbares Standalone- und OrgSuite-Ziel in
   den kanonischen Produktkatalog aufgenommen; die Bundle-Freigabe bleibt

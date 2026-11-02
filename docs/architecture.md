@@ -141,19 +141,14 @@ erhalten; Gruppen-ID-Kollisionen, ungültige Referenzen und Hierarchiezyklen
 werden abgelehnt. Eine ungültige gespeicherte Definition fällt sicher auf die
 geprüfte Standarddefinition zurück.
 
-Version 3 trennt die bisherigen Funktionen unterhalb `finance_lead` in die
-stabilen Schlüssel `finance` und `payroll`. Beim Upgrade bleibt die bestehende
-Gruppen-ID von `finance` erhalten; `payroll` wird additiv ergänzt. Beide
-Rollen bleiben im bisherigen Hierarchie- und Organisationsblock.
-Aus Sicherheitsgründen wird die Mitgliedschaft der bisherigen kombinierten
-Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
-`finance` zugeordnet und ihr unveränderter Standardtitel fachlich zu
-„Finanzen“ normalisiert. Administrator*innen verschieben Lohn-Mitarbeitende
-anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
-niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
-Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
-`flz-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
-ausdrücklich niemals die neue `payroll`-Rolle.
+Version 3 trennt die Funktionen unterhalb `finance_lead` in die stabilen
+Schlüssel `finance` und `payroll`. Die kanonische Version-4-Definition ordnet
+ihnen ausschließlich die getrennten präfixlosen Gruppen `Finanzen` und
+`Lohn` zu. Die frühere kombinierte Gruppen-ID ist kein ausführbarer Alias
+mehr und erteilt weder die Finanz- noch die Lohnrolle. Eine vorhandene
+Instanz wird deshalb vor dem Umschalten nach dem dokumentierten Runbook
+fachlich aufgeteilt und vollständig geprüft; Fresh Installs beginnen direkt
+mit dem kanonischen Zielzustand.
 
 Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
 Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie

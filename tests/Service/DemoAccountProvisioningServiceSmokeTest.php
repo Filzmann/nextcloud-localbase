@@ -88,11 +88,11 @@ namespace {
     $result = $service->provision('flzcalendar', [[
         'uid' => 'flz-calendar-demo-office',
         'displayName' => 'Mara Muster (Büro Nordost)',
-        'groups' => ['flz-Buero', 'flz-Nordost'],
+        'groups' => ['Buero', 'Bereich-Nordost'],
     ]]);
     if ($result !== ['createdUsers' => 1, 'reusedUsers' => 0, 'createdGroups' => 2]) throw new RuntimeException('Demo-Provisioning meldet falsche Zähler.');
     if (($users->createdPasswords['flz-calendar-demo-office'] ?? null) !== 'flz-calendar-demo-office') throw new RuntimeException('Das initiale Passwort entspricht nicht der Demo-UID.');
-    if (!isset($groups->groups['flz-Buero']->members['flz-calendar-demo-office'])) throw new RuntimeException('Demokonto wurde der Gruppe nicht zugeordnet.');
+    if (!isset($groups->groups['Buero']->members['flz-calendar-demo-office'])) throw new RuntimeException('Demokonto wurde der Gruppe nicht zugeordnet.');
     $registryAfterSafeRun = json_decode($config->values['localbase']['demo_account_registry'], true, 32, JSON_THROW_ON_ERROR);
     if (isset($registryAfterSafeRun['orphan-after-restore'])) throw new RuntimeException('Ein verwaister Demo-Registry-Eintrag wurde beim nächsten sicheren Lauf nicht entfernt.');
 
@@ -100,7 +100,7 @@ namespace {
     $again = $service->provision('flzcalendar', [[
         'uid' => 'flz-calendar-demo-office',
         'displayName' => 'Mara Muster (Büro Nordost)',
-        'groups' => ['flz-Buero'],
+        'groups' => ['Buero'],
     ]]);
     if ($again['createdUsers'] !== 0 || $again['reusedUsers'] !== 1) throw new RuntimeException('Eigene Demokonten werden nicht idempotent wiederverwendet.');
     if ($users->users['flz-calendar-demo-office']->password !== 'flz-calendar-demo-office') throw new RuntimeException('Ein eigenes wiederverwendetes Demokonto wurde nicht auf UID = Passwort zurückgesetzt.');

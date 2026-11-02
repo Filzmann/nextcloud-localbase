@@ -8,6 +8,15 @@ stabilen semantischen Rollen- und Bereichsschlüssel des LocalBase-Vertrags
 bleiben unverändert und sind weiterhin die fachliche Quelle. Fachrechte
 werden nicht aus dem Namen einer Gruppe abgeleitet.
 
+Seit der testgetriebenen Defaultumstellung verwendet
+`FlzOrganizationDefinition::defaults()` dieselbe unten dokumentierte
+Abbildung als ausführbaren Fresh-Install-Vertrag. Demofixtures, Peerfreigaben
+und öffentliche V1-Snapshots leiten ihre Gruppen ausschließlich aus dieser
+Definition ab. Es gibt keinen ausführbaren Präfixfallback und keinen
+kombinierten Finanz-/Lohn-Alias mehr. Persistierte Instanzen werden nicht
+stillschweigend umgeschrieben, sondern ausschließlich mit dem kontrollierten
+Lauf dieses Dokuments umgestellt.
+
 Die Regel `Benutzername = Passwort` gilt ausschließlich für registrierte
 synthetische Konten in der lokalen DDEV-Instanz. Sie darf weder auf Staging
 noch auf andere Umgebungen übertragen werden.

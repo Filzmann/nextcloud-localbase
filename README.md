@@ -26,7 +26,12 @@ Organigrammrolle.
 
 Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
 festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
-einzige persistierte Quelle, aus der der öffentliche Snapshot erzeugt wird.
+einzige persistierte Quelle, aus der der öffentliche Snapshot und die
+Gruppenzuordnungen der Demokonten erzeugt werden. Fresh Installs verwenden
+für Rollen, Bereiche und Assistenzteams ausschließlich die präfixlosen
+Gruppen-IDs aus dem dokumentierten Migrationsvertrag; frühere `flz-`- oder
+`ad-`-Gruppen und der kombinierte Finanz-/Lohn-Alias werden nicht mehr als
+zweite ausführbare Quelle erkannt.
 
 Für Filzmann Urlaubsplanung stellt
 `OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService` einen
