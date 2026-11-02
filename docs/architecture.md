@@ -123,6 +123,16 @@ Peergrenzen ab. Rollen und Bereiche werden über stabile semantische Schlüssel
 referenziert; konfigurierbare Gruppen-IDs oder Anzeigenamen sind keine
 Fachschlüssel.
 
+Der freigegebene Zielvertrag verwendet für Organisationsgruppen global
+eindeutige, verständliche Gruppen-IDs ohne herkunftsbezogene Präfixe wie
+`flz-` oder `ad-`. Rollen- und Bereichsschlüssel sowie gültige
+Assistenzteamkürzel bleiben die einzige fachliche Identität; die Gruppe selbst
+erteilt keine app-spezifische Berechtigung. Der kontrollierte lokale Nachweis
+und der vorgemerkte Staging-Lauf stehen im
+[Migrationsrunbook](prefixless-organization-group-migration.md). Historische
+Präfixdefaults und reine Übergangsaliase werden erst mit der separat
+testgetriebenen Defaultumstellung aus dem ausführbaren Vertrag entfernt.
+
 Die gemeinsame Reihenfolge umfasst unter anderem Fahrzeugverwaltung nach IT,
 Empfang nach Sekretariat sowie im Pflegebereich stellvertretende PDL,
 Büroorganisation Pflege und PFK. Der Organisationsvertrag Version 2 ergänzt
