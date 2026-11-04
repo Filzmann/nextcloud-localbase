@@ -11,8 +11,8 @@
   der ausführbaren Rollenauflösung entfernt.
 
 - Akutschichtvermittlung als navigierbares Standalone- und OrgSuite-Ziel in
-  den kanonischen Produktkatalog aufgenommen; die Bundle-Freigabe bleibt
-  weiterhin deaktiviert.
+  den kanonischen Produktkatalog aufgenommen und für das vollständige
+  Suite-Bundle sowie das eigenständige Produktbundle freigegeben.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35

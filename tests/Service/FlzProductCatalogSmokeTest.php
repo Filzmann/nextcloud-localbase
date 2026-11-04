@@ -28,15 +28,18 @@ if ($menuIds !== $expectedProducts) {
 }
 
 $fullSuite = $catalog->fullSuiteAppIds();
-if ($fullSuite !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
+if ($fullSuite !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flz_akut']) {
     throw new RuntimeException('Das vollständige Suite-Bundle enthält nicht Infrastruktur und alle FLZ-Produkte.');
 }
-if (array_column($catalog->bundleProducts(), 'id') !== ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
+if (array_column($catalog->bundleProducts(), 'id') !== ['flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flz_akut']) {
     throw new RuntimeException('Nicht freigegebene Entwicklungsprodukte gelangen in Einzelproduktbundles.');
 }
 
 if ($catalog->productBundleAppIds('flzrecruitment') !== ['localbase', 'orgsuite', 'flzrecruitment']) {
     throw new RuntimeException('Das Recruitment-Produktbundle ist nicht eigenständig zusammengesetzt.');
+}
+if ($catalog->productBundleAppIds('flz_akut') !== ['localbase', 'orgsuite', 'flz_akut']) {
+    throw new RuntimeException('Das Akut-Produktbundle ist nicht eigenständig zusammengesetzt.');
 }
 
 $recruitment = $catalog->product('flzrecruitment');
@@ -61,9 +64,9 @@ $acute = $catalog->product('flz_akut');
 if ($acute['route'] !== 'flz_akut.page.index'
     || $acute['standalone'] !== true
     || $acute['menu'] !== true
-    || $acute['fullSuiteBundle'] !== false
-    || $acute['productBundle'] !== false) {
-    throw new RuntimeException('Die Akutschichtvermittlung ist nicht korrekt als navigierbares Entwicklungsprodukt eingeordnet.');
+    || $acute['fullSuiteBundle'] !== true
+    || $acute['productBundle'] !== true) {
+    throw new RuntimeException('Die Akutschichtvermittlung ist nicht korrekt als auslieferbares Suite- und Einzelprodukt eingeordnet.');
 }
 
 try {
@@ -142,7 +145,7 @@ try {
     file_put_contents($temporaryCatalog, json_encode($reordered, JSON_THROW_ON_ERROR));
     $reorderedCatalog = new FlzProductCatalog($temporaryCatalog);
     if (array_column($reorderedCatalog->products(), 'id') !== $expectedProducts
-        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment']) {
+        || $reorderedCatalog->fullSuiteAppIds() !== ['localbase', 'orgsuite', 'flzcalendar', 'flzplaner', 'flzurlaub', 'flzroom', 'flzrecruitment', 'flz_akut']) {
         throw new RuntimeException('Katalogreihenfolge hängt von der JSON-Dateireihenfolge statt vom Vertrag ab.');
     }
 } finally {

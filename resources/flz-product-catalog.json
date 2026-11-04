@@ -115,8 +115,8 @@
       "navigationLabel": "Akut",
       "standalone": true,
       "menu": true,
-      "fullSuiteBundle": false,
-      "productBundle": false
+      "fullSuiteBundle": true,
+      "productBundle": true
     }
   ]
 }
