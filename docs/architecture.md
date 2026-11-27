@@ -98,9 +98,12 @@ bleibt die Konfliktmenge leer; Consumer greifen niemals auf Tabellen oder
 interne Services einer anderen Fachapp zu.
 
 `CalendarContext` und `CalendarContextSettingsService` definieren Land,
-ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,
-`DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche
-Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle Anzeigen.
+ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE` und
+`DE-BE` bleiben Bestandsdefaults; die fachliche Zeitzone folgt immer der
+Instanz-Zeitzone aus den Nextcloud-Systemeinstellungen (`config.php`
+`timezone`, Fallback UTC) und gilt app-übergreifend für alle FLZ-Apps.
+Persönliche Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle
+Anzeigen.
 
 `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als
 validierten read-only Jahresvertrag Version 1. Consumer werten neben der
