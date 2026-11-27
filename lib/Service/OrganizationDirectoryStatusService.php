@@ -7,6 +7,7 @@ namespace OCA\LocalBase\Service;
 use OCA\LocalBase\Organization\FlzOrganizationDefinition;
 use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 use OCP\IGroupManager;
+use OCP\IL10N;
 
 /**
  * Zweck: Prüft die konfigurierte FLZ-Organisation gegen alle in Nextcloud sichtbaren Gruppen-Backends.
@@ -17,10 +18,11 @@ final class OrganizationDirectoryStatusService {
     public function __construct(
         private IGroupManager $groups,
         private ?FlzOrganizationSettingsService $organization = null,
+        private ?IL10N $l10n = null,
     ) {}
 
     public function status(): array {
-        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
+        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults($this->l10n);
         $result = [];
         foreach ($definition->roles() as $key => $role) {
             $result[] = $this->groupStatus('role', (string)$key, $role['groupId'], $role['label']);

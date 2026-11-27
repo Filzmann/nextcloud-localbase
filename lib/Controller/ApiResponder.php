@@ -6,16 +6,25 @@ namespace OCA\LocalBase\Controller;
 
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\IL10N;
 use Throwable;
 
 class ApiResponder {
+    public function __construct(private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
     public function respond(
         callable $callback,
         callable $logError,
         string $action,
         array $context = [],
-        string $serverErrorMessage = 'Die Aktion konnte nicht ausgeführt werden. Details stehen im Nextcloud-Log.'
+        ?string $serverErrorMessage = null
     ): DataResponse {
+        $serverErrorMessage ??= $this->t('Die Aktion konnte nicht ausgeführt werden. Details stehen im Nextcloud-Log.');
         try {
             $response = $callback();
 

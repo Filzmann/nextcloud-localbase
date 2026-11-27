@@ -6,6 +6,7 @@ namespace OCA\LocalBase\Organization;
 
 use OCA\LocalBase\AppInfo\Application;
 use OCP\IAppConfig;
+use OCP\IL10N;
 
 /**
  * Zweck: Persistiert die kanonische FLZ-Organisationsdefinition als gemeinsame App-Einstellung.
@@ -15,7 +16,7 @@ use OCP\IAppConfig;
 final class FlzOrganizationSettingsService {
     private const KEY = 'flz_organization_definition';
 
-    public function __construct(private IAppConfig $config) {}
+    public function __construct(private IAppConfig $config, private ?IL10N $l10n = null) {}
 
     public function definition(): FlzOrganizationDefinition {
         return $this->state()['definition'];
@@ -24,21 +25,21 @@ final class FlzOrganizationSettingsService {
     /** @return array{definition: FlzOrganizationDefinition, valid: bool, persisted: bool} */
     public function state(): array {
         $raw = $this->config->getValueString(Application::APP_ID, self::KEY, '');
-        if ($raw === '') return ['definition' => FlzOrganizationDefinition::defaults(), 'valid' => false, 'persisted' => false];
+        if ($raw === '') return ['definition' => FlzOrganizationDefinition::defaults($this->l10n), 'valid' => false, 'persisted' => false];
         try {
             $data = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
-            $definition = FlzOrganizationDefinition::get(is_array($data) ? $data : []);
+            $definition = FlzOrganizationDefinition::get(is_array($data) ? $data : [], $this->l10n);
             if ((int)($data['version'] ?? 1) < 3) {
                 $this->config->setValueString(Application::APP_ID, self::KEY, json_encode($definition->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
             }
             return ['definition' => $definition, 'valid' => true, 'persisted' => true];
         } catch (\Throwable) {
-            return ['definition' => FlzOrganizationDefinition::defaults(), 'valid' => false, 'persisted' => true];
+            return ['definition' => FlzOrganizationDefinition::defaults($this->l10n), 'valid' => false, 'persisted' => true];
         }
     }
 
     public function save(array $data): FlzOrganizationDefinition {
-        $definition = FlzOrganizationDefinition::get($data);
+        $definition = FlzOrganizationDefinition::get($data, $this->l10n);
         $encoded = json_encode($definition->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         $this->config->setValueString(Application::APP_ID, self::KEY, $encoded);
         return $definition;

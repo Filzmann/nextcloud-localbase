@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text);
     function byId(id) {
         return document.getElementById(id);
     }
@@ -19,7 +20,7 @@
         return text === '' ? null : text;
     }
 
-    function errorMessage(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
+    function errorMessage(error, fallback = translate('localbase', 'Die Aktion konnte nicht ausgeführt werden.')) {
         if (typeof error === 'string') {
             return textOrNull(error) || fallback;
         }
@@ -81,7 +82,7 @@
             this.show(message, 'warning');
         }
 
-        error(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
+        error(error, fallback = translate('localbase', 'Die Aktion konnte nicht ausgeführt werden.')) {
             this.show(errorMessage(error, fallback), 'error');
         }
 

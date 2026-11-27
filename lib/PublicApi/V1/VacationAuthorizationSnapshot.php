@@ -25,7 +25,7 @@ final class VacationAuthorizationSnapshot {
         private array $ebAreaViews,
     ) {
         if ($definitionVersion < 1) {
-            throw new InvalidArgumentException('Invalid organization definition version.');
+            throw new InvalidArgumentException('Ungültige Organisationsdefinitionsversion.');
         }
         if (!$valid) {
             $this->peerEditing = [];
@@ -78,7 +78,7 @@ final class VacationAuthorizationSnapshot {
         $normalized = [];
         foreach ($permissions as $groupId => $enabled) {
             if (!is_string($groupId) || trim($groupId) === '' || !is_bool($enabled)) {
-                throw new InvalidArgumentException('Invalid vacation peer permission.');
+                throw new InvalidArgumentException('Ungültige Urlaubs-Peer-Berechtigung.');
             }
             $normalized[trim($groupId)] = $enabled;
         }
@@ -95,19 +95,19 @@ final class VacationAuthorizationSnapshot {
         $ids = [];
         $areaKeys = [];
         foreach ($views as $view) {
-            if (!is_array($view)) throw new InvalidArgumentException('Invalid vacation EB area view.');
+            if (!is_array($view)) throw new InvalidArgumentException('Ungültige Urlaubs-EB-Bereichsansicht.');
             $item = [];
             foreach (['id', 'label', 'roleKey', 'roleGroupId', 'areaKey', 'areaGroupId'] as $key) {
                 if (!is_string($view[$key] ?? null) || trim($view[$key]) === '') {
-                    throw new InvalidArgumentException('Invalid vacation EB area view field.');
+                    throw new InvalidArgumentException('Ungültiges Feld der Urlaubs-EB-Bereichsansicht.');
                 }
                 $item[$key] = trim($view[$key]);
             }
             if ($item['roleKey'] !== 'eb' || !preg_match('/^[a-z][a-z0-9_-]*$/', $item['id'])) {
-                throw new InvalidArgumentException('Invalid vacation EB area view identity.');
+                throw new InvalidArgumentException('Ungültige Identität der Urlaubs-EB-Bereichsansicht.');
             }
             if (isset($ids[$item['id']]) || isset($areaKeys[$item['areaKey']])) {
-                throw new InvalidArgumentException('Vacation EB area views must be unique.');
+                throw new InvalidArgumentException('Urlaubs-EB-Bereichsansichten müssen eindeutig sein.');
             }
             $ids[$item['id']] = true;
             $areaKeys[$item['areaKey']] = true;

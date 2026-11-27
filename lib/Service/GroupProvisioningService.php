@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Service;
 
 use OCP\IGroupManager;
+use OCP\IL10N;
 
 class GroupProvisioningService {
-    public function __construct(
-        private IGroupManager $groupManager
-    ) {
+    public function __construct(private IGroupManager $groupManager,
+        private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     /**
@@ -56,8 +62,8 @@ class GroupProvisioningService {
             foreach ($roleGroup->getUsers() as $user) {
                 if (!$requiredGroup->inGroup($user)) {
                     throw new \DomainException(
-                        'Alle Mitglieder der Rollengruppe ' . $roleGroupName
-                        . ' müssen zugleich der Gruppe ' . $requiredGroupName . ' angehören.',
+                        $this->t('Alle Mitglieder der Rollengruppe ') . $roleGroupName
+                        . $this->t(' müssen zugleich der Gruppe ') . $requiredGroupName . $this->t(' angehören.'),
                     );
                 }
             }

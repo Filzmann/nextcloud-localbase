@@ -6,13 +6,19 @@ namespace OCA\LocalBase\PublicApi\V1;
 
 use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 use OCA\LocalBase\Organization\FlzSuiteAdminSettingsService;
+use OCP\IL10N;
 
 /** Öffentliche Projektion der kanonischen LocalBase-Urlaubsfreigaben. */
 final class VacationAuthorizationSnapshotService {
-    public function __construct(
-        private FlzOrganizationSettingsService $organization,
+    public function __construct(private FlzOrganizationSettingsService $organization,
         private FlzSuiteAdminSettingsService $settings,
-    ) {}
+        private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
 
     public function snapshot(): VacationAuthorizationSnapshot {
         $state = $this->organization->state();
@@ -34,7 +40,7 @@ final class VacationAuthorizationSnapshotService {
         foreach ($areas as $areaKey => $area) {
             $views[] = [
                 'id' => 'eb-' . $areaKey,
-                'label' => 'EB – ' . $area['label'],
+                'label' => $this->t('EB – ') . $area['label'],
                 'roleKey' => 'eb',
                 'roleGroupId' => $roleGroupId,
                 'areaKey' => (string)$areaKey,

@@ -19,7 +19,7 @@ final class BrMembershipSnapshot {
         private ?string $deputyGroupId = null,
     ) {
         if ($definitionVersion < 1) {
-            throw new InvalidArgumentException('Invalid BR definition version.');
+            throw new InvalidArgumentException('Ungültige BR-Definitionsversion.');
         }
         if (!$valid) {
             $this->definitionRevision = 0;
@@ -29,7 +29,7 @@ final class BrMembershipSnapshot {
             return;
         }
         if ($definitionRevision < 1) {
-            throw new InvalidArgumentException('A valid BR identity requires a persisted definition revision.');
+            throw new InvalidArgumentException('Eine gültige BR-Identität erfordert eine persistierte Definitionsrevision.');
         }
         $memberGroupId = $this->validatedGroupId($memberGroupId);
         if ($chairGroupId === null && $deputyGroupId === null) {
@@ -37,11 +37,11 @@ final class BrMembershipSnapshot {
             return;
         }
         if ($chairGroupId === null || $deputyGroupId === null) {
-            throw new InvalidArgumentException('BR chair and deputy identities must be projected together.');
+            throw new InvalidArgumentException('BR-Vorsitz- und Stellvertreter-Identitäten müssen gemeinsam projiziert werden.');
         }
         $groupIds = [$memberGroupId, $this->validatedGroupId($chairGroupId), $this->validatedGroupId($deputyGroupId)];
         if (count(array_unique($groupIds)) !== count($groupIds)) {
-            throw new InvalidArgumentException('BR role group identities must be distinct.');
+            throw new InvalidArgumentException('BR-Rollengruppen-Identitäten müssen verschieden sein.');
         }
         [$this->memberGroupId, $this->chairGroupId, $this->deputyGroupId] = $groupIds;
     }
@@ -78,7 +78,7 @@ final class BrMembershipSnapshot {
 
     private function validatedGroupId(?string $groupId): string {
         if (!is_string($groupId)) {
-            throw new InvalidArgumentException('Invalid BR group identity.');
+            throw new InvalidArgumentException('Ungültige BR-Gruppenidentität.');
         }
         $groupId = trim($groupId);
         $characters = preg_match_all('/./us', $groupId, $matches);
@@ -86,7 +86,7 @@ final class BrMembershipSnapshot {
             || $characters === false
             || $characters > 64
             || preg_match('/[\x00-\x1F\x7F]/u', $groupId) === 1) {
-            throw new InvalidArgumentException('Invalid BR group identity.');
+            throw new InvalidArgumentException('Ungültige BR-Gruppenidentität.');
         }
         return $groupId;
     }

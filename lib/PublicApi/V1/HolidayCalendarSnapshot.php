@@ -19,11 +19,11 @@ final class HolidayCalendarSnapshot {
         private array $publicHolidayDates,
         private ?string $fetchedAt,
     ) {
-        if ($year < 2000 || $year > 2100) throw new InvalidArgumentException('Invalid holiday year.');
-        if ($timezone === '') throw new InvalidArgumentException('Missing holiday timezone.');
-        if (!in_array($cacheStatus, ['fresh', 'current', 'stale', 'unavailable'], true)) throw new InvalidArgumentException('Invalid holiday cache status.');
+        if ($year < 2000 || $year > 2100) throw new InvalidArgumentException('Ungültiges Feiertagsjahr.');
+        if ($timezone === '') throw new InvalidArgumentException('Fehlende Feiertags-Zeitzone.');
+        if (!in_array($cacheStatus, ['fresh', 'current', 'stale', 'unavailable'], true)) throw new InvalidArgumentException('Ungültiger Feiertags-Cache-Status.');
         foreach ($publicHolidayDates as $date) {
-            if (!is_string($date) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) throw new InvalidArgumentException('Invalid holiday date.');
+            if (!is_string($date) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) throw new InvalidArgumentException('Ungültiges Feiertagsdatum.');
         }
         $this->publicHolidayDates = array_values(array_unique($publicHolidayDates));
         sort($this->publicHolidayDates);

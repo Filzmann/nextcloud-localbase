@@ -7,8 +7,8 @@ $mode = ($_['mode'] ?? 'self') === 'admin' ? 'admin' : 'self';
 ?>
 <main id="localbase-privacy" class="lb-privacy" data-privacy-mode="<?php p($mode); ?>">
     <header>
-        <h1><?php p($mode === 'admin' ? 'Datenschutz-Auskunft' : 'Meine Daten'); ?></h1>
-        <p><?php p($mode === 'admin' ? 'Berechtigte Auskunft ohne Berichtskopie.' : 'Flüchtige Auskunft über die Daten der angemeldeten Person.'); ?></p>
+        <h1><?php p($mode === 'admin' ? $l->t('Datenschutz-Auskunft') : $l->t('Meine Daten')); ?></h1>
+        <p><?php p($mode === 'admin' ? $l->t('Berechtigte Auskunft ohne Berichtskopie.') : $l->t('Flüchtige Auskunft über die Daten der angemeldeten Person.')); ?></p>
     </header>
     <?php if ($mode === 'admin'): ?>
         <form id="lb-privacy-subject-form">
@@ -18,7 +18,7 @@ $mode = ($_['mode'] ?? 'self') === 'admin' ? 'admin' : 'self';
         </form>
     <?php endif; ?>
     <button type="button" id="lb-privacy-download" disabled>Auskunft als PDF herunterladen</button>
-    <div id="lb-privacy-status" role="status" aria-live="polite">Daten werden geladen.</div>
+    <div id="lb-privacy-status" role="status" aria-live="polite"><?php p($l->t('Daten werden geladen.')); ?></div>
     <section aria-labelledby="lb-privacy-article15-title">
         <h2 id="lb-privacy-article15-title">Angaben nach Art. 15 DSGVO</h2>
         <div id="lb-privacy-article15" class="lb-privacy-rights"></div>

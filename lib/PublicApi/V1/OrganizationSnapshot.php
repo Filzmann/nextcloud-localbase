@@ -21,7 +21,7 @@ final class OrganizationSnapshot {
         private array $areas,
     ) {
         if ($definitionVersion < 1) {
-            throw new InvalidArgumentException('Invalid organization definition version.');
+            throw new InvalidArgumentException('Ungültige Organisationsdefinitionsversion.');
         }
         if (!$valid) {
             $this->roles = [];
@@ -36,7 +36,7 @@ final class OrganizationSnapshot {
             ...array_column($this->areas, 'groupId'),
         ];
         if (count($groupIds) !== count(array_unique($groupIds))) {
-            throw new InvalidArgumentException('Organization group mappings must be unique.');
+            throw new InvalidArgumentException('Organisationsgruppen-Zuordnungen müssen eindeutig sein.');
         }
     }
 
@@ -78,12 +78,12 @@ final class OrganizationSnapshot {
         $normalized = [];
         foreach ($mappings as $key => $mapping) {
             if (!is_string($key) || trim($key) === '' || !is_array($mapping)) {
-                throw new InvalidArgumentException('Invalid organization mapping identity.');
+                throw new InvalidArgumentException('Ungültige Organisationszuordnungs-Identität.');
             }
             $groupId = $mapping['groupId'] ?? null;
             $label = $mapping['label'] ?? null;
             if (!is_string($groupId) || trim($groupId) === '' || !is_string($label) || trim($label) === '') {
-                throw new InvalidArgumentException('Invalid organization mapping fields.');
+                throw new InvalidArgumentException('Ungültige Organisationszuordnungs-Felder.');
             }
             $normalized[trim($key)] = ['groupId' => trim($groupId), 'label' => trim($label)];
         }

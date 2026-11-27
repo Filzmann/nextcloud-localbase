@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const client = new window.LocalBase.api.ApiClient({
         appId: 'localbase',
@@ -58,16 +59,16 @@
         const status = document.getElementById('orgs-directory-status');
         const groups = document.getElementById('orgs-directory-groups');
         const summary = directory?.compatible
-            ? 'Alle konfigurierten Gruppen sind über Nextcloud erreichbar.'
-            : 'Mindestens eine konfigurierte Gruppe fehlt in Nextcloud.';
+            ? translate('localbase', 'Alle konfigurierten Gruppen sind über Nextcloud erreichbar.')
+            : translate('localbase', 'Mindestens eine konfigurierte Gruppe fehlt in Nextcloud.');
         const demo = directory?.demoWritable
-            ? ' Organisations-Demo-Packs dürfen Mitgliedschaften vorbereiten.'
-            : ' Read-only Gruppen bleiben produktiv nutzbar, können aber nicht durch Demo-Packs verändert werden.';
+            ? ' ' + translate('localbase', 'Organisations-Demo-Packs dürfen Mitgliedschaften vorbereiten.')
+            : ' ' + translate('localbase', 'Read-only Gruppen bleiben produktiv nutzbar, können aber nicht durch Demo-Packs verändert werden.');
         status.textContent = summary + demo;
         groups.replaceChildren(...(directory?.groups || []).map(item => {
             const row = document.createElement('tr');
             const values = [
-                item.kind === 'role' ? 'Rolle' : 'Bereich',
+                item.kind === 'role' ? 'Rolle' : translate('localbase', 'Bereich'),
                 item.label,
                 item.groupId,
                 item.exists ? (item.backendNames || []).join(', ') || 'Nextcloud' : '–',
@@ -110,7 +111,7 @@
                 body: JSON.stringify({ calendarContext: collectCalendarContext() }),
             });
             renderCalendarContext(data.calendarContext);
-            notice.success('Gemeinsamer Kalenderkontext gespeichert.');
+            notice.success(translate('localbase', 'Gemeinsamer Kalenderkontext gespeichert.'));
         } catch (error) {
             notice.error(error);
         }
@@ -120,7 +121,7 @@
         try {
             await client.request('/api/flz-full-suite/admin/organization', { method: 'PUT', body: JSON.stringify({ organization }) });
             await load();
-            notice.success('Filzmann-Organisation gespeichert.');
+            notice.success(translate('localbase', 'Filzmann-Organisation gespeichert.'));
         } catch (error) {
             notice.error(error);
         }
@@ -142,7 +143,7 @@
             await layoutSave;
             await client.request('/api/flz-full-suite/admin/layout', { method: 'DELETE' });
             await load();
-            notice.success('Persönliche Anordnung zurückgesetzt.');
+            notice.success(translate('localbase', 'Persönliche Anordnung zurückgesetzt.'));
         } catch (error) {
             notice.error(error);
         } finally {
@@ -162,7 +163,7 @@
                 }),
             });
             await load();
-            notice.success('Organisationsweite Rechte gespeichert.');
+            notice.success(translate('localbase', 'Organisationsweite Rechte gespeichert.'));
         } catch (error) {
             notice.error(error);
         }

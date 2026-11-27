@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\LocalBase\Organization;
 
+use OCP\IL10N;
+
 /**
  * Zweck: Bewertet die konfigurierbare, transitive FLZ-Weisungshierarchie für lokale Fachapps.
  * Zusammenspiel: SettingsService -> Definition -> Hierarchy -> PermissionPolicy.
@@ -12,8 +14,8 @@ namespace OCA\LocalBase\Organization;
 class FlzOrganizationHierarchy {
     protected FlzOrganizationDefinition $definition;
 
-    public function __construct(?FlzOrganizationSettingsService $settings = null, ?FlzOrganizationDefinition $definition = null) {
-        $this->definition = $settings?->definition() ?? $definition ?? FlzOrganizationDefinition::defaults();
+    public function __construct(?FlzOrganizationSettingsService $settings = null, ?FlzOrganizationDefinition $definition = null, private ?IL10N $l10n = null) {
+        $this->definition = $settings?->definition() ?? $definition ?? FlzOrganizationDefinition::defaults($this->l10n);
     }
 
     public function definition(): FlzOrganizationDefinition { return $this->definition; }

@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const xml = value => String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -33,15 +34,15 @@
         }
 
         markup() {
-            return `<div class="orgs-export" role="group" aria-label="Organigramm exportieren">
-                <strong>Organigramm exportieren</strong>
+            return `<div class="orgs-export" role="group" aria-label="${translate('localbase', 'Organigramm exportieren')}">
+                <strong>${translate('localbase', 'Organigramm exportieren')}</strong>
                 <label><input type="checkbox" data-organization-export-people> Zugeordnete Nutzer*innen einbeziehen</label>
                 <div class="orgs-export-actions">
                     <button type="button" data-action="export-drawio">Draw.io</button>
                     <button type="button" data-action="export-png">PNG</button>
                     <button type="button" data-action="export-pdf">PDF</button>
                 </div>
-                <span class="orgs-export-help">Exportiert wird der aktuell sichtbare Stand. Alle Formate werden direkt als Datei heruntergeladen.</span>
+                <span class="orgs-export-help">${translate('localbase', 'Exportiert wird der aktuell sichtbare Stand. Alle Formate werden direkt als Datei heruntergeladen.')}</span>
                 <p class="orgs-feedback" data-organization-export-feedback role="status" aria-live="polite"></p>
             </div>`;
         }
@@ -51,16 +52,16 @@
             if (!button) return;
             const includePeople = Boolean(this.container.querySelector('[data-organization-export-people]')?.checked);
             const snapshot = this.board.exportSnapshot(includePeople);
-            if (!snapshot.nodes.length) return this.feedback('Das Organigramm enthält keine exportierbaren Karten.');
+            if (!snapshot.nodes.length) return this.feedback(translate('localbase', 'Das Organigramm enthält keine exportierbaren Karten.'));
             const layout = this.layout(snapshot);
             button.disabled = true;
             try {
                 if (button.dataset.action === 'export-drawio') this.downloadBlob(new Blob([this.toDrawio(layout)], { type: 'application/vnd.jgraph.mxfile' }), 'flz-organigramm.drawio');
                 if (button.dataset.action === 'export-png') await this.exportPng(layout);
                 if (button.dataset.action === 'export-pdf') this.downloadBlob(new Blob([this.toPdf(layout)], { type: 'application/pdf' }), 'flz-organigramm.pdf');
-                this.feedback('Das Organigramm wurde exportiert.');
+                this.feedback(translate('localbase', 'Das Organigramm wurde exportiert.'));
             } catch (error) {
-                this.feedback(error instanceof Error ? error.message : 'Das Organigramm konnte nicht exportiert werden.');
+                this.feedback(error instanceof Error ? error.message : translate('localbase', 'Das Organigramm konnte nicht exportiert werden.'));
             } finally {
                 button.disabled = false;
             }
@@ -162,15 +163,15 @@
             const ids = new Map(layout.nodes.map((node, index) => [node.id, `node-${index + 1}`]));
             const vertices = layout.nodes.map(node => {
                 const value = this.nodeLines(node).map(xml).join('&#xa;');
-                return `<mxCell id="${ids.get(node.id)}" value="${value}" style="rounded=1;whiteSpace=wrap;html=0;strokeWidth=2;fillColor=#ffffff;strokeColor=#8c8c8c;fontFamily=Arial;" vertex="1" parent="1"><mxGeometry x="${Math.round(node.x)}" y="${Math.round(node.y)}" width="${node.width}" height="${node.height}" as="geometry"/></mxCell>`;
+                return `<${'mxCell id'}="${ids.get(node.id)}" value="${value}" style="rounded=1;whiteSpace=wrap;html=0;strokeWidth=2;fillColor=#ffffff;strokeColor=#8c8c8c;fontFamily=Arial;" vertex="1" parent="1"><${'mxGeometry x'}="${Math.round(node.x)}" y="${Math.round(node.y)}" width="${node.width}" height="${node.height}" as="geometry"/></mxCell>`;
             }).join('');
             const edges = layout.edges.map((edge, index) => {
                 const source = ids.get(edge.source);
                 const target = ids.get(edge.destination);
                 if (!source || !target) return '';
-                return `<mxCell id="edge-${index + 1}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="${source}" target="${target}"><mxGeometry relative="1" as="geometry"/></mxCell>`;
+                return `<${'mxCell id'}="edge-${index + 1}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;strokeWidth=2;endArrow=block;" edge="1" parent="1" source="${source}" target="${target}"><${'mxGeometry relative'}="1" as="geometry"/></mxCell>`;
             }).join('');
-            return `<?xml version="1.0" encoding="UTF-8"?><mxfile host="app.diagrams.net" compressed="false"><diagram id="flz-organigramm" name="Organigramm"><mxGraphModel dx="${layout.width}" dy="${layout.height}" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="${layout.width}" pageHeight="${layout.height}"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${vertices}${edges}</root></mxGraphModel></diagram></mxfile>`;
+            return `<?xml version="1.0" encoding="UTF-8"?><mxfile host="app.diagrams.net" compressed="false"><diagram id="flz-organigramm" name="${translate('localbase', 'Organigramm')}"><${'mxGraphModel dx'}="${layout.width}" dy="${layout.height}" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="${layout.width}" pageHeight="${layout.height}"><root><${'mxCell id'}="0"/><${'mxCell id'}="1" parent="0"/>${vertices}${edges}</root></mxGraphModel></diagram></mxfile>`;
         }
 
         toSvg(layout) {
@@ -186,13 +187,13 @@
                 const middleY = fromY + Math.max(20, (toY - fromY) / 2);
                 return `<path d="M ${fromX} ${fromY} C ${fromX} ${middleY}, ${toX} ${middleY}, ${toX} ${toY - 4}" fill="none" stroke="#00679e" stroke-width="2.5" marker-end="url(#arrow)"/>`;
             }).join('');
-            const clips = layout.nodes.map((node, index) => `<clipPath id="node-clip-${index}"><rect x="${node.x + 8}" y="${node.y + 8}" width="${node.width - 16}" height="${node.height - 16}"/></clipPath>`).join('');
+            const clips = layout.nodes.map((node, index) => `<${'clipPath id'}="node-clip-${index}"><rect x="${node.x + 8}" y="${node.y + 8}" width="${node.width - 16}" height="${node.height - 16}"/></clipPath>`).join('');
             const cards = layout.nodes.map((node, index) => {
                 const textLayout = this.nodeTextLayout(node);
                 const text = textLayout.lines.map(line => `<tspan x="${node.x + 14}" y="${node.y + line.baseline}"${line.bold ? ' font-weight="700"' : ''}>${xml(line.text)}</tspan>`).join('');
-                return `<g><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="7" fill="#ffffff" stroke="#8c8c8c" stroke-width="2"/><text clip-path="url(#node-clip-${index})" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="${textLayout.fontSize}">${text}</text></g>`;
+                return `<g><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="7" fill="#ffffff" stroke="#8c8c8c" stroke-width="2"/><${'text clip-path'}="url(#node-clip-${index})" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="${textLayout.fontSize}">${text}</text></g>`;
             }).join('');
-            return `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="${xml(layout.title)}"><rect width="100%" height="100%" fill="#ffffff"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00679e"/></marker>${clips}</defs><text x="24" y="30" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="20" font-weight="700">${xml(layout.title)}</text>${edges}${cards}</svg>`;
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="${xml(layout.title)}"><rect width="100%" height="100%" fill="#ffffff"/><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00679e"/></marker>${clips}</defs><${'text x'}="24" y="30" fill="#1f1f1f" font-family="Arial, sans-serif" font-size="20" font-weight="700">${xml(layout.title)}</text>${edges}${cards}</svg>`;
         }
 
         toPdf(layout) {
@@ -263,7 +264,7 @@
                 const image = new Image();
                 await new Promise((resolve, reject) => {
                     image.addEventListener('load', resolve, { once: true });
-                    image.addEventListener('error', () => reject(new Error('Die PNG-Vorschau konnte nicht erzeugt werden.')), { once: true });
+                    image.addEventListener('error', () => reject(new Error(translate('localbase', 'Die PNG-Vorschau konnte nicht erzeugt werden.'))), { once: true });
                     image.src = svgUrl;
                 });
                 const scale = Math.min(2, 16000 / layout.width, 16000 / layout.height);
@@ -271,11 +272,11 @@
                 canvas.width = Math.round(layout.width * scale);
                 canvas.height = Math.round(layout.height * scale);
                 const context = canvas.getContext('2d');
-                if (!context) throw new Error('Der Browser unterstützt den PNG-Export nicht.');
+                if (!context) throw new Error(translate('localbase', 'Der Browser unterstützt den PNG-Export nicht.'));
                 context.fillStyle = '#ffffff';
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                const png = await new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Die PNG-Datei konnte nicht erzeugt werden.')), 'image/png'));
+                const png = await new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error(translate('localbase', 'Die PNG-Datei konnte nicht erzeugt werden.'))), 'image/png'));
                 this.downloadBlob(png, 'flz-organigramm.png');
             } finally {
                 URL.revokeObjectURL(svgUrl);

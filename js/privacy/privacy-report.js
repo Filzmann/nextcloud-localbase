@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const root = document.getElementById('localbase-privacy');
     if (!root) return;
@@ -28,12 +29,12 @@
         if (!processing) return;
         const section = document.createElement('section');
         section.className = 'lb-privacy-processing';
-        section.append(element('h4', 'Weitere Angaben zur Verarbeitung in dieser App'));
+        section.append(element('h4', translate('localbase', 'Weitere Angaben zur Verarbeitung in dieser App')));
         const list = document.createElement('ul');
         for (const [label, value] of [
-            ['Empfänger*innen', processing.recipients],
-            ['Herkunft der Daten', processing.source],
-            ['Drittlandübermittlung', processing.thirdCountryTransfers],
+            [translate('localbase', 'Empfänger') + '*innen', processing.recipients],
+            [translate('localbase', 'Herkunft der Daten'), processing.source],
+            [translate('localbase', 'Drittlandübermittlung'), processing.thirdCountryTransfers],
             ['Automatisierte Entscheidungen', processing.automatedDecisionMaking],
         ]) {
             const item = document.createElement('li');
@@ -47,7 +48,7 @@
     function appendItems(card, provider) {
         const items = provider.items || [];
         if (!items.length) {
-            card.append(element('p', provider.status === 'failed' ? 'Diese App konnte für die Auskunft nicht erreicht werden.' : 'Für dich sind in dieser App keine Datensätze vorhanden.', 'lb-privacy-empty'));
+            card.append(element('p', provider.status === 'failed' ? 'Diese App konnte für die Auskunft nicht erreicht werden.' : translate('localbase', 'Für dich sind in dieser App keine Datensätze vorhanden.'), 'lb-privacy-empty'));
             return;
         }
         const groups = new Map();
@@ -64,14 +65,14 @@
             const retention = sharedValue(typeItems, 'retention');
             const common = document.createElement('div');
             common.className = 'lb-privacy-common';
-            if (purpose) common.append(element('p', 'Grund der Speicherung: ' + purpose));
-            if (retention) common.append(element('p', 'Aufbewahrt bis: ' + retention));
+            if (purpose) common.append(element('p', translate('localbase', 'Grund der Speicherung:') + ' ' + purpose));
+            if (retention) common.append(element('p', translate('localbase', 'Aufbewahrt bis:') + ' ' + retention));
             if (common.children.length) section.append(common);
 
             const fields = [];
             for (const item of typeItems) for (const field of Object.keys(item.attributes || {})) if (!fields.includes(field)) fields.push(field);
             const hasNote = typeItems.some(item => item.thirdPartyNote);
-            const headers = [...fields, ...(hasNote ? ['Hinweis'] : []), ...(!purpose ? ['Grund der Speicherung'] : []), ...(!retention ? ['Aufbewahrt bis'] : [])];
+            const headers = [...fields, ...(hasNote ? [translate('localbase', 'Hinweis')] : []), ...(!purpose ? [translate('localbase', 'Grund der Speicherung')] : []), ...(!retention ? [translate('localbase', 'Aufbewahrt bis')] : [])];
             const wrap = document.createElement('div');
             wrap.className = 'lb-privacy-table-wrap';
             const table = document.createElement('table');
@@ -95,16 +96,16 @@
 
     function render(report) {
         apps.replaceChildren(); article15.replaceChildren();
-        completeness.replaceChildren(element('p', report.complete ? 'Die beteiligten Apps haben vollständig geantwortet.' : 'Die Auskunft ist unvollständig. Hinweise stehen bei der betroffenen App.'));
+        completeness.replaceChildren(element('p', report.complete ? 'Die beteiligten Apps haben vollständig geantwortet.' : translate('localbase', 'Die Auskunft ist unvollständig. Hinweise stehen bei der betroffenen App.')));
         downloadableReport = report; download.disabled = false;
-        article15.append(element('p', 'Du kannst insbesondere Berichtigung verlangen sowie – soweit die gesetzlichen Voraussetzungen vorliegen – Löschung, Einschränkung oder Widerspruch. Du kannst dich außerdem bei einer Datenschutzaufsichtsbehörde beschweren.'));
+        article15.append(element('p', translate('localbase', 'Du kannst insbesondere Berichtigung verlangen sowie – soweit die gesetzlichen Voraussetzungen vorliegen – Löschung, Einschränkung oder Widerspruch. Du kannst dich außerdem bei einer Datenschutzaufsichtsbehörde beschweren.')));
         article15.append(element('p', report.article15?.contactNote || ''));
         if (report.coverage) {
             const coverage = document.createElement('section');
             coverage.className = 'lb-privacy-coverage';
-            coverage.append(element('h3', 'Umfang dieser Auskunft'));
+            coverage.append(element('h3', translate('localbase', 'Umfang dieser Auskunft')));
             coverage.append(element('p', report.coverage.scopeNotice || ''));
-            coverage.append(element('h4', 'Aktuell noch nicht implementierte Datenabrufe'));
+            coverage.append(element('h4', translate('localbase', 'Aktuell noch nicht implementierte Datenabrufe')));
             const missing = document.createElement('ul');
             for (const source of report.coverage.notImplemented || []) missing.append(element('li', source));
             coverage.append(missing);
@@ -117,14 +118,14 @@
             appendProcessing(card, provider.processing); appendItems(card, provider);
             apps.append(card);
         }
-        status.textContent = 'Auskunft geladen.';
+        status.textContent = translate('localbase', 'Auskunft geladen.');
     }
 
     async function load(path) {
-        status.textContent = 'Daten werden geladen.';
+        status.textContent = translate('localbase', 'Daten werden geladen.');
         downloadableReport = null; download.disabled = true;
         try { render(await client.request(path)); }
-        catch (error) { apps.replaceChildren(); completeness.replaceChildren(); status.textContent = error?.message || 'Die Auskunft konnte nicht geladen werden.'; status.focus(); }
+        catch (error) { apps.replaceChildren(); completeness.replaceChildren(); status.textContent = error?.message || translate('localbase', 'Die Auskunft konnte nicht geladen werden.'); status.focus(); }
     }
 
     download.addEventListener('click', () => { if (downloadableReport) window.LocalBase.privacy.PrivacyReportDownload.download(downloadableReport); });

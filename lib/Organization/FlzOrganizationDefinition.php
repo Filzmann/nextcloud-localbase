@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Organization;
 
 use InvalidArgumentException;
+use OCP\IL10N;
 
 /**
  * Zweck: Hält den validierten, app-übergreifenden Vertrag der FLZ-Organisation.
@@ -14,50 +15,57 @@ use InvalidArgumentException;
 final class FlzOrganizationDefinition {
     private const DEFAULT_SINGLE_OCCUPANT_ROLES = ['gf_as', 'pdl', 'deputy_pdl', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'bl', 'deputy_bl'];
 
-    private function __construct(private array $data) {}
+    private function __construct(private array $data, private ?IL10N $l10n = null) {}
 
-    public static function get(array $data): self {
-        return new self(self::validate(self::migrate($data)));
+    /** Lokalisierung fachlicher Texte; ohne IL10N identity. */
+    private static function t(?IL10N $l10n, string $text): string
+    {
+        return $l10n?->t($text) ?? $text;
+    }
+
+
+    public static function get(array $data, ?IL10N $l10n = null): self {
+        return new self(self::validate(self::migrate($data, $l10n), $l10n), $l10n);
     }
 
     /** @return list<self> */
-    public static function get_all(array $items): array {
-        return array_map(static fn(array $item): self => self::get($item), $items);
+    public static function get_all(array $items, ?IL10N $l10n = null): array {
+        return array_map(static fn(array $item): self => self::get($item, $l10n), $items);
     }
 
-    public static function defaults(): self {
+    public static function defaults(?IL10N $l10n = null): self {
         return self::get([
             'version' => 4,
             'teamGroupPrefix' => 'ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
-            'staffBlockLabel' => 'Geschäftsführung, Leitungen und Stabsstellen',
+            'staffBlockLabel' => self::t($l10n, 'Geschäftsführung, Leitungen und Stabsstellen'),
             'roles' => [
-                'gf_as' => self::role('GF-AS', 'Geschäftsführung Assistenz', 10, staffBlock: true, singleOccupant: true),
+                'gf_as' => self::role('GF-AS', self::t($l10n, 'Geschäftsführung Assistenz'), 10, staffBlock: true, singleOccupant: true),
                 'pdl' => self::role('PDL', 'Pflegedienstleitung', 20, staffBlock: true, singleOccupant: true),
-                'staff_hr' => self::role('Stab-HR', 'Stabsstelle HR', 30, peerEnabled: true, staffBlock: true),
-                'staff_qmb' => self::role('Stab-QMB', 'Stabsstelle Qualitätsmanagement', 40, peerEnabled: true, staffBlock: true),
-                'gf_digi' => self::role('GF-Digi', 'Geschäftsführung Digitales und Finanzen', 50, staffBlock: true, singleOccupant: true),
-                'assistant_gf_digi' => self::role('AsdGF-Digi', 'Assistenz der Geschäftsführung Digitalisierung', 60, staffBlock: true, singleOccupant: true),
-                'finance_lead' => self::role('Leitung-Finanzen-Lohn', 'Leitung Finanzen und Lohn', 70, staffBlock: true, singleOccupant: true),
+                'staff_hr' => self::role('Stab-HR', self::t($l10n, 'Stabsstelle HR'), 30, peerEnabled: true, staffBlock: true),
+                'staff_qmb' => self::role('Stab-QMB', self::t($l10n, 'Stabsstelle Qualitätsmanagement'), 40, peerEnabled: true, staffBlock: true),
+                'gf_digi' => self::role('GF-Digi', self::t($l10n, 'Geschäftsführung Digitales und Finanzen'), 50, staffBlock: true, singleOccupant: true),
+                'assistant_gf_digi' => self::role('AsdGF-Digi', self::t($l10n, 'Assistenz der Geschäftsführung Digitalisierung'), 60, staffBlock: true, singleOccupant: true),
+                'finance_lead' => self::role('Leitung-Finanzen-Lohn', self::t($l10n, 'Leitung Finanzen und Lohn'), 70, staffBlock: true, singleOccupant: true),
                 'finance' => self::role('Finanzen', 'Finanzen', 80, peerEnabled: true, staffBlock: true),
-                'payroll' => self::role('Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true),
+                'payroll' => self::role(self::t($l10n, 'Lohn'), self::t($l10n, 'Lohn'), 85, peerEnabled: true, staffBlock: true),
                 'it' => self::role('IT', 'IT', 90, peerEnabled: true, staffBlock: true, shortLabel: 'IT'),
                 'fleet_management' => self::role('Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
                 'secretariat' => self::role('Sekretariat', 'Sekretariat', 100, peerEnabled: true, staffBlock: true),
                 'reception' => self::role('Empfang', 'Empfang', 105),
-                'bl' => self::role('BL', 'Büroleitung', 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
-                'deputy_bl' => self::role('StvBL', 'Stellvertretende Büroleitung', 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
+                'bl' => self::role('BL', self::t($l10n, 'Büroleitung'), 200, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
+                'deputy_bl' => self::role('StvBL', self::t($l10n, 'Stellvertretende Büroleitung'), 210, areaScoped: true, managementAreaScoped: true, singleOccupant: true),
                 'office' => self::role('Buero', 'Büromitarbeiter*innen', 230, areaScoped: true, peerEnabled: true, shortLabel: 'BO'),
-                'deputy_pdl' => self::role('StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
-                'care_office' => self::role('Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237, shortLabel: 'BO-Pflege'),
+                'deputy_pdl' => self::role('StvPDL', self::t($l10n, 'Stellvertretende Pflegedienstleitung'), 235, singleOccupant: true),
+                'care_office' => self::role('Bueroorganisation-Pflege', self::t($l10n, 'Büroorganisation Pflege'), 237, shortLabel: 'BO-Pflege'),
                 'eb' => self::role('EB', 'Einsatzbegleitung', 220, areaScoped: true, peerEnabled: true, shortLabel: 'EB'),
                 'pfk' => self::role('PFK', 'Pflegefachkraft', 240, peerEnabled: true, shortLabel: 'PFK'),
             ],
             'areas' => [
                 'northeast' => ['groupId' => 'Bereich-Nordost', 'label' => 'Nordost', 'shortLabel' => 'NO', 'sortOrder' => 10],
                 'west' => ['groupId' => 'Bereich-West', 'label' => 'West', 'shortLabel' => 'W', 'sortOrder' => 20],
-                'south' => ['groupId' => 'Bereich-Sued', 'label' => 'Süd', 'shortLabel' => 'S', 'sortOrder' => 30],
+                'south' => ['groupId' => 'Bereich-Sued', 'label' => self::t($l10n, 'Süd'), 'shortLabel' => 'S', 'sortOrder' => 30],
             ],
             'hierarchy' => [
                 'gf_as' => ['pdl', 'bl', 'staff_hr', 'staff_qmb', 'secretariat'],
@@ -72,16 +80,16 @@ final class FlzOrganizationDefinition {
             ],
             'diagramOrder' => [],
             'organizationTeams' => [
-                ['id' => 'office-northeast', 'label' => 'Büro Nordost', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['northeast'], 'sortOrder' => 10],
-                ['id' => 'office-west', 'label' => 'Büro West', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['west'], 'sortOrder' => 20],
-                ['id' => 'office-south', 'label' => 'Büro Süd', 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 30],
+                ['id' => 'office-northeast', 'label' => self::t($l10n, 'Büro Nordost'), 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['northeast'], 'sortOrder' => 10],
+                ['id' => 'office-west', 'label' => self::t($l10n, 'Büro West'), 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['west'], 'sortOrder' => 20],
+                ['id' => 'office-south', 'label' => self::t($l10n, 'Büro Süd'), 'roles' => ['office', 'bl', 'deputy_bl'], 'areas' => ['south'], 'sortOrder' => 30],
                 ['id' => 'eb', 'label' => 'Einsatzbegleitungen', 'roles' => ['eb'], 'areas' => [], 'sortOrder' => 40],
-                ['id' => 'pfk', 'label' => 'Pflegefachkräfte', 'roles' => ['deputy_pdl', 'care_office', 'pfk'], 'areas' => [], 'sortOrder' => 50],
-                ['id' => 'staff', 'label' => 'Geschäftsführung, Leitungen und Stabsstellen', 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'payroll', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
+                ['id' => 'pfk', 'label' => self::t($l10n, 'Pflegefachkräfte'), 'roles' => ['deputy_pdl', 'care_office', 'pfk'], 'areas' => [], 'sortOrder' => 50],
+                ['id' => 'staff', 'label' => self::t($l10n, 'Geschäftsführung, Leitungen und Stabsstellen'), 'roles' => ['gf_as', 'pdl', 'staff_hr', 'staff_qmb', 'gf_digi', 'assistant_gf_digi', 'finance_lead', 'finance', 'payroll', 'it', 'secretariat'], 'areas' => [], 'sortOrder' => 60],
                 ['id' => 'fleet-management', 'label' => 'Fahrzeugverwaltung', 'roles' => ['fleet_management'], 'areas' => [], 'sortOrder' => 70],
                 ['id' => 'reception', 'label' => 'Empfang', 'roles' => ['reception'], 'areas' => [], 'sortOrder' => 80],
             ],
-        ]);
+        ], $l10n);
     }
 
     public function toArray(): array { return $this->data; }
@@ -198,14 +206,14 @@ final class FlzOrganizationDefinition {
     }
 
     /** Ergänzt veröffentlichte Organisationsversionen ausschließlich additiv. */
-    private static function migrate(array $data): array {
+    private static function migrate(array $data, ?IL10N $l10n = null): array {
         $version = (int)($data['version'] ?? 1);
         if ($version === 4) return $data;
         if (!in_array($version, [1, 2, 3], true)) throw new InvalidArgumentException("Organisationsversion {$version} wird nicht unterstützt.");
         if (!isset($data['roles'], $data['areas'], $data['hierarchy'], $data['organizationTeams']) || !is_array($data['roles']) || !is_array($data['areas']) || !is_array($data['hierarchy']) || !is_array($data['organizationTeams'])) return $data;
 
         if ($version === 1) {
-            foreach (self::versionTwoRoles() as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
+            foreach (self::versionTwoRoles($l10n) as $key => $role) if (!isset($data['roles'][$key])) $data['roles'][$key] = $role;
             self::appendHierarchyTargets($data['hierarchy'], [
                 'pdl' => ['deputy_pdl', 'care_office', 'pfk'],
                 'deputy_pdl' => ['care_office', 'pfk'],
@@ -213,19 +221,19 @@ final class FlzOrganizationDefinition {
                 'secretariat' => ['reception'],
             ]);
 
-            self::migrateOrganizationTeam($data['organizationTeams'], 'pfk', 'Pflegefachkräfte', ['deputy_pdl', 'care_office', 'pfk'], 50, true);
+            self::migrateOrganizationTeam($data['organizationTeams'], 'pfk', self::t($l10n, 'Pflegefachkräfte'), ['deputy_pdl', 'care_office', 'pfk'], 50, true);
             self::migrateOrganizationTeam($data['organizationTeams'], 'fleet-management', 'Fahrzeugverwaltung', ['fleet_management'], 70);
             self::migrateOrganizationTeam($data['organizationTeams'], 'reception', 'Empfang', ['reception'], 80);
             $version = 2;
         }
 
         if ($version === 2) {
-            if (($data['roles']['finance']['label'] ?? null) === 'Finanzen und Lohn') {
+            if (($data['roles']['finance']['label'] ?? null) === self::t($l10n, 'Finanzen und Lohn')) {
                 $data['roles']['finance']['label'] = 'Finanzen';
             }
-            if (!isset($data['roles']['payroll'])) $data['roles']['payroll'] = self::role('Lohn', 'Lohn', 85, peerEnabled: true, staffBlock: true);
+            if (!isset($data['roles']['payroll'])) $data['roles']['payroll'] = self::role(self::t($l10n, 'Lohn'), self::t($l10n, 'Lohn'), 85, peerEnabled: true, staffBlock: true);
             self::appendHierarchyTargets($data['hierarchy'], ['finance_lead' => ['finance', 'payroll']]);
-            self::migrateOrganizationTeam($data['organizationTeams'], 'staff', 'Geschäftsführung, Leitungen und Stabsstellen', ['payroll'], 60);
+            self::migrateOrganizationTeam($data['organizationTeams'], 'staff', self::t($l10n, 'Geschäftsführung, Leitungen und Stabsstellen'), ['payroll'], 60);
             $version = 3;
         }
 
@@ -255,10 +263,10 @@ final class FlzOrganizationDefinition {
         }
     }
 
-    private static function versionTwoRoles(): array {
+    private static function versionTwoRoles(?IL10N $l10n = null): array {
         return [
-            'deputy_pdl' => self::role('StvPDL', 'Stellvertretende Pflegedienstleitung', 235, singleOccupant: true),
-            'care_office' => self::role('Bueroorganisation-Pflege', 'Büroorganisation Pflege', 237),
+            'deputy_pdl' => self::role('StvPDL', self::t($l10n, 'Stellvertretende Pflegedienstleitung'), 235, singleOccupant: true),
+            'care_office' => self::role('Bueroorganisation-Pflege', self::t($l10n, 'Büroorganisation Pflege'), 237),
             'fleet_management' => self::role('Fahrzeugverwaltung', 'Fahrzeugverwaltung', 95),
             'reception' => self::role('Empfang', 'Empfang', 105),
         ];
@@ -278,18 +286,18 @@ final class FlzOrganizationDefinition {
         $teams[] = ['id' => $id, 'label' => $label, 'roles' => $requiredRoles, 'areas' => [], 'sortOrder' => $sortOrder];
     }
 
-    private static function validate(array $data): array {
+    private static function validate(array $data, ?IL10N $l10n = null): array {
         foreach (['roles', 'areas', 'hierarchy', 'organizationTeams'] as $key) if (!isset($data[$key]) || !is_array($data[$key])) throw new InvalidArgumentException("Organisationsfeld {$key} fehlt.");
-        $teamGroupPrefix = self::text($data['teamGroupPrefix'] ?? '', 'Team-Gruppenpräfix', 64);
-        $teamLabelPrefix = self::text($data['teamLabelPrefix'] ?? '', 'Anzeigename der Assistenzteams', 64);
+        $teamGroupPrefix = self::text($data['teamGroupPrefix'] ?? '', self::t($l10n, 'Team-Gruppenpräfix'), 64);
+        $teamLabelPrefix = self::text($data['teamLabelPrefix'] ?? '', self::t($l10n, 'Anzeigename der Assistenzteams'), 64);
         $teamCodeMaxLength = (int)($data['teamCodeMaxLength'] ?? 0);
         if ($teamCodeMaxLength < 1 || $teamCodeMaxLength > 64) throw new InvalidArgumentException('Die maximale Teamkürzellänge muss zwischen 1 und 64 liegen.');
-        $staffBlockLabel = self::text($data['staffBlockLabel'] ?? '', 'Titel des Leitungs- und Stabsblocks', 120);
+        $staffBlockLabel = self::text($data['staffBlockLabel'] ?? '', self::t($l10n, 'Titel des Leitungs- und Stabsblocks'), 120);
 
         $roles = [];
         $groupIds = [];
         foreach ($data['roles'] as $key => $role) {
-            self::key((string)$key, 'Rollenschlüssel');
+            self::key((string)$key, self::t($l10n, 'Rollenschlüssel'));
             if (!is_array($role)) throw new InvalidArgumentException("Rolle {$key} ist ungültig.");
             $groupId = self::text($role['groupId'] ?? '', "Gruppen-ID der Rolle {$key}", 255);
             if (isset($groupIds[$groupId])) throw new InvalidArgumentException("Die Gruppen-ID {$groupId} ist mehrfach vergeben.");
@@ -311,7 +319,7 @@ final class FlzOrganizationDefinition {
 
         $areas = [];
         foreach ($data['areas'] as $key => $area) {
-            self::key((string)$key, 'Bereichsschlüssel');
+            self::key((string)$key, self::t($l10n, 'Bereichsschlüssel'));
             if (!is_array($area)) throw new InvalidArgumentException("Bereich {$key} ist ungültig.");
             $groupId = self::text($area['groupId'] ?? '', "Gruppen-ID des Bereichs {$key}", 255);
             if (isset($groupIds[$groupId])) throw new InvalidArgumentException("Die Gruppen-ID {$groupId} ist mehrfach vergeben.");

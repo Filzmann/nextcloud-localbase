@@ -10,23 +10,31 @@ use JsonException;
 use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataCatalog;
 use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataProvider;
 use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataProviderDescriptor;
+use OCP\IL10N;
 
 final class LocalBaseProcessingMetadataProvider implements ProcessingMetadataProvider {
+    public function __construct(private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
     public function descriptor(): ProcessingMetadataProviderDescriptor {
-        return new ProcessingMetadataProviderDescriptor('localbase', 'Lokale Nextcloud-Basis', '1.0');
+        return new ProcessingMetadataProviderDescriptor('localbase', $this->t('Lokale Nextcloud-Basis'), '1.0');
     }
 
     public function catalog(): ProcessingMetadataCatalog {
         $path = dirname(__DIR__, 2) . '/resources/privacy-processing.json';
-        if (!is_file($path)) throw new DomainException('Processing metadata catalog unavailable.');
+        if (!is_file($path)) throw new DomainException('Der Verarbeitungsmetadaten-Katalog ist nicht verfügbar.');
         try {
             $content = file_get_contents($path);
-            if ($content === false) throw new DomainException('Processing metadata catalog unavailable.');
+            if ($content === false) throw new DomainException('Der Verarbeitungsmetadaten-Katalog ist nicht verfügbar.');
             $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-            if (!is_array($payload)) throw new DomainException('Processing metadata catalog is invalid.');
+            if (!is_array($payload)) throw new DomainException('Der Verarbeitungsmetadaten-Katalog ist ungültig.');
             return ProcessingMetadataCatalog::fromArray($payload);
         } catch (JsonException|InvalidArgumentException) {
-            throw new DomainException('Processing metadata catalog is invalid.');
+            throw new DomainException('Der Verarbeitungsmetadaten-Katalog ist ungültig.');
         }
     }
 }

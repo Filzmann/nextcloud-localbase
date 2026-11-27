@@ -83,6 +83,7 @@ LocalBase keine eigene Fachnavigation besitzt.
 
 - [Architektur](docs/architecture.md)
 - [Migration auf präfixlose Organisationsgruppen](docs/prefixless-organization-group-migration.md)
+- [Lokalisierungsinventar](docs/l10n-inventory.md)
 - [Manuelle Abnahme](docs/manual-acceptance.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)

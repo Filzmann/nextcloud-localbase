@@ -14,25 +14,31 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Throwable;
 
 final class PrivacyController extends Controller {
-    public function __construct(
-        IRequest $request,
+    public function __construct(IRequest $request,
         private IUserSession $session,
         private PersonalDataAggregator $personalData,
         private PrivacyAccessService $access,
-    ) {
+        private ?IL10N $l10n = null) {
         parent::__construct(AppId::VALUE, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
     public function selfService(): JSONResponse {
         $uid = $this->session->getUser()?->getUID();
-        if ($uid === null || $uid === '') return new JSONResponse(['message' => 'Authentifizierung erforderlich.'], Http::STATUS_UNAUTHORIZED);
+        if ($uid === null || $uid === '') return new JSONResponse(['message' => $this->t('Authentifizierung erforderlich.')], Http::STATUS_UNAUTHORIZED);
         return new JSONResponse($this->personalData->collect(new PersonalDataRequest(
             new PersonalDataSubject(PersonalDataSubject::NEXTCLOUD_USER, $uid),
             'de',
@@ -43,7 +49,7 @@ final class PrivacyController extends Controller {
     #[NoAdminRequired]
     #[NoCSRFRequired]
     public function adminReport(string $subjectUid): JSONResponse {
-        if (!$this->access->canReadAdminReports()) return new JSONResponse(['message' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
+        if (!$this->access->canReadAdminReports()) return new JSONResponse(['message' => $this->t('Keine Berechtigung.')], Http::STATUS_FORBIDDEN);
         try {
             $report = $this->personalData->collect(new PersonalDataRequest(
                 new PersonalDataSubject(PersonalDataSubject::NEXTCLOUD_USER, $subjectUid),
@@ -53,7 +59,7 @@ final class PrivacyController extends Controller {
             $this->access->logAdminAccess('privacy.admin_report', $subjectUid);
             return new JSONResponse($report);
         } catch (Throwable) {
-            return new JSONResponse(['message' => 'Subject ist ungültig.'], 400);
+            return new JSONResponse(['message' => $this->t('Subject ist ungültig.')], 400);
         }
     }
 
