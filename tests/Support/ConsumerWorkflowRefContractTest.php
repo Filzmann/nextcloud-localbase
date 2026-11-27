@@ -24,6 +24,7 @@ $repositories = [
     'Filzmann/nextcloud-brstunden',
     'Filzmann/nextcloud-flz-permission-matrix',
     'Filzmann/nextcloud-flzrecruitment',
+    'Filzmann/nextcloud-flz-organization',
 ];
 foreach ($repositories as $repository) {
     if (!str_contains($workflow, $repository)) {
