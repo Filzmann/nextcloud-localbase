@@ -91,7 +91,7 @@ namespace {
 
     try {
         new OrganizationSnapshot(true, 4, [
-            'finance' => ['groupId' => 'flz-finance', 'label' => ['invalid']],
+            'finance' => ['groupId' => 'test-finance', 'label' => ['invalid']],
         ], []);
         throw new RuntimeException('Ungültige öffentliche Mappingfelder wurden akzeptiert.');
     } catch (InvalidArgumentException) {

@@ -1,4 +1,5 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text);
     class Model {
         static get(data) {
             if (data == null) {
@@ -17,7 +18,7 @@
         }
 
         toArray() {
-            throw new Error(`${this.constructor.name} muss toArray implementieren.`);
+            throw new Error(`${this.constructor.name} ${translate('localbase', 'muss toArray implementieren.')}`);
         }
 
         to_array() {
@@ -25,7 +26,7 @@
         }
 
         save() {
-            throw new Error(`${this.constructor.name} kann nicht direkt gespeichert werden.`);
+            throw new Error(`${this.constructor.name} ${translate('localbase', 'kann nicht direkt gespeichert werden.')}`);
         }
     }
 

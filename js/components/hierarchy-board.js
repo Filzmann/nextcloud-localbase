@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const esc = window.LocalBase.ui.esc;
     const clone = value => JSON.parse(JSON.stringify(value));
@@ -156,12 +157,12 @@
             const nodes = this.diagramNodes(roles.map(([key]) => key));
             const roleLevels = this.levels(roles.map(([key]) => key));
             this.container.querySelector('[data-hierarchy-board]').innerHTML = `
-                <div class="orgs-organigram-toolbar" role="group" aria-label="Organigrammansicht vergrößern oder verkleinern">
-                    <button type="button" data-action="zoom-out" aria-label="Organigramm verkleinern">−</button>
-                    <button type="button" data-action="zoom-reset" aria-label="Organigramm auf 100 Prozent zurücksetzen">100 %</button>
-                    <button type="button" data-action="zoom-in" aria-label="Organigramm vergrößern">+</button>
+                <div class="orgs-organigram-toolbar" role="group" aria-label="${translate('localbase', 'Organigrammansicht vergrößern oder verkleinern')}">
+                    <button type="button" data-action="zoom-out" aria-label="${translate('localbase', 'Organigramm verkleinern')}">−</button>
+                    <button type="button" data-action="zoom-reset" aria-label="${translate('localbase', 'Organigramm auf 100 Prozent zurücksetzen')}">100 %</button>
+                    <button type="button" data-action="zoom-in" aria-label="${translate('localbase', 'Organigramm vergrößern')}">+</button>
                     <output data-organigram-zoom aria-live="polite">${this.zoom} %</output>
-                    <span>Freie Fläche ziehen oder scrollen. Tastatur: +, − und 0.</span>
+                    <span>${translate('localbase', 'Freie Fläche ziehen oder scrollen. Tastatur:')} +, − ${translate('localbase', 'und 0.')}</span>
                 </div>
                 <div class="orgs-organigram" data-organigram-viewport tabindex="0" aria-label="Organigramm, verschiebbarer hierarchischer Ausschnitt">
                     <div class="orgs-diagram" data-hierarchy-diagram>
@@ -187,7 +188,7 @@
             const areaLabel = area ? `<span class="orgs-card-area">Bereich ${esc(area.label)}</span>` : '';
             const personMarkup = role.singleOccupant ? `<span class="orgs-card-person${personClass}">${esc(person)}</span>` : '';
             const label = `${role.label}${area ? `, Bereich ${area.label}` : ''}`;
-            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}" data-diagram-level="${levelIndex}"><div class="orgs-card-position"><button type="button" data-action="edit-role" data-role-key="${esc(node.roleKey)}" aria-label="Einstellungen für ${esc(label)} bearbeiten"><span aria-hidden="true">✎</span></button><button type="button" data-action="move-node-left" aria-label="${esc(label)} nach links verschieben" ${nodeIndex === 0 ? 'disabled' : ''}>←</button><button type="button" class="orgs-position-handle" draggable="true" data-position-node="${esc(node.id)}" aria-label="${esc(label)} waagerecht per Drag-and-drop anordnen"><span aria-hidden="true">↔</span></button><button type="button" data-action="move-node-right" aria-label="${esc(label)} nach rechts verschieben" ${nodeIndex === nodeCount - 1 ? 'disabled' : ''}>→</button></div><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(label)} ziehen, um die Rolle einer Leitung zuzuordnen"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
+            return `<article class="orgs-card" data-manager-key="${esc(node.roleKey)}" data-diagram-node="${esc(node.id)}" data-diagram-level="${levelIndex}"><div class="orgs-card-position"><button type="button" data-action="edit-role" data-role-key="${esc(node.roleKey)}" aria-label="${translate('localbase', 'Einstellungen für')} ${esc(label)} bearbeiten"><span aria-hidden="true">✎</span></button><button type="button" data-action="move-node-left" aria-label="${esc(label)} nach links verschieben" ${nodeIndex === 0 ? 'disabled' : ''}>←</button><button type="button" class="orgs-position-handle" draggable="true" data-position-node="${esc(node.id)}" aria-label="${esc(label)} waagerecht per Drag-and-drop anordnen"><span aria-hidden="true">↔</span></button><button type="button" data-action="move-node-right" aria-label="${esc(label)} nach rechts verschieben" ${nodeIndex === nodeCount - 1 ? 'disabled' : ''}>→</button></div><button type="button" class="orgs-drag-role" draggable="true" data-drag-role="${esc(node.roleKey)}" aria-label="${esc(label)} ${translate('localbase', 'ziehen, um die Rolle einer Leitung zuzuordnen')}"><span aria-hidden="true">⠿</span><strong>${esc(role.label)}</strong><code>${esc(node.roleKey)}</code></button>${areaLabel}${personMarkup}</article>`;
         }
 
         focusRoleEdit(roleKey) {
@@ -245,9 +246,9 @@
 
         positionText(roleKey, areaKey) {
             const names = this.position(roleKey, areaKey)?.displayNames || [];
-            if (!names.length) return 'Nicht besetzt';
+            if (!names.length) return translate('localbase', 'Nicht besetzt');
             if (names.length === 1) return names[0];
-            return `Mehrfach besetzt: ${names.join(', ')}`;
+            return `${translate('localbase', 'Mehrfach besetzt:')} ${names.join(', ')}`;
         }
 
         connections(roleMap) {
@@ -262,8 +263,8 @@
         }
 
         connectionList(connections) {
-            if (!connections.length) return '<p class="orgs-empty">Keine direkten Unterstellungen.</p>';
-            return `<ul class="orgs-connection-list">${connections.map(edge => `<li><span>${esc(edge.managerLabel)} <span aria-hidden="true">→</span><span class="hidden-visually"> leitet </span> ${esc(edge.targetLabel)}</span><button type="button" data-action="remove-edge" data-manager-key="${esc(edge.manager)}" data-target-key="${esc(edge.target)}" aria-label="Unterstellung ${esc(edge.targetLabel)} unter ${esc(edge.managerLabel)} entfernen">Entfernen</button></li>`).join('')}</ul>`;
+            if (!connections.length) return '<p class="orgs-empty">' + translate('localbase', 'Keine direkten Unterstellungen.') + '</p>';
+            return `<ul class="orgs-connection-list">${connections.map(edge => `<li><span>${esc(edge.managerLabel)} <span aria-hidden="true">→</span><span class="hidden-visually"> leitet </span> ${esc(edge.targetLabel)}</span><button type="button" data-action="remove-edge" data-manager-key="${esc(edge.manager)}" data-target-key="${esc(edge.target)}" aria-label="Unterstellung ${esc(edge.targetLabel)} unter ${esc(edge.managerLabel)} entfernen">${translate('localbase', 'Entfernen')}</button></li>`).join('')}</ul>`;
         }
 
         scheduleConnections() {
@@ -315,18 +316,18 @@
         }
 
         addEdge(manager, target) {
-            if (!this.roles[manager] || !this.roles[target]) return this.render('Bitte wähle zwei gültige Rollen.');
-            if (manager === target) return this.render('Eine Rolle kann sich nicht selbst unterstellt sein.');
-            if ((this.hierarchy[manager] || []).includes(target)) return this.render('Diese direkte Unterstellung besteht bereits.');
-            if (this.reaches(target, manager)) return this.render('Diese Verbindung würde einen Hierarchiezyklus erzeugen.');
+            if (!this.roles[manager] || !this.roles[target]) return this.render(translate('localbase', 'Bitte wähle zwei gültige Rollen.'));
+            if (manager === target) return this.render(translate('localbase', 'Eine Rolle kann sich nicht selbst unterstellt sein.'));
+            if ((this.hierarchy[manager] || []).includes(target)) return this.render(translate('localbase', 'Diese direkte Unterstellung besteht bereits.'));
+            if (this.reaches(target, manager)) return this.render(translate('localbase', 'Diese Verbindung würde einen Hierarchiezyklus erzeugen.'));
             this.hierarchy[manager] = [...(this.hierarchy[manager] || []), target];
-            this.render(`${this.roles[target].label} ist jetzt ${this.roles[manager].label} direkt unterstellt.`);
+            this.render(`${this.roles[target].label} ${translate('localbase', 'ist jetzt')} ${this.roles[manager].label} direkt unterstellt.`);
         }
 
         removeEdge(manager, target) {
             this.hierarchy[manager] = (this.hierarchy[manager] || []).filter(key => key !== target);
             if (!this.hierarchy[manager].length) delete this.hierarchy[manager];
-            this.render('Direkte Unterstellung entfernt.');
+            this.render(translate('localbase', 'Direkte Unterstellung entfernt.'));
         }
 
         reaches(start, goal, visited = new Set()) {
@@ -379,7 +380,7 @@
                 const sourceId = this.draggedNode.id;
                 this.applyDiagramOrderMove(sourceId, placement.targetId, placement.before);
                 this.clearDrag();
-                return this.render('Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.');
+                return this.render(translate('localbase', 'Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.'));
             }
             if (!target) return;
             event.preventDefault();
@@ -433,7 +434,7 @@
             const target = levelCards[index + offset];
             if (!target) return;
             this.applyDiagramOrderMove(nodeId, target.dataset.diagramNode, offset < 0);
-            this.render('Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.');
+            this.render(translate('localbase', 'Die Links-rechts-Anordnung wurde rein visuell geändert. Bitte speichere die Organisation.'));
         }
     }
 

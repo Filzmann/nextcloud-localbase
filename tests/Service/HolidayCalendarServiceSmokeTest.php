@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 namespace OCP {
+    if (!interface_exists(IConfig::class)) {
+        interface IConfig {
+            public function getSystemValueString(string $key, string $default = ''): string;
+        }
+    }
     if (!interface_exists(IAppConfig::class)) {
         interface IAppConfig {
             public function getValueString(string $appId, string $key, string $default = ''): string;
@@ -83,7 +88,10 @@ namespace {
         public array $warnings = [];
         public function warning(string $message, array $context = []): void { $this->warnings[] = [$message, $context]; }
     };
-    $contexts = new CalendarContextSettingsService($config);
+    $system = new class implements \OCP\IConfig {
+        public function getSystemValueString(string $key, string $default = ''): string { return $key === 'timezone' ? 'Europe/Berlin' : $default; }
+    };
+    $contexts = new CalendarContextSettingsService($config, $system);
     $service = new HolidayCalendarService(
         new OpenHolidaysClient($clients),
         new HolidayCalendarCacheStore($config),

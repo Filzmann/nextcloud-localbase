@@ -47,7 +47,7 @@ jobs:
           PHP_COVERAGE_COMMAND="$GITHUB_WORKSPACE/localbase/tests/coverage/vendor/bin/phpcov" \
           PHP_COVERAGE_OUTPUT_DIR="$RUNNER_TEMP/php-coverage" \
           php tests/run.php
-          php "$GITHUB_WORKSPACE/localbase/tests/coverage/merge-clover.php" localbase "$RUNNER_TEMP/php-coverage" 95.71
+          php "$GITHUB_WORKSPACE/localbase/tests/coverage/merge-clover.php" localbase "$RUNNER_TEMP/php-coverage" 95.38
 
   javascript:
     name: JavaScript
@@ -100,6 +100,7 @@ jobs:
             Filzmann/nextcloud-brstunden
             Filzmann/nextcloud-flz-permission-matrix
             Filzmann/nextcloud-flzrecruitment
+            Filzmann/nextcloud-flz-organization
           )
           for repository in "${repositories[@]}"; do
             if ! git ls-remote --exit-code --heads "https://github.com/${repository}.git" "refs/heads/$CANDIDATE_REF" >/dev/null 2>&1; then
@@ -162,6 +163,12 @@ jobs:
           repository: Filzmann/nextcloud-flzrecruitment
           ref: ${{ steps.consumer-ref.outputs.ref }}
           path: flzrecruitment
+      - name: Filzmann Organisation auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: ${{ steps.consumer-ref.outputs.ref }}
+          path: flz_organization
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:

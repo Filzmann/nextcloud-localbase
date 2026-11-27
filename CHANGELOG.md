@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- L10N-Migration (ZM-06): sichtbare Texte über Nextcloud-l10n (deutsche Quelltexte, Kataloge `l10n/en.*` + `l10n/en_GB.*`), inkl. `tests/Ui/L10nCatalogContractTest.php` und `docs/l10n-inventory.md`.
+
+- Lokalen DDEV-Organisationsstand kontrolliert auf präfixlose Rollen-,
+  Bereichs- und ASN-Teamgruppen migriert und den späteren Staging-Lauf mit
+  Preflight-, Validierungs-, Stop- und Rückbauvertrag dokumentiert.
+- Organisationsdefaults, ASN-Teampräfix, Demofixtures, Peerfreigaben und
+  öffentliche Snapshots auf dieselbe präfixlose kanonische Definition
+  umgestellt; den historischen kombinierten Finanz-/Lohn-Gruppenalias aus
+  der ausführbaren Rollenauflösung entfernt.
+
+- Akutschichtvermittlung als navigierbares Standalone- und OrgSuite-Ziel in
+  den kanonischen Produktkatalog aufgenommen und für das vollständige
+  Suite-Bundle sowie das eigenständige Produktbundle freigegeben.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35

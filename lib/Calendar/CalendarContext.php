@@ -11,12 +11,13 @@ use LogicException;
 /**
  * Zweck: Beschreibt die organisationsweit verbindliche Region und fachliche Zeitzone für gemeinsame Kalenderdaten.
  * Vertrag: Persönliche Zeitzonen verändern nur individuelle Darstellungen und sind kein Bestandteil dieses read-only DTOs.
+ * Die fachliche Zeitzone folgt immer der Instanz-Zeitzone aus den Nextcloud-Systemeinstellungen (config.php 'timezone');
+ * das Feld bleibt aus Vertragsgründen im DTO erhalten, wird aber beim Lesen und Schreiben vom Einstellungsservice gesetzt.
  */
 final class CalendarContext {
     private const VERSION = 1;
     private const DEFAULT_COUNTRY = 'DE';
     private const DEFAULT_SUBDIVISION = 'DE-BE';
-    private const DEFAULT_TIMEZONE = 'Europe/Berlin';
 
     private function __construct(
         private string $countryCode,
@@ -55,11 +56,12 @@ final class CalendarContext {
         return array_map(static fn(array $item): self => self::get($item), $items);
     }
 
-    public static function defaults(): self {
+    public static function defaults(string $instanceTimezone = 'UTC'): self {
+        $timezone = self::isTimezone($instanceTimezone) ? $instanceTimezone : 'UTC';
         return self::get([
             'countryCode' => self::DEFAULT_COUNTRY,
             'subdivisionCode' => self::DEFAULT_SUBDIVISION,
-            'timezone' => self::DEFAULT_TIMEZONE,
+            'timezone' => $timezone,
         ]);
     }
 

@@ -14,6 +14,7 @@ use OCP\IAppConfig;
  */
 final class FlzSuiteAdminSettingsService {
     private const KEY = 'flz_suite_admin_settings';
+    private const CALENDAR_PEER_DEFAULT_ROLES = ['office', 'eb', 'pfk'];
 
     public function __construct(
         private IAppConfig $config,
@@ -31,8 +32,21 @@ final class FlzSuiteAdminSettingsService {
     }
 
     /** @return array<string,bool> */
+    public function vacationPeerEditing(): array {
+        $data = $this->data();
+        return [$this->asnPeerGroup() => (bool)($data['vacationAsnPeerEditing'] ?? false)]
+            + $this->roleValues('vacationPeerEditing');
+    }
+
+    /** @return list<string> */
+    public function enabledVacationPeerEditingGroups(): array {
+        return array_keys(array_filter($this->vacationPeerEditing()));
+    }
+
+    /** @return array<string,bool> */
     public function vacationPeerApproval(): array {
-        return [$this->asnPeerGroup() => (bool)($this->data()['vacationAsnPeerApproval'] ?? false)]
+        $data = $this->data();
+        return [$this->asnPeerGroup() => (bool)($data['vacationAsnPeerApproval'] ?? false)]
             + $this->roleValues('vacationPeerApproval');
     }
 
@@ -56,15 +70,24 @@ final class FlzSuiteAdminSettingsService {
 
     /** @return array<string,bool> */
     public function saveCalendarPeerEditing(array $values): array {
-        $data = $this->data();
+        $data = $this->data() ?? [];
         $data['calendarPeerEditing'] = $this->semanticRoleValues($values);
         $this->save($data);
         return $this->calendarPeerEditing();
     }
 
     /** @return array<string,bool> */
+    public function saveVacationPeerEditing(array $values): array {
+        $data = $this->data() ?? [];
+        $data['vacationAsnPeerEditing'] = filter_var($values[$this->asnPeerGroup()] ?? false, FILTER_VALIDATE_BOOL);
+        $data['vacationPeerEditing'] = $this->semanticRoleValues($values);
+        $this->save($data);
+        return $this->vacationPeerEditing();
+    }
+
+    /** @return array<string,bool> */
     public function saveVacationPeerApproval(array $values): array {
-        $data = $this->data();
+        $data = $this->data() ?? [];
         $data['vacationAsnPeerApproval'] = filter_var($values[$this->asnPeerGroup()] ?? false, FILTER_VALIDATE_BOOL);
         $data['vacationPeerApproval'] = $this->semanticRoleValues($values);
         $this->save($data);
@@ -75,12 +98,23 @@ final class FlzSuiteAdminSettingsService {
         return $this->definition()->teamGroupPrefix() . '*';
     }
 
+    public function isValid(): bool {
+        return $this->data() !== null;
+    }
+
     /** @return array<string,bool> */
     private function roleValues(string $key): array {
-        $stored = $this->data()[$key] ?? [];
+        $data = $this->data();
+        $stored = $data[$key] ?? [];
+        if (!is_array($stored)) {
+            $data = null;
+            $stored = [];
+        }
         $result = [];
         foreach ($this->peerRoles() as $roleKey => $role) {
-            $result[$role['groupId']] = (bool)($stored[$roleKey] ?? false);
+            $result[$role['groupId']] = $data !== null && array_key_exists($roleKey, $stored)
+                ? (bool)$stored[$roleKey]
+                : $data !== null && $key === 'calendarPeerEditing' && in_array($roleKey, self::CALENDAR_PEER_DEFAULT_ROLES, true);
         }
         return $result;
     }
@@ -110,16 +144,33 @@ final class FlzSuiteAdminSettingsService {
         return $this->organization->definition();
     }
 
-    /** @return array<string,mixed> */
-    private function data(): array {
+    /** @return array<string,mixed>|null Null kennzeichnet beschädigte Persistenz und bleibt fail-closed. */
+    private function data(): ?array {
         $raw = $this->config->getValueString(Application::APP_ID, self::KEY, '');
         if ($raw === '') return [];
         try {
             $data = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-            return is_array($data) ? $data : [];
+            if (!is_array($data) || !$this->hasValidSchema($data)) return null;
+            return $data;
         } catch (\Throwable) {
-            return [];
+            return null;
         }
+    }
+
+    /** @param array<string,mixed> $data */
+    private function hasValidSchema(array $data): bool {
+        if (array_key_exists('version', $data) && $data['version'] !== 1) return false;
+        foreach (['vacationAsnPeerEditing', 'vacationAsnPeerApproval'] as $key) {
+            if (array_key_exists($key, $data) && !is_bool($data[$key])) return false;
+        }
+        foreach (['calendarPeerEditing', 'vacationPeerEditing', 'vacationPeerApproval'] as $key) {
+            if (!array_key_exists($key, $data)) continue;
+            if (!is_array($data[$key])) return false;
+            foreach ($data[$key] as $roleKey => $enabled) {
+                if (!is_string($roleKey) || trim($roleKey) === '' || !is_bool($enabled)) return false;
+            }
+        }
+        return true;
     }
 
     /** @param array<string,mixed> $data */

@@ -37,6 +37,31 @@ Mitgliedschaftsänderung abgelehnt. Die einmalige Übernahme einer bisherigen
 Mitgliedergruppe ist nur zulässig, solange noch kein persistierter Vertrag
 existiert; beschädigte Bestandswerte werden dabei nicht überschrieben.
 
+Der öffentliche Kategorie-B-Vertrag
+`OCA\\LocalBase\\PublicApi\\V1\\BrMembershipSnapshotService` projiziert daraus
+ausschließlich die kanonischen Gruppen-IDs für BR-Mitgliedschaft, Vorsitz und
+Stellvertretung. Das unveränderliche DTO `BrMembershipSnapshot` enthält
+Vertragsversion `1.0`, Definitionsversion und -revision, Gültigkeitsstatus,
+`memberGroupId`, `chairGroupId`, `deputyGroupId` und eine Prüfsumme;
+Mitgliederlisten und Fachberechtigungen bleiben ausgeschlossen. Die drei
+Rollenfelder sind eine additive V1-Erweiterung: `memberGroupId` und dessen
+Accessor bleiben unverändert, sodass reine Mitgliedschafts-Consumer
+kompatibel bleiben. Die Projektion bezeichnet Organisationsidentitäten und
+erteilt selbst keine App-Berechtigung.
+
+Consumer prüfen zuerst über Nextclouds App-Manager, dass `localbase` aktiv
+ist, und lösen erst danach die öffentliche Klasse über den Nextcloud-Container
+auf. Fehlende oder deaktivierte Provider, eine nicht vorhandene öffentliche
+Klasse, eine unbekannte Vertragsversion, Auflösungsfehler, ungültige Snapshots
+und nicht mehr vorhandene native Gruppen sind kontrollierte deny-by-default-
+Zustände. Ein Consumer prüft die zu seiner benötigten semantischen Rolle
+gehörige nichtleere Gruppen-ID und anschließend die native Mitgliedschaft;
+erst dann ist die jeweilige BR-Identität belegt. Reine Mitgliedschafts-Consumer
+benötigen weiterhin nur `memberGroupId`. Die Fachapp entscheidet davon
+getrennt über ihre Berechtigungen. Die feste native Nextcloud-Gruppe
+`Datenschutzbeauftragte` bleibt die Ausnahme des Admin-/Datenschutzvertrags
+und wird nicht als Organigramm- oder BR-Rolle in diese API aufgenommen.
+
 ## Lokale Demokonten
 
 `DemoAccountProvisioningService` ist die kanonische Provisionierung für die
@@ -73,9 +98,12 @@ bleibt die Konfliktmenge leer; Consumer greifen niemals auf Tabellen oder
 interne Services einer anderen Fachapp zu.
 
 `CalendarContext` und `CalendarContextSettingsService` definieren Land,
-ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`,
-`DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche
-Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle Anzeigen.
+ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE` und
+`DE-BE` bleiben Bestandsdefaults; die fachliche Zeitzone folgt immer der
+Instanz-Zeitzone aus den Nextcloud-Systemeinstellungen (`config.php`
+`timezone`, Fallback UTC) und gilt app-übergreifend für alle FLZ-Apps.
+Persönliche Nextcloud-Zeitzonen beeinflussen ausschließlich individuelle
+Anzeigen.
 
 `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als
 validierten read-only Jahresvertrag Version 1. Consumer werten neben der
@@ -98,6 +126,16 @@ Peergrenzen ab. Rollen und Bereiche werden über stabile semantische Schlüssel
 referenziert; konfigurierbare Gruppen-IDs oder Anzeigenamen sind keine
 Fachschlüssel.
 
+Der freigegebene Zielvertrag verwendet für Organisationsgruppen global
+eindeutige, verständliche Gruppen-IDs ohne herkunftsbezogene Präfixe wie
+`flz-` oder `ad-`. Rollen- und Bereichsschlüssel sowie gültige
+Assistenzteamkürzel bleiben die einzige fachliche Identität; die Gruppe selbst
+erteilt keine app-spezifische Berechtigung. Der kontrollierte lokale Nachweis
+und der vorgemerkte Staging-Lauf stehen im
+[Migrationsrunbook](prefixless-organization-group-migration.md). Historische
+Präfixdefaults und reine Übergangsaliase werden erst mit der separat
+testgetriebenen Defaultumstellung aus dem ausführbaren Vertrag entfernt.
+
 Die gemeinsame Reihenfolge umfasst unter anderem Fahrzeugverwaltung nach IT,
 Empfang nach Sekretariat sowie im Pflegebereich stellvertretende PDL,
 Büroorganisation Pflege und PFK. Der Organisationsvertrag Version 2 ergänzt
@@ -106,19 +144,14 @@ erhalten; Gruppen-ID-Kollisionen, ungültige Referenzen und Hierarchiezyklen
 werden abgelehnt. Eine ungültige gespeicherte Definition fällt sicher auf die
 geprüfte Standarddefinition zurück.
 
-Version 3 trennt die bisherigen Funktionen unterhalb `finance_lead` in die
-stabilen Schlüssel `finance` und `payroll`. Beim Upgrade bleibt die bestehende
-Gruppen-ID von `finance` erhalten; `payroll` wird additiv ergänzt. Beide
-Rollen bleiben im bisherigen Hierarchie- und Organisationsblock.
-Aus Sicherheitsgründen wird die Mitgliedschaft der bisherigen kombinierten
-Gruppe nicht automatisch zu `payroll` kopiert: Die Bestandsgruppe wird
-`finance` zugeordnet und ihr unveränderter Standardtitel fachlich zu
-„Finanzen“ normalisiert. Administrator*innen verschieben Lohn-Mitarbeitende
-anschließend bewusst in die neue konfigurierte Lohn-Gruppe. Bis dahin erhält
-niemand aus der alten kombinierten Gruppe Zugriff auf Vertragsstammdaten.
-Für bestehende Hierarchie-Consumer bleibt die frühere technische Gruppen-ID
-`flz-Finanzen-Lohn` als reiner `finance`-Alias lesbar; dieser Alias erteilt
-ausdrücklich niemals die neue `payroll`-Rolle.
+Version 3 trennt die Funktionen unterhalb `finance_lead` in die stabilen
+Schlüssel `finance` und `payroll`. Die kanonische Version-4-Definition ordnet
+ihnen ausschließlich die getrennten präfixlosen Gruppen `Finanzen` und
+`Lohn` zu. Die frühere kombinierte Gruppen-ID ist kein ausführbarer Alias
+mehr und erteilt weder die Finanz- noch die Lohnrolle. Eine vorhandene
+Instanz wird deshalb vor dem Umschalten nach dem dokumentierten Runbook
+fachlich aufgeteilt und vollständig geprüft; Fresh Installs beginnen direkt
+mit dem kanonischen Zielzustand.
 
 Version 4 ergänzt Rollen und Bereichen additiv um ein Kalenderkürzel. Die
 Standarddefinition verwendet `BO`, `EB`, `PFK`, `BO-Pflege` und `IT` sowie
@@ -152,6 +185,29 @@ umgestellt.
 semantisch nach Rollen. Die Organisationsdefinition und diese Freigaben liegen
 zentral in LocalBase-AppConfig. Bei Einzelinstallation erscheinen sie im
 Adminabschnitt des Fachprodukts, ab zwei Produkten im OrgSuite-Adminabschnitt.
+Ohne gespeicherte Einzelentscheidung ist die Kalender-Peerbearbeitung nur für
+die semantischen Rollen `office`, `eb` und `pfk` aktiv. Alle übrigen
+freigabefähigen Rollen sind standardmäßig deaktiviert, können aber einzeln
+aktiviert werden. Ein explizit gespeichertes `false` hat Vorrang vor dem
+Default. Urlaubs-Peerbearbeitung und Urlaubs-Peergenehmigung sind getrennte
+Einstellungen. Beide bleiben einschließlich ASN-Peers standardmäßig
+vollständig deaktiviert und können unabhängig voneinander je Rolle aktiviert
+werden. Beschädigte oder typfremde Persistenz fällt für alle Verträge
+fail-closed auf deaktivierte Freigaben zurück.
+
+Der öffentliche Kategorie-B-Vertrag
+`OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService`
+projiziert diese beiden Urlaubsfreigaben in das unveränderliche DTO
+`VacationAuthorizationSnapshot`. Derselbe Snapshot enthält je konfiguriertem
+Büro einen EB-Ansichtsdeskriptor mit stabilen semantischen Rollen- und
+Bereichsschlüsseln sowie den aktuell zugeordneten Gruppen-IDs. Diese
+Deskriptoren werden ausschließlich aus der validierten Organisationsdefinition
+abgeleitet; Consumer führen keine zweite Büro- oder EB-Zuordnung. Fehlende,
+beschädigte oder widersprüchliche Organisations- beziehungsweise
+Freigabeeinstellungen sowie eine nicht bereichsgebundene EB-Rolle ergeben
+einen ungültigen Snapshot ohne Freigaben und Ansichten. Der neue Vertrag ist
+additiv; der bestehende öffentliche `OrganizationSnapshot` Version `1.0`
+bleibt unverändert.
 
 ## Organisationseditor und persönliche Darstellung
 

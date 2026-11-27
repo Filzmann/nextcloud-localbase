@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const pdfNumber = value => Number(value.toFixed(2)).toString();
     const pdfText = value => [...String(value ?? '')].map(character => {
@@ -36,16 +37,16 @@
 
     function reportLines(report) {
         const lines = [
-            { text: 'Auskunft zu deinen personenbezogenen Daten', size: 18, bold: true, gap: 8 },
-            { text: `Erstellt am ${shortGermanDate(report.article15.generatedAt)} für ${report.subject?.id || 'das angefragte Konto'}.`, size: 10, gap: 12 },
+            { text: translate('localbase', 'Auskunft zu deinen personenbezogenen Daten'), size: 18, bold: true, gap: 8 },
+            { text: `Erstellt am ${shortGermanDate(report.article15.generatedAt)} für ${report.subject?.id || translate('localbase', 'das angefragte Konto')}.`, size: 10, gap: 12 },
             { text: 'Deine Rechte', size: 14, bold: true, gap: 5 },
         ];
         for (const right of report.article15.rights || []) lines.push({ text: '- ' + right, size: 10, indent: 10 });
         lines.push({ text: report.article15.contactNote || '', size: 10, gap: 14 });
         if (report.coverage) {
-            lines.push({ text: 'Umfang dieser Auskunft', size: 14, bold: true, gap: 5 });
+            lines.push({ text: translate('localbase', 'Umfang dieser Auskunft'), size: 14, bold: true, gap: 5 });
             lines.push({ text: report.coverage.scopeNotice || '', size: 10, gap: 5 });
-            lines.push({ text: 'Aktuell noch nicht implementierte Datenabrufe', size: 11, bold: true, gap: 3 });
+            lines.push({ text: translate('localbase', 'Aktuell noch nicht implementierte Datenabrufe'), size: 11, bold: true, gap: 3 });
             for (const source of report.coverage.notImplemented || []) lines.push({ text: '- ' + source, size: 9, indent: 10 });
             lines.push({ text: '', size: 9, gap: 10 });
         }
@@ -53,13 +54,13 @@
         for (const provider of report.providers || []) {
             lines.push({ text: provider.name || provider.appId, size: 15, bold: true, gap: 6, keepWithNext: true });
             const items = provider.items || [];
-            if (!items.length) lines.push({ text: provider.status === 'failed' ? 'Diese App konnte für die Auskunft nicht erreicht werden.' : 'Für dich sind in dieser App keine Datensätze vorhanden.', size: 10, gap: 8 });
+            if (!items.length) lines.push({ text: provider.status === 'failed' ? 'Diese App konnte für die Auskunft nicht erreicht werden.' : translate('localbase', 'Für dich sind in dieser App keine Datensätze vorhanden.'), size: 10, gap: 8 });
             const processing = provider.processing;
             if (processing) {
-                lines.push({ text: 'Weitere Angaben zur Verarbeitung in dieser App', size: 10, bold: true, keepWithNext: true });
-                lines.push({ text: 'Empfänger*innen: ' + (processing.recipients || []).join('; '), size: 9 });
+                lines.push({ text: translate('localbase', 'Weitere Angaben zur Verarbeitung in dieser App'), size: 10, bold: true, keepWithNext: true });
+                lines.push({ text: translate('localbase', 'Empfänger') + '*innen: ' + (processing.recipients || []).join('; '), size: 9 });
                 lines.push({ text: 'Herkunft: ' + String(processing.source || ''), size: 9 });
-                lines.push({ text: 'Drittlandübermittlung: ' + String(processing.thirdCountryTransfers || ''), size: 9 });
+                lines.push({ text: translate('localbase', 'Drittlandübermittlung:') + ' ' + String(processing.thirdCountryTransfers || ''), size: 9 });
                 lines.push({ text: 'Automatisierte Entscheidungen: ' + String(processing.automatedDecisionMaking || ''), size: 9, gap: 12 });
             }
             const groups = new Map();
@@ -72,12 +73,12 @@
                 lines.push({ text: type, size: 11, bold: true, gap: 3, keepWithNext: true });
                 const purpose = sharedValue(typeItems, 'purpose');
                 const retention = sharedValue(typeItems, 'retention');
-                if (purpose) lines.push({ text: 'Grund der Speicherung: ' + purpose, size: 9, gap: 2 });
-                if (retention) lines.push({ text: 'Aufbewahrt bis: ' + retention, size: 9, gap: 5 });
+                if (purpose) lines.push({ text: translate('localbase', 'Grund der Speicherung:') + ' ' + purpose, size: 9, gap: 2 });
+                if (retention) lines.push({ text: translate('localbase', 'Aufbewahrt bis:') + ' ' + retention, size: 9, gap: 5 });
                 const fields = [];
                 for (const item of typeItems) for (const field of Object.keys(item.attributes || {})) if (!fields.includes(field)) fields.push(field);
                 const hasNote = typeItems.some(item => item.thirdPartyNote);
-                const headers = [...fields, ...(hasNote ? ['Hinweis'] : []), ...(!purpose ? ['Grund der Speicherung'] : []), ...(!retention ? ['Aufbewahrt bis'] : [])];
+                const headers = [...fields, ...(hasNote ? [translate('localbase', 'Hinweis')] : []), ...(!purpose ? [translate('localbase', 'Grund der Speicherung')] : []), ...(!retention ? [translate('localbase', 'Aufbewahrt bis')] : [])];
                 const rows = typeItems.map(item => {
                     const cells = fields.map(field => String(item.attributes?.[field] ?? '—'));
                     if (hasNote) cells.push(item.thirdPartyNote || '—');
@@ -92,7 +93,7 @@
     }
 
     function buildPdf(report) {
-        if (!report?.article15?.generatedAt || !Array.isArray(report.providers) || !report.subject) throw new Error('Es liegt keine vollständige Auskunft zum Herunterladen vor.');
+        if (!report?.article15?.generatedAt || !Array.isArray(report.providers) || !report.subject) throw new Error(translate('localbase', 'Es liegt keine vollständige Auskunft zum Herunterladen vor.'));
         const pageWidth = 595.28;
         const pageHeight = 841.89;
         const margin = 48;

@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
 
     const clone = value => JSON.parse(JSON.stringify(value));
 
@@ -82,7 +83,7 @@
             if (!widget) return;
             const collapsed = button.getAttribute('aria-expanded') === 'true';
             this.setCollapsed(widget, collapsed);
-            this.announce(`${this.widgetLabel(widget)} wurde ${collapsed ? 'eingeklappt' : 'ausgeklappt'}.`);
+            this.announce(`${this.widgetLabel(widget)} ${translate('localbase', 'wurde')} ${collapsed ? 'eingeklappt' : 'ausgeklappt'}.`);
             this.changed();
         }
 
@@ -104,7 +105,7 @@
             if (!target) return;
             scope.insertBefore(widget, offset < 0 ? target : target.nextSibling);
             this.updateControls(scope);
-            this.announce(`${this.widgetLabel(widget)} wurde an Position ${this.widgets(scope).indexOf(widget) + 1} verschoben.`);
+            this.announce(`${this.widgetLabel(widget)} ${translate('localbase', 'wurde an Position')} ${this.widgets(scope).indexOf(widget) + 1} verschoben.`);
             this.changed();
             button.focus();
         }
@@ -145,7 +146,7 @@
             const { widget, scope, handle } = this.drag;
             this.clearDrag();
             this.updateControls(scope);
-            this.announce(`${this.widgetLabel(widget)} wurde an Position ${this.widgets(scope).indexOf(widget) + 1} verschoben.`);
+            this.announce(`${this.widgetLabel(widget)} ${translate('localbase', 'wurde an Position')} ${this.widgets(scope).indexOf(widget) + 1} verschoben.`);
             this.changed();
             handle.focus();
         }
@@ -168,7 +169,7 @@
                 widget = widget.parentElement?.closest('[data-dashboard-widget]') || null;
             }
             if (!revealed) return;
-            this.announce('Der Block mit dem ungültigen Pflichtfeld wurde geöffnet.');
+            this.announce(translate('localbase', 'Der Block mit dem ungültigen Pflichtfeld wurde geöffnet.'));
             this.changed();
         }
 

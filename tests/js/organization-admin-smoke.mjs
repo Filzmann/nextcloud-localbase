@@ -86,21 +86,21 @@ if (positionedGap?.card !== rightCard || positionedGap?.targetId !== 'right' || 
 const editor = Object.create(context.window.LocalBase.components.OrganizationEditor.prototype);
 editor.definition = {
     roles: {
-        first: { label: 'Erste Rolle', groupId: 'flz-Erste', sortOrder: 20, calendarVisible: true, areaScoped: false, managementAreaScoped: false, peerEnabled: true, staffBlock: false, singleOccupant: false },
-        second: { label: 'Zweite Rolle', groupId: 'flz-Zweite', sortOrder: 10, calendarVisible: true, areaScoped: true, managementAreaScoped: true, peerEnabled: false, staffBlock: false, singleOccupant: true },
+        first: { label: 'Erste Rolle', groupId: 'Gruppe-Erste', sortOrder: 20, calendarVisible: true, areaScoped: false, managementAreaScoped: false, peerEnabled: true, staffBlock: false, singleOccupant: false },
+        second: { label: 'Zweite Rolle', groupId: 'Gruppe-Zweite', sortOrder: 10, calendarVisible: true, areaScoped: true, managementAreaScoped: true, peerEnabled: false, staffBlock: false, singleOccupant: true },
     },
-    areas: { west: { label: 'West', groupId: 'flz-West', sortOrder: 20 }, east: { label: 'Ost', groupId: 'flz-Ost', sortOrder: 10 } },
+    areas: { west: { label: 'West', groupId: 'Bereich-Test-West', sortOrder: 20 }, east: { label: 'Ost', groupId: 'Bereich-Test-Ost', sortOrder: 10 } },
 };
 editor.applyOrder('roles', ['first', 'second']);
 editor.applyOrder('areas', ['west', 'east']);
 if (editor.definition.roles.first.sortOrder !== 10 || editor.definition.roles.second.sortOrder !== 20) throw new Error('Rollenreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
 if (editor.definition.areas.west.sortOrder !== 10 || editor.definition.areas.east.sortOrder !== 20) throw new Error('Bereichsreihenfolge wird nach Drag-and-drop nicht kanonisch nummeriert.');
 const rolePanel = editor.roleEditorMarkup('second');
-if (!rolePanel.includes('Zweite Rolle') || !rolePanel.includes('flz-Zweite') || !rolePanel.includes('Technische Zuordnung') || !rolePanel.includes('gilt für alle Karten dieser Rolle')) throw new Error('Das seitliche Rollenpanel enthält nicht alle globalen Rolleninformationen.');
+if (!rolePanel.includes('Zweite Rolle') || !rolePanel.includes('Gruppe-Zweite') || !rolePanel.includes('Technische Zuordnung') || !rolePanel.includes('gilt für alle Karten dieser Rolle')) throw new Error('Das seitliche Rollenpanel enthält nicht alle globalen Rolleninformationen.');
 const roleOrder = editor.roleOrderItem('first', editor.definition.roles.first);
 if (!roleOrder.includes('data-sort-kind="roles"') || !roleOrder.includes('Erste Rolle') || roleOrder.includes('data-field="groupId"')) throw new Error('Die kompakte fachliche Reihenfolge vermischt Sortierung und Rolleneinstellungen.');
 const areaCard = editor.areaCard('west', editor.definition.areas.west);
-if (!areaCard.includes('data-setting-card') || !areaCard.includes('data-action="toggle-card"') || !areaCard.includes('flz-West')) throw new Error('Bereiche werden nicht als kompakte aufklappbare Karten dargestellt.');
+if (!areaCard.includes('data-setting-card') || !areaCard.includes('data-action="toggle-card"') || !areaCard.includes('Bereich-Test-West')) throw new Error('Bereiche werden nicht als kompakte aufklappbare Karten dargestellt.');
 const teamCard = editor.teamCard({ id: 'pflege', label: 'Pflege', roles: ['first'], areas: [], sortOrder: 10 });
 if (!teamCard.includes('data-organization-team') || !teamCard.includes('data-action="toggle-card"') || !teamCard.includes('Pflege')) throw new Error('Urlaubsansichten werden nicht als kompakte aufklappbare Karten dargestellt.');
 let boardRefreshed = false;

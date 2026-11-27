@@ -5,10 +5,17 @@ declare(strict_types=1);
 namespace OCA\LocalBase\Privacy;
 
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IL10N;
 use Throwable;
 
 final class PersonalDataAggregator {
-    public function __construct(private IEventDispatcher $events) {}
+    public function __construct(private IEventDispatcher $events, private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
 
     public function collect(PersonalDataRequest $request): array {
         $registry = new PersonalDataProviderRegistryEvent();
@@ -43,24 +50,24 @@ final class PersonalDataAggregator {
             'subject' => $request->subject()->toArray(),
             'complete' => $complete,
             'coverage' => [
-                'scopeNotice' => 'Dieser Download umfasst die derzeit angebundenen Auskunftsprovider, aber noch nicht die gesamte Nextcloud-Instanz.',
+                'scopeNotice' => $this->t('Dieser Download umfasst die derzeit angebundenen Auskunftsprovider, aber noch nicht die gesamte Nextcloud-Instanz.'),
                 'notImplemented' => [
-                    'Dateien, Freigaben, Versionen und Papierkorb',
-                    'Aktivitäts-, Anmelde-, Sitzungs-, Sicherheits- und Auditprotokolle',
-                    'Talk, Kontakte, Mail, Aufgaben, Deck, Formulare, Notizen und weitere Apps',
-                    'persönliche App-Einstellungen und angebundene Dienste',
-                    'externe Bewerbungsakten ohne sicher authentifizierte Zuordnung zu einer betroffenen Person',
+                    $this->t('Dateien, Freigaben, Versionen und Papierkorb'),
+                    $this->t('Aktivitäts-, Anmelde-, Sitzungs-, Sicherheits- und Auditprotokolle'),
+                    $this->t('Talk, Kontakte, Mail, Aufgaben, Deck, Formulare, Notizen und weitere Apps'),
+                    $this->t('persönliche App-Einstellungen und angebundene Dienste'),
+                    $this->t('externe Bewerbungsakten ohne sicher authentifizierte Zuordnung zu einer betroffenen Person'),
                 ],
             ],
             'article15' => [
                 'generatedAt' => (new \DateTimeImmutable('now'))->format(DATE_ATOM),
                 'rights' => [
-                    'Berichtigung unrichtiger personenbezogener Daten',
-                    'Löschung oder Einschränkung der Verarbeitung, soweit die gesetzlichen Voraussetzungen vorliegen',
-                    'Widerspruch gegen eine Verarbeitung, soweit ein Widerspruchsrecht besteht',
-                    'Beschwerde bei einer zuständigen Datenschutzaufsichtsbehörde',
+                    $this->t('Berichtigung unrichtiger personenbezogener Daten'),
+                    $this->t('Löschung oder Einschränkung der Verarbeitung, soweit die gesetzlichen Voraussetzungen vorliegen'),
+                    $this->t('Widerspruch gegen eine Verarbeitung, soweit ein Widerspruchsrecht besteht'),
+                    $this->t('Beschwerde bei einer zuständigen Datenschutzaufsichtsbehörde'),
                 ],
-                'contactNote' => 'Anträge zu Berichtigung, Löschung, Einschränkung oder Widerspruch sind an die in Nextcloud beziehungsweise den Organisationsinformationen benannte verantwortliche Stelle oder Datenschutzstelle zu richten.',
+                'contactNote' => $this->t('Anträge zu Berichtigung, Löschung, Einschränkung oder Widerspruch sind an die in Nextcloud beziehungsweise den Organisationsinformationen benannte verantwortliche Stelle oder Datenschutzstelle zu richten.'),
             ],
             'registeredProviders' => array_keys($registry->providers()),
             'providers' => $providers,

@@ -13,9 +13,33 @@ realer Installations-, Deaktivierungs- und Rückbaunachweis bleibt bis zum
 freigegebenen Runtime-Lauf offen. Weitere Fachapps folgen einzeln nach eigenen
 Contract- und Laufzeitnachweisen.
 
+Dieselbe öffentliche V1-Grenze stellt die kanonischen Gruppen-IDs für
+BR-Mitgliedschaft, Vorsitz und Stellvertretung über
+`BrMembershipSnapshotService` als eigene read-only Identitätsprojektion
+bereit. Die additive Erweiterung lässt `memberGroupId` und Vertragsversion
+`1.0` für bestehende reine Mitgliedschafts-Consumer unverändert. Sie enthält
+keine Mitgliederliste und keine Fachberechtigung. Fehlt LocalBase, ist der
+Vertrag inkompatibel oder ist die BR-Gruppendefinition ungültig beziehungsweise
+nativ widersprüchlich, bleibt die Projektion leer und ungültig. Die feste
+Gruppe `Datenschutzbeauftragte` bleibt davon getrennt und ist keine
+Organigrammrolle.
+
 Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
 festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
-einzige persistierte Quelle, aus der der öffentliche Snapshot erzeugt wird.
+einzige persistierte Quelle, aus der der öffentliche Snapshot und die
+Gruppenzuordnungen der Demokonten erzeugt werden. Fresh Installs verwenden
+für Rollen, Bereiche und Assistenzteams ausschließlich die präfixlosen
+Gruppen-IDs aus dem dokumentierten Migrationsvertrag; frühere `flz-`- oder
+`ad-`-Gruppen und der kombinierte Finanz-/Lohn-Alias werden nicht mehr als
+zweite ausführbare Quelle erkannt.
+
+Für Filzmann Urlaubsplanung stellt
+`OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService` einen
+eigenen read-only Vertrag bereit. Er trennt die ausdrücklich konfigurierten
+Peerrechte zum Bearbeiten und Genehmigen und leitet EB-Ansichten je Büro aus
+derselben Organisationsdefinition ab. Beide Rechte sind standardmäßig aus;
+fehlende, typfremde oder widersprüchliche Quellen liefern einen ungültigen,
+leeren Snapshot.
 
 Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
 Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
@@ -58,6 +82,8 @@ LocalBase keine eigene Fachnavigation besitzt.
 ## Dokumentation
 
 - [Architektur](docs/architecture.md)
+- [Migration auf präfixlose Organisationsgruppen](docs/prefixless-organization-group-migration.md)
+- [Lokalisierungsinventar](docs/l10n-inventory.md)
 - [Manuelle Abnahme](docs/manual-acceptance.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)

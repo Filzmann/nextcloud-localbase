@@ -15,6 +15,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IGroupManager;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
@@ -25,8 +26,7 @@ use Psr\Log\LoggerInterface;
  * Vertrag: Keine Methode trägt NoAdminRequired; zusätzlich verweigert der Controller direkte Aufrufe ohne aktive Admin-Sitzung.
  */
 final class FlzSuiteAdminApiController extends Controller {
-    public function __construct(
-        IRequest $request,
+    public function __construct(IRequest $request,
         private IUserSession $session,
         private IGroupManager $groups,
         private FlzOrganizationSettingsService $organization,
@@ -35,8 +35,14 @@ final class FlzSuiteAdminApiController extends Controller {
         private OrganizationDirectoryStatusService $directoryStatus,
         private FlzSuiteAdminLayoutService $dashboardLayout,
         private LoggerInterface $logger,
-    ) {
+        private ?IL10N $l10n = null) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function settings(): JSONResponse {
@@ -46,6 +52,7 @@ final class FlzSuiteAdminApiController extends Controller {
             'calendarContext' => $this->calendarContext->context()->toArray(),
             'calendarPeerEditing' => $this->adminSettings->calendarPeerEditing(),
             'calendarPeerOptions' => $this->adminSettings->calendarPeerOptions(),
+            'vacationPeerEditing' => $this->adminSettings->vacationPeerEditing(),
             'vacationPeerApproval' => $this->adminSettings->vacationPeerApproval(),
             'vacationPeerOptions' => $this->adminSettings->vacationPeerOptions(),
             'directory' => $this->directoryStatus->status(),
@@ -58,10 +65,10 @@ final class FlzSuiteAdminApiController extends Controller {
         try {
             return new JSONResponse(['calendarContext' => $this->calendarContext->save($calendarContext)->toArray()]);
         } catch (InvalidArgumentException $error) {
-            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t($error->getMessage())], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $error) {
             $this->logger->error('Gemeinsamer Kalenderkontext konnte nicht gespeichert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Der gemeinsame Kalenderkontext konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t('Der gemeinsame Kalenderkontext konnte nicht gespeichert werden.')], Http::STATUS_BAD_REQUEST);
         }
     }
 
@@ -70,17 +77,18 @@ final class FlzSuiteAdminApiController extends Controller {
         try {
             return new JSONResponse(['organization' => $this->organization->save($organization)->toArray()]);
         } catch (InvalidArgumentException $error) {
-            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t($error->getMessage())], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $error) {
             $this->logger->error('Filzmann-Organisation konnte nicht gespeichert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Die Filzmann-Organisation konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t('Die Filzmann-Organisation konnte nicht gespeichert werden.')], Http::STATUS_BAD_REQUEST);
         }
     }
 
-    public function savePermissions(array $calendarPeerEditing, array $vacationPeerApproval): JSONResponse {
+    public function savePermissions(array $calendarPeerEditing, array $vacationPeerApproval, array $vacationPeerEditing = []): JSONResponse {
         if (!$this->isAdmin()) return $this->denied();
         return new JSONResponse([
             'calendarPeerEditing' => $this->adminSettings->saveCalendarPeerEditing($calendarPeerEditing),
+            'vacationPeerEditing' => $this->adminSettings->saveVacationPeerEditing($vacationPeerEditing),
             'vacationPeerApproval' => $this->adminSettings->saveVacationPeerApproval($vacationPeerApproval),
         ]);
     }
@@ -90,10 +98,10 @@ final class FlzSuiteAdminApiController extends Controller {
         try {
             return new JSONResponse(['dashboardLayout' => $this->dashboardLayout->save($this->session->getUser()->getUID(), $layout)]);
         } catch (InvalidArgumentException $error) {
-            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t($error->getMessage())], Http::STATUS_BAD_REQUEST);
         } catch (\Throwable $error) {
             $this->logger->error('Persönliches Filzmann-Adminlayout konnte nicht gespeichert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht gespeichert werden.'], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t('Das persönliche Adminlayout konnte nicht gespeichert werden.')], Http::STATUS_BAD_REQUEST);
         }
     }
 
@@ -103,7 +111,7 @@ final class FlzSuiteAdminApiController extends Controller {
             return new JSONResponse(['dashboardLayout' => $this->dashboardLayout->reset($this->session->getUser()->getUID())]);
         } catch (\Throwable $error) {
             $this->logger->error('Persönliches Filzmann-Adminlayout konnte nicht zurückgesetzt werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Das persönliche Adminlayout konnte nicht zurückgesetzt werden.'], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => $this->t('Das persönliche Adminlayout konnte nicht zurückgesetzt werden.')], Http::STATUS_BAD_REQUEST);
         }
     }
 
@@ -113,6 +121,6 @@ final class FlzSuiteAdminApiController extends Controller {
     }
 
     private function denied(): JSONResponse {
-        return new JSONResponse(['error' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
+        return new JSONResponse(['error' => $this->t('Keine Berechtigung.')], Http::STATUS_FORBIDDEN);
     }
 }
