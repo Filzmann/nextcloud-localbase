@@ -100,6 +100,7 @@ jobs:
             Filzmann/nextcloud-brstunden
             Filzmann/nextcloud-flz-permission-matrix
             Filzmann/nextcloud-flzrecruitment
+            Filzmann/nextcloud-flz-organization
           )
           for repository in "${repositories[@]}"; do
             if ! git ls-remote --exit-code --heads "https://github.com/${repository}.git" "refs/heads/$CANDIDATE_REF" >/dev/null 2>&1; then
@@ -162,6 +163,12 @@ jobs:
           repository: Filzmann/nextcloud-flzrecruitment
           ref: ${{ steps.consumer-ref.outputs.ref }}
           path: flzrecruitment
+      - name: Filzmann Organisation auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: ${{ steps.consumer-ref.outputs.ref }}
+          path: flz_organization
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
