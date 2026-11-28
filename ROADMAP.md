@@ -2,37 +2,35 @@
 
 Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
 und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
-erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
-`docs/architecture.md`.
+erledigte Änderungen in `CHANGELOG.md` und geltende Regeln in `AGENTS.md`.
 
-## LocalBase-Runtime-Ersetzung — Verbraucher migriert, Rückbau offen
+## LocalBase-Runtime-Ersetzung — abgeschlossen
 
-### LB-RUNTIME-RETIREMENT – aus Bundles entfernt; vollständiger Code-Rückbau offen
+### LB-RUNTIME-RETIREMENT – vollständiger Code-Rückbau erledigt
 
-- Erledigt 28. November 2026 (Freigabe Simon): LocalBase ist aus dem
-  FLZ-Produktkatalog, dem Produktbundle-Installer und allen Suite-/Produkt-
-  Bundles entfernt; OrgSuite ist alleinige Katalog- und
-  Suite-Infrastruktur. Kein Produktivbestand, daher keine Datenmigration.
-- Stand 28. November 2026: Kein Verbraucher mehr. Weder `lib/`, `appinfo/`,
-  `templates/` noch `js/` irgendeiner Fachapp (brtop, brstunden, flzcalendar,
-  flzplaner, flzurlaub, flzroom, flzrecruitment, flzbqplanung, flz_akut,
-  flz_organization, flz_permission_matrix, flz_data_protection, flz_dpa,
-  orgsuite) referenziert `OCA\LocalBase\`; keine `appinfo/info.xml` deklariert
-  eine Abhängigkeit auf `localbase`. Organisationsdaten liegen in
-  `flz_organization` (PublicApi V1), BR-Rollen in `flz_permission_matrix`
-  (PublicApi V1), gemeinsam benötigte PHP-Hilfen als app-lokal gebündelte
-  Kategorie-A-Bibliothek (`vendor/flz-shared`), Navigation und Admin je App
-  app-lokal.
-- Verbleibende LocalBase-Rolle: Test-Harness (PhpTestRunner, Coverage-Tools
-  unter `tests/` — nur testweise gekoppelt) und Pilot-Komponenten der eigenen
-  App. Der Katalog-Eintrag `localbase` (infrastructure, fullSuiteBundle +
-  productBundle) und der Installer-Schritt `app:enable localbase` bleiben
-  deshalb vorerst bestehen.
-- Offen: vollständiger Code-Rückbau der Kategorie-B-App (Pilot-Komponenten,
-  eigene Katalog-Kopie unter `resources/`, Admin-Oberfläche). LocalBase bleibt
-  als Repository für Test-Harness (PhpTestRunner, Coverage-Tooling) und
-  Compat-Stage/Staging-Mirror bestehen. Dafür braucht es eine ausdrückliche
-  Freigabe.
+- Erledigt 28. November 2026 (Freigabe Simon): Zuerst war LocalBase aus
+  FLZ-Produktkatalog, Installer und allen Bundles entfernt worden; danach wurden
+  am selben Tag alle Laufzeit-Pilotkomponenten aus dem Repository entfernt
+  (`lib/`, `appinfo/routes.php`, `templates/`, `js/`-Pilot-Assets, `css/`,
+  `img/`, `l10n/`, `resources/`, Pilot-Tests). `appinfo/info.xml` ist eine
+  registrierungsfreie Hülle (0.13.0).
+- Verbleibende Rolle: Test-Harness (`tests/Support/PhpTestRunner.php`,
+  Assertions, `js-runner.mjs`, `tests/js/helpers/fake-dom.js`,
+  `tests/coverage/`-Tooling) und leere Compat-Stage-App für DDEV/Staging-Mirror.
+  Der koordinierte Verbraucher-Vertragslauf in `.github/workflows/tests.yml`
+  prüft alle Fachapps gegen den jeweiligen Stand.
+- `tests/Support/PilotRemovalContractTest.php` sichert den Rückbauzustand
+  (Pilot-Pfade entfernt, Harness vollständig vorhanden).
+
+### LB-PERSONAL-DATA-PILOT-RETIREMENT – erledigt
+
+- Der Art.-15-Pilot (Self-Service-/Adminoberfläche, interne PersonalData-Klassen,
+  `resources/privacy-processing.json`) wurde mit dem vollständigen Rückbau
+  entfernt, nachdem der Runtime-Nachweis grün war (alle Consumer auf
+  `OCA\FlzOrganization\PublicApi\V1\*` / `OCA\FlzPermissionMatrix\PublicApi\V1\*`
+  / `flz_data_protection` migriert, Delivery-Gate grün). Es gab keinen
+  Datenfallback über fremde Speicher; Datenschutz-Projektionen der Fachapps
+  liegen bei `flz_data_protection` bzw. app-lokal.
 
 ## App-lokale Migrationsaufgabe
 
@@ -47,54 +45,10 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
   Dieser Lauf braucht eine eigene ausdrückliche Freigabe. Die lokale Regel
   `Benutzername = Passwort` für synthetische Konten ist dort verboten.
 
-### LB-PERSONAL-DATA-PILOT-RETIREMENT – verbliebenen Art.-15-Piloten kontrolliert zurückbauen
-
-- Rückbau der alten LocalBase-Self-Service-/Adminoberfläche und ihrer internen
-  PersonalData-Klassen erst nach einem grünen Runtime- und Rückbaunachweis
-  planen und freigeben. Ein Datenfallback über fremde Speicher bleibt verboten.
-- Die im app-lokalen Processing-Katalog sichtbaren Entscheidungen zu
-  Rechtsgrundlage und betrieblichem Backupdurchgriff benötigen vor einer
-  produktiven Verarbeitung eine fachliche Freigabe.
-
-## Aktueller Fokus
-
-- Bestehende gemeinsame Modelle, API-, UI-, Organisations-, Integrations- und Testverträge klein, dependency-arm und stabil halten.
-- Öffentliche Verträge mit den betroffenen Consumer-Apps auf einem realitätsnahen Staging und durch Contract-Tests absichern.
-- Den Organisationseditor mit realen Gruppenbesetzungen und großen Organisationsstrukturen visuell und fachlich abnehmen.
-
-## Geplante Erweiterungen
-
-- Die zustandslosen, semantisch gemeinsam benötigten Hilfen werden gemäß
-  Parent-ADR 0001 perspektivisch als app-lokal gebündelte Kategorie-A-Bibliothek
-  ausgeliefert. Die bestehende Kategorie-B-Laufzeitapp wird erst nach
-  kontrollierter Migration ihrer persistierenden Organisations-, Kalender-,
-  Admin- und Jobanteile zurückgebaut.
-- Neue gemeinsame Bausteine werden erst aufgenommen, wenn mindestens zwei Apps dieselbe Semantik und einen gemeinsam testbaren Vertrag benötigen.
-- Die geplante Kalendersynchronisation bleibt zunächst eine Filzmann-Kalender-Anforderung. Ein gemeinsamer LocalBase-Vertrag wird erst nach einem zweiten semantisch gleichen Bedarf bewertet.
-- Test-Helper werden nur bei konkret nachgewiesener app-übergreifender Duplizierung ergänzt.
-
-## Vor der Umsetzung zu klären
-
-- Provider und Consumer, exakter öffentlicher Vertrag sowie Verhalten bei fehlenden Apps.
-- Rechte-, Datenschutz-, Versions- und Rückwärtskompatibilitätsfolgen.
-- Contract-Tests in LocalBase und in jeder betroffenen Consumer-App.
-
-### Vor einem weiteren Ausbau des Organigramms zu klären
-
-- Bedarf und Vertrag für Suche oder einen temporären Zweigfokus bei Organisationen, die deutlich größer als die aktuelle FLZ-Struktur sind.
-- Weiterführende Screenreader-Navigation zwischen Diagrammknoten und Verbindungen über die vorhandene textliche Alternative hinaus.
-
 ## Bewusst zurückgestellt – niedrigste Priorität
 
 ### LB-L10N – app-lokale LocalBase-Texte lokalisieren
 
-Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
-priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des
-Root-Vorhabens `ZM-06`. Neue Funktionen und Codeänderungen berücksichtigen
-die spätere Lokalisierbarkeit an den jeweils berührten Stellen, lösen aber
-keine flächige Umstellung oder Übersetzungsimplementierung aus.
-
-Bei der späteren Umsetzung wechseln nur von LocalBase selbst gerenderte
-sichtbare Texte, Datumsnamen, Pluralformen und Platzhalter auf
-Nextcloud-l10n; konfigurierte Eigennamen, technische Schlüssel, API-Werte
-und Organisationsdaten bleiben unverändert.
+Status seit 17. September 2026: gegenstandslos nach dem Code-Rückbau —
+LocalBase rendert keine sichtbaren Texte mehr. Das Root-Vorhaben `ZM-06`
+betrifft nur noch die Fachapps.

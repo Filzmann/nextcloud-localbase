@@ -3,9 +3,9 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>localbase</id>
     <name>Filzmann Nextcloud Basis</name>
-    <summary>Gemeinsame lokale Basisbausteine für eigene Nextcloud-Apps.</summary>
-    <description>Stellt kleine, gemeinsam genutzte PHP- und JavaScript-Basisbausteine für eigene lokale Nextcloud-Apps bereit.</description>
-    <version>0.12.0-dev.2</version>
+    <summary>Test-Harness und Kompatibilitäts-Stage für die eigenen Nextcloud-Apps.</summary>
+    <description>Leere App-Hülle für die Entwicklungs-Compat-Stage. Laufzeit-Pilotkomponenten wurden zurückgebaut; das Repository hält das gemeinsame Test-Harness unter tests/.</description>
+    <version>0.13.0</version>
     <licence>agpl</licence>
     <author>Filzmann Software</author>
     <namespace>LocalBase</namespace>
@@ -17,21 +17,4 @@
         <php min-version="8.3"/>
         <nextcloud min-version="33" max-version="35"/>
     </dependencies>
-    <background-jobs>
-        <job>OCA\LocalBase\BackgroundJob\RefreshHolidayCalendarJob</job>
-    </background-jobs>
-    <settings>
-        <personal>OCA\LocalBase\Settings\PersonalPrivacy</personal>
-        <personal-section>OCA\LocalBase\Settings\PersonalPrivacySection</personal-section>
-    </settings>
-    <navigations>
-        <navigation>
-            <id>localbase_privacy</id>
-            <name>Datenschutz</name>
-            <route>localbase.privacy_page.selfService</route>
-            <icon>privacy.svg</icon>
-            <order>90</order>
-            <type>settings</type>
-        </navigation>
-    </navigations>
 </info>

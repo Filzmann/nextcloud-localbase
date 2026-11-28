@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import {
     cpSync,
+    existsSync,
     mkdirSync,
     mkdtempSync,
     rmSync,
@@ -16,12 +17,11 @@ const workspace = mkdtempSync(join(tmpdir(), 'localbase-js-runner-contract.'));
 try {
     const localbaseFixture = join(workspace, 'localbase');
     const consumerRoot = join(workspace, 'consumer');
-    mkdirSync(join(localbaseFixture, 'js'), { recursive: true });
+    // Harness-Fixture ohne js/-Verzeichnis: Der Runner darf ein fehlendes js/ tolerieren.
     mkdirSync(join(localbaseFixture, 'tests', 'js'), { recursive: true });
     mkdirSync(join(consumerRoot, 'js'), { recursive: true });
     mkdirSync(join(consumerRoot, 'tests', 'js'), { recursive: true });
 
-    cpSync(join(localbaseRoot, 'js'), join(localbaseFixture, 'js'), { recursive: true });
     cpSync(
         join(localbaseRoot, 'tests', 'js', 'helpers'),
         join(localbaseFixture, 'tests', 'js', 'helpers'),
@@ -37,10 +37,8 @@ try {
             "const { join } = require('node:path');",
             "require('../../js/consumer.js');",
             `if (globalThis.ConsumerFixture !== ${JSON.stringify(join(consumerRoot, 'js', 'consumer.js'))}) throw new Error('App source was not executed from its coverage-attributed path');`,
-            "require('../../../localbase/js/ui/ui.js');",
             "const { FakeElement } = require('../../../localbase/tests/js/helpers/fake-dom.js');",
             "if (typeof FakeElement !== 'function') throw new Error('LocalBase helper missing');",
-            "if (!global.window.LocalBase?.ui) throw new Error('LocalBase UI module missing');",
             "if (readFileSync(join(__dirname, '..', 'sibling-contract.txt'), 'utf8').trim() !== 'available') throw new Error('App-local test fixture missing');",
             '',
         ].join('\n'),
@@ -63,6 +61,24 @@ try {
     });
     if (result.status !== 0) {
         throw new Error(`Shared LocalBase fixture failed in isolation:\n${result.stderr || result.stdout}`);
+    }
+
+    // Runner ohne js/-Verzeichnis im eigenen Root darf nicht abstürzen.
+    const bareEntrypoint = join(localbaseFixture, 'run-bare.mjs');
+    writeFileSync(
+        bareEntrypoint,
+        [
+            `import { runJavaScriptSuite } from ${JSON.stringify(runnerUrl)};`,
+            `runJavaScriptSuite({ root: ${JSON.stringify(localbaseFixture)}, testFiles: [], successMessage: 'bare ok' });`,
+            '',
+        ].join('\n'),
+    );
+    const bare = spawnSync(process.execPath, [bareEntrypoint], { cwd: localbaseFixture, encoding: 'utf8' });
+    if (bare.status !== 0 || !bare.stdout.includes('bare ok')) {
+        throw new Error(`Runner toleriert fehlendes js/ nicht:\n${bare.stderr || bare.stdout}`);
+    }
+    if (existsSync(join(localbaseFixture, 'js'))) {
+        throw new Error('Runner darf kein js/-Verzeichnis anlegen.');
     }
 } finally {
     rmSync(workspace, { recursive: true, force: true });

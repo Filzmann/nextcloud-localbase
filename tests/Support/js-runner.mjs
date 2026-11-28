@@ -7,6 +7,10 @@ export function collectJsFiles(root, directory) {
     const path = join(root, directory);
     const files = [];
 
+    if (!existsSync(path)) {
+        return files;
+    }
+
     function walk(currentPath) {
         for (const entry of readdirSync(currentPath)) {
             const entryPath = join(currentPath, entry);
@@ -66,7 +70,9 @@ export function runJavaScriptSuite(options) {
             const localbaseRoot = join(dirname(options.root), 'localbase');
             if (localbaseRoot !== options.root && existsSync(localbaseRoot)) {
                 mkdirSync(join(isolatedWorkspace, 'localbase'), { recursive: true });
-                symlinkSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), 'dir');
+                if (existsSync(join(localbaseRoot, 'js'))) {
+                    symlinkSync(join(localbaseRoot, 'js'), join(isolatedWorkspace, 'localbase', 'js'), 'dir');
+                }
                 cpSync(
                     join(localbaseRoot, 'tests', 'js', 'helpers'),
                     join(isolatedWorkspace, 'localbase', 'tests', 'js', 'helpers'),

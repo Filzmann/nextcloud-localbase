@@ -2,178 +2,54 @@
 
 ## Projekt
 
-Nextcloud-Hilfsapp `localbase` fuer gemeinsame lokale Basisbausteine eigener Nextcloud-Apps.
+Test-Harness und leere Kompatibilitäts-Stage (`localbase`) für die lokalen FLZ- und
+BR-Nextcloud-Apps. Nextcloud-App-ID: `localbase`.
 
-Nextcloud-App-ID:
-
-    localbase
-
-Die priorisierte Produktplanung und offene Entscheidungen stehen in `ROADMAP.md`; verbindliche Fach-, Sicherheits- und Architekturregeln bleiben in dieser Datei.
-Der ausführliche Katalog öffentlicher Verträge steht in
-`docs/architecture.md`; diese Datei hält die bei jeder Arbeit benötigten
-Cross-App-Grenzen und Prüfungen.
+Die priorisierte Planung und offene Entscheidungen stehen in `ROADMAP.md`;
+verbindliche Regeln bleiben in dieser Datei.
 
 ## Zweck
 
-LocalBase enthält app-übergreifende Basisbausteine, die in mindestens zwei eigenen Apps semantisch identisch gebraucht werden. Der ausdrücklich gemeinsame FLZ-Organisationsvertrag ist fachlich nicht neutral, gehört aber bewusst hierher, weil Kalender, Urlaub und Assistenzplanung exakt dieselben Gruppen-, Bereichs- und Hierarchieregeln verwenden müssen.
+Seit dem vollständigen Code-Rückbau am 28. November 2026 (Freigabe Simon,
+`LB-RUNTIME-RETIREMENT`) enthält dieses Repository **keine Laufzeit-Pilotkomponenten
+mehr**. Die ehemaligen öffentlichen Verträge liegen in den zuständigen Apps:
+`OCA\FlzOrganization\PublicApi\V1\*` (Organisation, Kalender, Feiertage),
+`OCA\FlzPermissionMatrix\PublicApi\V1\*` (BR-Rollen),
+`OCA\FlzDataProtection\PublicApi\V1\*` (Datenschutz-Registry), gemeinsam benötigte
+PHP-/JS-Hilfen als app-lokal gebündelte Kategorie-A-Bibliothek (`vendor/flz-shared`).
 
-Aktuell enthalten:
+Verbleibender Zweck:
 
-- Öffentliche Privacy-Verträge für Nextcloud-User-Subjects,
-  `PersonalDataProvider`, feste Provider-Registry-Snapshots und fehlerisolierte
-  Aggregation. Self-Service bindet die Session-UID; die Admin-Auskunft verlangt
-  die explizit konfigurierte Nextcloud-Gruppe `privacy_admin_group` und bleibt
-  ohne Konfiguration deny by default.
-- Die flüchtige Self-Service- und Admin-Grundansicht persistiert keine
-  Berichtskopie. Sie weist die Betroffenenrechte einmal im Kopf aus und
-  zeigt je App weitere Verarbeitungsangaben vor den Datentabellen und gliedert
-  danach nach Datentyp. Der Tabellenkopf besteht aus den freigegebenen
-  Datenfeldern. Innerhalb eines Datentyps identische Zwecke oder
-  Aufbewahrungsaussagen stehen einmal vor der Tabelle; nur unterschiedliche
-  Werte bleiben zusätzliche Tabellenspalten.
-  Menschenlesbare Datumsangaben verwenden die deutsche Kurzform `TT.MM.JJ`;
-  Uhrzeiten werden bei Bedarf als `HH:MM Uhr` ergänzt.
-  Derselbe Stand
-  kann clientseitig als mehrseitiges PDF heruntergeladen werden; geheime
-  Anmeldewerte und Identitäten geschützter Drittpersonen bleiben ausgeschlossen.
-  Der app-eigene Nextcloud-Kontoprovider liest Konto, sämtliche nichtleeren
-  Nextcloud-Profilfelder einschließlich ihrer Sichtbarkeit und Bestätigung
-  sowie die eigenen Gruppenzuordnungen ausschließlich über öffentliche
-  Nextcloud-User-, Account- und GroupManager-APIs. Der Bericht weist außerdem
-  sichtbar darauf hin, dass er noch nicht die gesamte Instanz abdeckt, und
-  benennt die noch nicht implementierten Datenabrufe. Normale Konten erreichen dieselbe kanonische
-  Self-Service-Seite über den `Datenschutz`-Eintrag im rechten
-  Nextcloud-Benutzermenü und über den persönlichen Einstellungsbereich.
-  Der historische Retention-Pilot wurde nach grüner Lifecycle- und
-  Rückbaumatrix entfernt; LocalBase koordiniert keine Retention-Ausführung,
-  automatische Löschung oder Lifecycle-Provider.
-- PHP-API-Responder `OCA\LocalBase\Controller\ApiResponder` fuer einheitliche JSON-Fehlerantworten in Controllern.
-- PHP-Modelltrait `OCA\LocalBase\Model\ModelApiTrait`.
-- PHP-Logger `OCA\LocalBase\Service\AppLogger` fuer sichere, skalare Log-Kontexte mit App-ID und optionaler User-ID.
-- PHP-Gruppenhelfer `OCA\LocalBase\Service\GroupProvisioningService` zum
-  idempotenten Anlegen beliebiger Nextcloud-Gruppen und zur read-only Prüfung,
-  dass Mitglieder definierter Rollengruppen zugleich einer Basisgruppe
-  angehören. Widersprüche werden ohne automatische Mitgliedschaftsänderung
-  abgelehnt.
-- `BrGroupDefinition` und `BrGroupSettingsService` bilden den versionierten,
-  zentral persistierten BR-Gruppenvertrag mit den getrennten semantischen
-  Schlüsseln `member`, `chair` und `deputy`. Ein fehlender, ungültiger oder
-  hinsichtlich der nativen Nextcloud-Mitgliedschaften widersprüchlicher
-  Vertrag ist für Consumer nicht freigabefähig. Vorsitz und Stellvertretung
-  müssen immer auch der Mitgliedergruppe angehören.
-- `PublicApi\\V1\\BrMembershipSnapshotService` projiziert daraus ausschließlich
-  die kanonischen Gruppen-IDs für BR-Mitgliedschaft, Vorsitz und
-  Stellvertretung als versionierte, read-only Organisationsidentitäten. Sie
-  enthält weder Mitgliederlisten noch App-Berechtigungen und bleibt bei
-  fehlender oder widersprüchlicher Quelle leer und ungültig. Die feste native
-  Gruppe `Datenschutzbeauftragte` ist ausdrücklich kein Teil dieses
-  Organisationsvertrags.
-- `DemoAccountProvisioningService` erzeugt ausschließlich explizit
-  registrierte lokale Test- und Demokonten. Für diese Konten gilt
-  Benutzername = Passwort; eine erneute Provisionierung stellt diesen Zustand
-  nur für dasselbe registrierte Demo-Pack wieder her. Fremde, externe oder
-  nicht passwortänderbare Konten werden vor jeder Mutation abgewiesen. Dieser
-  bewusst schwache Zugang darf nicht für echte oder produktive Konten
-  verwendet werden.
-- Neutraler Kalendervertrag `AbsenceEmployeeDiscoveryEvent`/`AbsenceQueryEvent`/`AbsenceInterval` fuer optionale, read-only Abwesenheitsprovider. Die Discovery bleibt auf einen halboffenen Zeitraum begrenzt, liefert ausschließlich normalisierte Konto-UIDs und bleibt ohne Provider leer. `planned` liefert `U?` ohne Blockade, `approved` liefert `U` mit Blockade.
-- `CalendarContext` und `CalendarContextSettingsService` definieren Land, ISO-3166-2-Region und fachliche IANA-Zeitzone organisationsweit. `DE`, `DE-BE` und `Europe/Berlin` bleiben Bestandsdefaults. Persönliche Nextcloud-Zeitzonen dürfen ausschließlich individuelle Terminanzeigen beeinflussen. Der Kontext ist im gemeinsamen FLZ-Adminbereich änderbar und wird bei bestehenden persönlichen Dashboardlayouts additiv eingeblendet.
-- `HolidayCalendarService` liefert Schulferien und gesetzliche Feiertage als validierten, read-only Jahresvertrag Version 1 für den gemeinsamen Kalenderkontext. Consumer prüfen Version und `cacheStatus`; `stale` bleibt nur mit sichtbarer Aktualitätseinschränkung nutzbar, `unavailable` ist niemals eine konfliktfreie Leerliste. `OpenHolidaysClient` ist der einzige externe Provideradapter; `HolidayCalendarCacheStore` hält regionsgebundene Jahresstände in der LocalBase-AppConfig. Ein täglicher Hintergrundjob aktualisiert das laufende und die zwei folgenden Jahre. Bei Providerfehlern bleibt ein vorhandener Stand als `stale` verfügbar, Erstabrufe werden sicher als `unavailable` ausgewiesen und nach kurzer Sperrfrist erneut versucht.
-- `FlzOrganizationDefinition`, `FlzOrganizationSettingsService`, `FlzOrganizationHierarchy` und `FlzOrganizationPermissionPolicy` bilden die konfigurierbaren gemeinsamen FLZ-Gruppen, Anzeigenamen, Bereiche, Teamansichten, Hierarchie und Peer-Grenzen fuer Kalender, Urlaub und Assistenzplanung ab.
-- `FlzSuiteAdminSettingsService` speichert app-übergreifend verwendete Peer-Freigaben semantisch nach Rollen und stellt sie Filzmann Kalender, Filzmann Urlaubsplanung und der administrativen OrgSuite-Oberfläche gemeinsam bereit. Kalender-Peerbearbeitung ist ohne Einzelkonfiguration ausschließlich für `office`, `eb` und `pfk` aktiv; ein gespeichertes `false` überschreibt diesen Default. Urlaubs-Peerbearbeitung und Urlaubs-Peergenehmigung sind getrennte Einstellungen und bleiben beide ohne Einzelkonfiguration vollständig deaktiviert.
-- `PublicApi\\V1\\VacationAuthorizationSnapshotService` projiziert Urlaubs-Peerbearbeitung, Peergenehmigung und aus der kanonischen Organisationsdefinition abgeleitete EB-pro-Büro-Ansichten als unveränderlichen Vertrag. Fehlende, beschädigte oder widersprüchliche Organisations- beziehungsweise Freigabeeinstellungen ergeben einen ungültigen, leeren Snapshot.
-- Rollen und Bereiche werden über stabile semantische Schlüssel referenziert; konfigurierbare Nextcloud-Gruppen-IDs oder Anzeigenamen dürfen nicht als Fachschlüssel in App-Code dupliziert werden.
-- Die initiale Reihenfolge umfasst Fahrzeugverwaltung nach IT, Empfang nach Sekretariat sowie im Pflegebereich stellvertretende PDL, Büroorganisation Pflege und Pflegefachkraft. Für den Bürobereich bleibt Büroleitung, stellvertretende Büroleitung, Einsatzbegleitung und Büromitarbeiter*innen maßgeblich. Die im Adminbereich gespeicherte Reihenfolge bleibt für alle Verbraucher verbindlich.
-- Organisationsvertrag Version 2 ergänzt bestehende Version-1-Einstellungen additiv um `deputy_pdl`, `care_office`, `fleet_management` und `reception`, die freigegebenen Hierarchiekanten sowie Urlaubsansichten. Bestehende Werte und Kanten bleiben erhalten; Gruppen-ID-Kollisionen und Zyklen werden abgelehnt.
-- Organisationsvertrag Version 3 trennt `finance` und `payroll` unter `finance_lead`; Version 4 ergänzt die betriebsweit festgelegten Kalenderkürzel `BO`, `EB`, `PFK`, `BO-Pflege`, `IT`, `NO`, `W` und `S`. Der kanonische Fresh-Install-Vertrag verwendet ausschließlich die präfixlosen getrennten Gruppen `Finanzen` und `Lohn`; ein historischer kombinierter Gruppenalias erteilt keine Rolle. Persistierte Instanzen werden nur nach dem app-lokalen Migrationsrunbook umgestellt. Der read-only `FlzOrganizationSnapshot` enthält nur Rollen und Bereiche, keine Mitgliederlisten, und ist bei fehlender oder ungültiger Persistenz nicht freigabefähig.
-- `diagramOrder` speichert davon getrennt ausschließlich die globale Links-rechts-Anordnung der Organigrammkarten innerhalb ihrer Hierarchieebene. Beim horizontalen Drag-and-drop bestimmt der Zwischenraum zwischen zwei Karten die neue Einfügeposition. Diese visuelle Anordnung verändert weder Rollen-/Bereichsreihenfolgen noch Kalender, Rechte oder Hierarchiekanten.
-- Das Organigramm bleibt automatisch nach Hierarchieebenen angeordnet; freie X-/Y-Knotenpositionen sind kein Bestandteil des Organisationsvertrags. Karten derselben Ebene stehen waagerecht nebeneinander und verwenden innerhalb definierter Mindest-/Maximalgrenzen nur ihre benötigte Breite; sie brechen nicht in scheinbare zusätzliche Hierarchiezeilen um. Der persönliche Zoom wird in 10-Prozent-Schritten von 50 bis 150 Prozent über `IUserConfig` geräteübergreifend gespeichert. Der verschobene Ausschnitt bleibt wegen unterschiedlicher Viewportgrößen flüchtig. Zoom und Ausschnitt verändern weder Hierarchie und Diagrammordnung noch die logische Größe der Exporte.
-- Fachliche Rolleneinstellungen werden über den Edit-Stift der Diagrammkarten in einem zugänglichen Seitenpanel bearbeitet und gelten für alle Diagrammkarten derselben semantischen Rolle. Technische Gruppen-IDs bleiben dort eingeklappt; die für Kalender und Gruppenlisten verbindliche Rollenreihenfolge bleibt als eigene kompakte Drag-and-drop-Liste sichtbar. Bürobereiche und Urlaubsansichten werden als aufklappbare Einstellungskarten dargestellt.
-- Hauptblöcke, Organisationsabschnitte und Rechteblöcke der FLZ-Administration sind unabhängig einklappbar und per Drag-and-drop sowie Tastatur verschiebbar. Die Organisationsabschnitte erscheinen als eigenständige Cards in einer ungerahmten Sammlung und nicht gemeinsam in einer äußeren Organisations-Card; die Card mit dem Organigramm belegt dabei immer die volle verfügbare Grid-Breite. Reihenfolge und Einklappzustand sind ausschließlich persönliche UI-Präferenzen, werden über Nextclouds native `IUserConfig` je Konto gespeichert und verändern weder fachliche Reihenfolgen noch Organisations- oder Rechtewerte. Der serverseitige Layoutvertrag akzeptiert nur bekannte Scopes und Block-IDs und ergänzt neue Standardblöcke rückwärtskompatibel.
-- Der Organigrammexport arbeitet ausschließlich clientseitig mit dem aktuell sichtbaren Stand. Draw.io enthält editierbare Knoten und Kanten, PNG wird hochauflösend gerendert und PDF als skalierbares Vektordokument erzeugt; alle drei Formate lösen unmittelbar einen Dateidownload aus. Lange Karteninhalte werden in PNG und PDF innerhalb der Karten umgebrochen und nötigenfalls passend verkleinert. Zugeordnete Nutzer*innen werden nur nach ausdrücklicher, standardmäßig deaktivierter Auswahl aufgenommen; es gibt weder Serverablage noch externe Exportdienste.
-- Die gemeinsame Organisationsdefinition und app-übergreifende Freigaben werden zentral in der LocalBase-App-Konfiguration gespeichert. Bei einer Einzelinstallation erscheinen sie im Adminabschnitt des Fachprodukts, ab zwei Produkten im Adminabschnitt der OrgSuite. Rein app-spezifische Admin-Einstellungen verbleiben bei der jeweiligen Fachapp.
-- Organisationsansichten für den Urlaubsplan sind dynamisch konfigurierbare Rollen-/Bereichsschnitte. Büro Nordost, West und Süd bleiben eigenständige Ansichten, auch wenn eine Leitung mehrere Bereiche führt.
-- Die Pflegeansicht beginnt mit der globalen Einzelposition stellvertretende PDL, gefolgt von Büroorganisation Pflege und Pflegefachkräften. Fahrzeugverwaltung und Empfang besitzen eigene globale Organisationsansichten.
-- Ungültige Referenzen, doppelte Gruppen-IDs und Hierarchiezyklen werden beim Speichern abgelehnt. Eine ungültige persistierte Definition fällt beim Lesen sicher auf die geprüfte Standarddefinition zurück.
-- `ScheduleConflictQueryEvent` liefert vor genehmigten Abwesenheiten read-only Konflikte aus optional aktivierten Planungsapps; Provider loeschen oder aendern dabei keine Daten.
-- `IntegrationCapabilityQueryEvent`, `FlzIntegrationCapabilities` und `IntegrationCapabilityService` beschreiben optionale Cross-App-Fähigkeiten. Ein leerer Snapshot ist ein zulässiger Standalone-Zustand und erweitert niemals Berechtigungen.
-- `FlzProductCatalog` liest den versionierten FLZ-Produktkatalog als kanonische
-  Quelle für Produkt-IDs, Reihenfolge, Routen sowie getrennte Menü-,
-  Standalone- und Bundle-Eigenschaften. Ungültige oder fehlende Katalogdaten
-  erweitern weder Navigation noch Berechtigungen. Menüfähige
-  Entwicklungsprodukte dürfen über explizit falsche Bundle-Flags von
-  Release-Artefakten ausgeschlossen bleiben; Delivery-Code verwendet dafür
-  ausschließlich die gefilterte Bundle-Produktmenge.
-- `StandaloneAppNavigationService` registriert katalogisierte
-  Fachapp-Einstiege nur ohne aktive OrgSuite. `FlzProductSuiteService` und die
-  dynamischen Settings-Adapter platzieren die gemeinsame
-  Organisationsverwaltung bei einer Einzelinstallation unter deren
-  Fachprodukt.
-- Organisationseditor, Admin-API und Persistenz des gemeinsamen FLZ-Vertrags liegen vollständig in LocalBase. OrgSuite bindet diese Oberfläche ab zwei Produkten nur als Adminadapter ein.
-- JavaScript-Basisklasse `window.LocalBase.models.Model`.
-- JavaScript-API-Client `window.LocalBase.api.ApiClient`.
-- JavaScript-Repository-Basis `window.LocalBase.repositories.Repository`.
-- JavaScript-UI-Primitives `window.LocalBase.ui.byId`, `window.LocalBase.ui.esc`, `window.LocalBase.ui.errorMessage` und `window.LocalBase.ui.Notice`.
-- Test-Helper fuer app-uebergreifend gleiche, dependency-arme Fakes, Fixtures und Assertions.
-- Test-only PHP-Runner `PhpTestRunner`, der Lint- und Smoke-Tests deterministisch sammelt und jeden Test isoliert in einem eigenen PHP-Prozess ausführt.
+- Zentraler PHP-Test-Runner und Assertions (`tests/Support/PhpTestRunner.php`,
+  `tests/Support/assertions.php`), eingebunden über `OCA\LocalBase\Tests\...` im
+  jeweiligen App-Bootstrap (test-only).
+- JavaScript-Testrunner und DOM-Fake (`tests/Support/js-runner.mjs`,
+  `tests/js/helpers/fake-dom.js`) für Verbraucher-Smokes.
+- Coverage-Tooling (`tests/coverage/`: phpcov/c8, `merge-clover.php`) für die
+  CI-Coverage-Gates aller Apps.
+- Koordinierter Verbraucher-Vertragslauf im eigenen CI-Workflow
+  (`consumer-contracts` in `.github/workflows/tests.yml`).
+- Registrierungsfreie App-Hülle (`appinfo/info.xml`), damit die wegwerfbare
+  DDEV-Compat-Stage die App weiter installieren kann.
+
+`tests/Support/PilotRemovalContractTest.php` sichert diesen Zustand: Pilot-Pfade
+dürfen nicht zurückkehren, das Harness muss vollständig bleiben.
 
 ## Repository und gemeinsamer Arbeitsablauf
 
-- Lokalisierung (ZM-06): Sichtbare Texte ausschließlich über Nextcloud-l10n — deutsche Quelltexte via `IL10N::t()`/`window.t('localbase', …)`, Kataloge `l10n/en.*` und `l10n/en_GB.*` (Englisch); technische IDs bleiben unübersetzt. `tests/Ui/L10nCatalogContractTest.php` erzwingt das Rohtext-Gate (siehe `docs/l10n-inventory.md`).
-
-
-- Dieses Verzeichnis ist ein eigenstaendiges Git-Repository fuer die Hilfsapp `localbase`.
+- Dieses Verzeichnis ist ein eigenstaendiges Git-Repository.
 - Diese Datei und lokal referenzierte Skills bilden bei einem direkten Start in diesem Repository die vollständige Repository-Steuerung.
-- Fuer den allgemeinen Git-/Sandboxrahmen gilt der lokal mitgefuehrte Skill `work-in-nextcloud-app`. Oeffentliche LocalBase- oder Cross-App-Vertraege unterliegen dessen Stop-Regel und brauchen einen ausdrücklich beauftragten, aus jedem betroffenen Repository geprüften Cross-App-Lauf.
-- Aenderungen muessen app-uebergreifend neutral bleiben.
-- Keine Fachlogik aus BRTop, BRStunden oder FlzPlaner hierher verschieben.
-
-## Architekturregeln
-
-- LocalBase bleibt klein und dependency-arm.
-- Gemeinsamer Code wird erst hierher verschoben, wenn er in mindestens zwei Apps semantisch gleich gebraucht wird.
-- Modelle/DTOs werden in PHP und JavaScript einheitlich angefasst: `get(...)`, `get_all([...])`, `toArray()` und `save()`.
-- Nicht persistierbare DTOs duerfen `save()` bewusst mit klarer Fehlermeldung blockieren.
-- Neue `fromApi`-/`toApi`-Kompatibilitaetsaliase werden nicht eingefuehrt.
-- Gemeinsame API-Helfer kapseln `fetch`, `OC.generateUrl`, JSON-Parsing, CSRF-Token und Fehlerobjekte; App-spezifische Module bleiben nur duenne Adapter.
-- Gemeinsame UI-Helfer oder Komponenten werden nur aufgenommen, wenn mindestens zwei Apps dieselbe Semantik, dieselben Zustaende, dieselben Events und dieselben Accessibility-Anforderungen teilen.
-- LocalBase darf kleine UI-Primitives wie Escaping, Notices, Button-Helfer oder Formatierer bereitstellen; fachliche Komponenten und app-spezifisches Markup bleiben in den App-Repos.
+- Fuer den allgemeinen Git-/Sandboxrahmen gilt der lokal mitgefuehrte Skill `work-in-nextcloud-app`. Oeffentliche Cross-App-Vertraege unterliegen dessen Stop-Regel und brauchen einen ausdrücklich beauftragten, aus jedem betroffenen Repository geprüften Cross-App-Lauf.
+- Aenderungen am Harness muessen app-uebergreifend neutral, test-only und dependency-arm bleiben.
+- Keine Fachlogik aus BRTop, BRStunden, FilzPlaner oder anderen Fachapps hierher verschieben; Fachverträge gehoeren in die zustaendige Kategorie-B-App.
 
 ## Tests
 
-LocalBase ist Multiplikator-Code. Oeffentliche Vertraege muessen bei Aenderungen durch passende Tests abgesichert werden, bevor darauf aufbauende Apps weiter refaktoriert werden.
-
-- Tests sind Teil der Architekturarbeit und kein optionaler Nachtrag. Neue oeffentliche LocalBase-Vertraege bekommen eigene Tests, bevor Apps darauf migriert werden.
-- Vor groesseren Refactorings zuerst Charakterisierungstests fuer das bestehende gewuenschte Verhalten schreiben oder aktualisieren.
-- Gemeinsame Test-Helper gehoeren zu den LocalBase-Testvertraegen: Sie bleiben test-only, fachlich neutral, dependency-arm und werden in LocalBase selbst getestet.
-- Apps sollen gemeinsame Test-Helper nutzen, wenn dadurch echte Setup-Duplizierung verschwindet, ohne dass die Lesbarkeit des einzelnen Tests leidet.
-- Bei Aenderungen an PHP-Bausteinen `php tests/run.php` ausfuehren.
-- Bei Aenderungen an JavaScript-Bausteinen `node tests/run-js.mjs` ausfuehren.
-- Bei Aenderungen an Controller-/DI-nahen Klassen zusaetzlich einen gezielten DDEV-DI-Check ausfuehren.
-- Nach LocalBase-Aenderungen die betroffenen App-Contract-/Smoke-Tests laufen lassen.
+- Bei Aenderungen am PHP-Harness `php tests/run.php` ausfuehren.
+- Bei Aenderungen am JS-Harness `node tests/run-js.mjs` ausfuehren.
+- Nach Harness-Aenderungen die betroffenen App-Contract-/Smoke-Tests laufen lassen
+  (der eigene `consumer-contracts`-CI-Lauf macht das koordiniert).
 - PHPUnit/Vitest/Jest erst einfuehren, wenn die einfachen Testlaeufer, Assertion-Helfer, Mocks oder Fixtures selbst spuerbar dupliziert werden.
-
-Wichtige lokale Pruefungen:
-
-    php tests/run.php
-    node tests/run-js.mjs
-
-Einzelne Checks, die durch die Testlaeufer gebuendelt werden:
-
-    php -l lib/AppInfo/Application.php
-    php -l lib/Controller/ApiResponder.php
-    php -l lib/Model/ModelApiTrait.php
-    php -l lib/Service/AppLogger.php
-    php -l lib/Service/GroupProvisioningService.php
-    php tests/Controller/ApiResponderSmokeTest.php
-    php tests/Service/AppLoggerSmokeTest.php
-    php tests/Service/GroupProvisioningServiceSmokeTest.php
-    node --check js/api/api-client.js
-    node --check js/models/model.js
-    node --check js/repositories/repository.js
-    node --check js/ui/ui.js
-    node tests/js/api-client-smoke.js
-    node tests/js/repository-smoke.js
-    node tests/js/ui-smoke.js
 
 ## DDEV
 
@@ -188,19 +64,14 @@ Die App wird nach Nextcloud gemountet unter:
 
 ## Dokumentenverantwortung
 
-- `README.md` beschreibt ausschließlich den aktuellen nutzbaren Stand,
-  Installation, Betrieb, Tests und den Dokumentationsindex.
+- `README.md` beschreibt ausschließlich den aktuellen nutzbaren Stand, Betrieb,
+  Tests und den Dokumentationsindex.
 - `ROADMAP.md` enthält ausschließlich offene, zurückgestellte oder
   freigabepflichtige Arbeit und Entscheidungen.
 - `CHANGELOG.md` dokumentiert erledigte Änderungen releasebezogen; erledigte
   Checklisten verbleiben nicht in der Roadmap.
-- `docs/architecture.md` ist die ausführliche Quelle für geltende fachliche
-  und technische Architekturverträge.
-- `docs/manual-acceptance.md` enthält wiederholbare manuelle Prüfungen und
-  keine Produktplanung.
-- `AGENTS.md` enthält ausschließlich verbindliche Arbeits-, Sicherheits-,
-  Architektur- und Prüfregeln. Zusätzliche Dokumente werden in `README.md`
-  mit eindeutiger Zuständigkeit eingeordnet.
+- `docs/` enthält das Staging-Migrations-Runbook; `AGENTS.md` enthält ausschließlich
+  verbindliche Arbeits- und Prüfregeln.
 
 ## Parent-Governance-Vertrag: 2
 
