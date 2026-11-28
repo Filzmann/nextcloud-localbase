@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- LB-RUNTIME-RETIREMENT (vollständiger Code-Rückbau, Freigabe Simon 28.11.2026):
+  Alle Laufzeit-Pilotkomponenten entfernt — `lib/` (Organisation, Kalender, Privacy,
+  PublicApi/V1, Service, Controller, Settings, Listener, Migration, BackgroundJob,
+  Catalog, Model), `appinfo/routes.php`, `templates/`, `js/` (Pilot-Assets),
+  `css/`, `img/`, `l10n/`, `resources/` (Katalog- und Processing-Kopie) sowie die
+  Pilot-Tests. `appinfo/info.xml` ist auf eine registrierungsfreie Hülle reduziert
+  (Version 0.13.0). Das Test-Harness unter `tests/` (PhpTestRunner, Assertions,
+  js-runner, fake-dom-Helper, Coverage-Tooling) bleibt vollständig erhalten;
+  `tests/Support/PilotRemovalContractTest.php` sichert den Rückbauzustand.
+  Der Art.-15-Pilot (Self-Service/Admin, PersonalData-Klassen) ist damit ebenfalls
+  zurückgebaut; es gab keinen Datenfallback über fremde Speicher.
+
 - LB-RUNTIME-RETIREMENT: LocalBase ist aus FLZ-Produktkatalog, Installer und
   allen Bundles entfernt (OrgSuite alleinige Suite-Infrastruktur); das Repo
   bleibt als Test-Harness und für Compat-Stage/Staging-Mirror bestehen.

@@ -7,16 +7,6 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 runJavaScriptSuite({
     root,
     testFiles: [
-        'tests/js/api-client-smoke.js',
-        'tests/js/fake-dom-smoke.js',
-        'tests/js/model-smoke.js',
-        'tests/js/organization-admin-smoke.mjs',
-        'tests/js/organization-dashboard-smoke.mjs',
-        'tests/js/organization-exporter-smoke.mjs',
-        'tests/js/privacy-download-smoke.mjs',
-        'tests/js/privacy-table-smoke.mjs',
-        'tests/js/repository-smoke.js',
-        'tests/js/ui-smoke.js',
         'tests/Support/js-runner-smoke.mjs',
     ],
     successMessage: 'LocalBase JavaScript tests passed',

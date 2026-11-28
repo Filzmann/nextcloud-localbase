@@ -8,8 +8,8 @@ use OCA\LocalBase\Tests\Support\PhpTestRunner;
 
 PhpTestRunner::run(
     root: dirname(__DIR__),
-    lintDirectories: ['appinfo', 'lib', 'tests'],
-    testDirectories: ['tests/Controller', 'tests/Model', 'tests/Service', 'tests/Support'],
+    lintDirectories: ['appinfo', 'tests'],
+    testDirectories: ['tests/Support'],
     testSuffixes: ['Test.php'],
     successMessage: 'LocalBase PHP tests passed',
     prependBootstrap: true,

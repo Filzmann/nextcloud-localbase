@@ -1,90 +1,37 @@
 # LocalBase
 
-Gemeinsame Basisbausteine für die lokalen FLZ- und BR-Nextcloud-Apps. LocalBase besitzt keine eigene Navigation und wird als technische Infrastruktur mit den FLZ-Fachprodukten ausgeliefert.
+Test-Harness und leere Kompatibilitäts-Stage für die lokalen FLZ- und BR-Nextcloud-Apps.
 
-Der öffentliche Laufzeitvertrag `OCA\\LocalBase\\PublicApi\\V1` stellt Rollen
-und Bürobereiche als unveränderlichen, datensparsamen
-Organisationssnapshot bereit. Vertragsversion, Definitionsversion und
-Prüfsumme machen den Stand überprüfbar. Fehlende, ungültige oder inkompatible
-Snapshots enthalten keine Zuordnungen und erteilen keine fachlichen Rechte.
-Die Berechtigungsmatrix ist der erste migrierte Consumer. Filzmann Recruitment ist
-als zweiter Consumer app-lokal auf die öffentliche V1-Grenze umgestellt; sein
-realer Installations-, Deaktivierungs- und Rückbaunachweis bleibt bis zum
-freigegebenen Runtime-Lauf offen. Weitere Fachapps folgen einzeln nach eigenen
-Contract- und Laufzeitnachweisen.
+LocalBase ist nach dem abgeschlossenen Runtime-Rückbau (28. November 2026,
+Freigabe Simon) **keine Laufzeit-App mit Pilotkomponenten mehr**. Alle ehemaligen
+Fachverträge liegen heute in den zuständigen Kategorie-B-Apps
+(`flz_organization`, `flz_permission_matrix`, `flz_data_protection`) bzw. als
+app-lokal gebündelte Kategorie-A-Bibliothek (`vendor/flz-shared` in den Apps).
 
-Dieselbe öffentliche V1-Grenze stellt die kanonischen Gruppen-IDs für
-BR-Mitgliedschaft, Vorsitz und Stellvertretung über
-`BrMembershipSnapshotService` als eigene read-only Identitätsprojektion
-bereit. Die additive Erweiterung lässt `memberGroupId` und Vertragsversion
-`1.0` für bestehende reine Mitgliedschafts-Consumer unverändert. Sie enthält
-keine Mitgliederliste und keine Fachberechtigung. Fehlt LocalBase, ist der
-Vertrag inkompatibel oder ist die BR-Gruppendefinition ungültig beziehungsweise
-nativ widersprüchlich, bleibt die Projektion leer und ungültig. Die feste
-Gruppe `Datenschutzbeauftragte` bleibt davon getrennt und ist keine
-Organigrammrolle.
+Verbleibender Inhalt dieses Repositories:
 
-Die kanonische Organisationsdefinition Version 4 ergänzt die betriebsweit
-festgelegten Kalenderkürzel für Rollen und Bürobereiche. Sie bleibt die
-einzige persistierte Quelle, aus der der öffentliche Snapshot und die
-Gruppenzuordnungen der Demokonten erzeugt werden. Fresh Installs verwenden
-für Rollen, Bereiche und Assistenzteams ausschließlich die präfixlosen
-Gruppen-IDs aus dem dokumentierten Migrationsvertrag; frühere `flz-`- oder
-`ad-`-Gruppen und der kombinierte Finanz-/Lohn-Alias werden nicht mehr als
-zweite ausführbare Quelle erkannt.
+- `tests/Support/PhpTestRunner.php` und `tests/Support/assertions.php` — zentraler
+  PHP-Test-Runner und Assertions, den alle App-Repositories testweise über ihren
+  Bootstrap einbinden (`OCA\LocalBase\Tests\...`).
+- `tests/Support/js-runner.mjs` und `tests/js/helpers/fake-dom.js` — JavaScript-Testrunner
+  und DOM-Fake für Verbraucher-Smokes.
+- `tests/coverage/` — Coverage-Tooling (phpcov/c8, `merge-clover.php`), das die
+  CI-Coverage-Gates aller Apps verwendet.
+- `appinfo/info.xml` — minimale, registrierungsfreie App-Hülle, damit die
+  Entwicklungs-Compat-Stage (DDEV) die App weiter installieren kann.
+- `.github/workflows/tests.yml` — eigener Harness-Testlauf plus koordinierter
+  Verbraucher-Vertragslauf (`consumer-contracts`), der alle Fachapps gegen den
+  jeweiligen Branch/MAIN-Stand prüft.
 
-Für Filzmann Urlaubsplanung stellt
-`OCA\\LocalBase\\PublicApi\\V1\\VacationAuthorizationSnapshotService` einen
-eigenen read-only Vertrag bereit. Er trennt die ausdrücklich konfigurierten
-Peerrechte zum Bearbeiten und Genehmigen und leitet EB-Ansichten je Büro aus
-derselben Organisationsdefinition ab. Beide Rechte sind standardmäßig aus;
-fehlende, typfremde oder widersprüchliche Quellen liefern einen ungültigen,
-leeren Snapshot.
+Es gibt keine Navigation, keine Settings, keine Routen, keine Hintergrundjobs und
+keine eigenen Datenbanktabellen mehr. Frühere Installationen (rein interne
+Entwicklungsstände, kein Produktivbestand) können bei Bedarf die verwaiste Tabelle
+über einen Neuaufbau der wegwerfbaren DDEV-Instanz entfernen.
 
-Der öffentliche Planungskonfliktvertrag Version 1.0 verbindet optionale
-Kalender- und Planungsprovider read-only. Requester- und Provider-App-ID
-verhindern Eigenmeldungen; ohne Listener bleibt die Konfliktmenge leer.
+## Tests
 
-Über den öffentlichen Standalone-V1-Datenschutzvertrag projiziert LocalBase
-seine eigenen persönlichen Adminlayoutwerte und die Registrierung synthetischer
-Demokonten ausschließlich für die angefragte Nextcloud-UID. Der app-lokale
-Processing-Katalog beschreibt beide Verarbeitungen; persönlicher Reset,
-Kontolöschung und der nächste sichere Demo-Provisionierungslauf bereinigen die
-jeweils zuständigen nativen beziehungsweise app-lokalen Speicher.
+    php tests/run.php
+    node tests/run-js.mjs
 
-## Staging-Kompatibilität
-
-- Nextcloud 33 bis 35
-- PHP 8.3 oder neuer innerhalb des von Nextcloud 33 bis 35 unterstützten Bereichs
-- App-ID und Installationsordner: `localbase`
-
-## Installation
-
-Auf Staging- und Zielsystemen werden Nextcloud-Root, `custom_apps`, CLI-PHP und
-Runtimebenutzer aus der realen Konfiguration ermittelt. Danach wird LocalBase
-im vorgesehenen Runtimekontext aktiviert:
-
-```bash
-<RUNTIME-KONTEXT> <CLI-PHP> occ app:enable localbase
-```
-
-Auf Staging- und Zielsystemen wird LocalBase nicht als separates Fachprodukt installiert, sondern automatisch durch den geprüften Produktinstaller. Die vollständige Installationsreihenfolge und Prüfschritte stehen im öffentlichen [Filzmann-Full-Suite-Projekt](https://github.com/Filzmann/flz-full-suite).
-
-## Roadmap
-
-Geplante gemeinsame Bausteine und offene Architekturentscheidungen stehen in der [Roadmap](ROADMAP.md).
-
-Für die manuelle Staging-Prüfung der Administrationsoberfläche und der
-Cross-App-Verträge steht ein ausfüllbares
-[Abnahmeformular](docs/manual-acceptance.md) bereit. Es berücksichtigt, dass
-LocalBase keine eigene Fachnavigation besitzt.
-
-## Dokumentation
-
-- [Architektur](docs/architecture.md)
-- [Migration auf präfixlose Organisationsgruppen](docs/prefixless-organization-group-migration.md)
-- [Lokalisierungsinventar](docs/l10n-inventory.md)
-- [Manuelle Abnahme](docs/manual-acceptance.md)
-- [Roadmap](ROADMAP.md)
-- [Changelog](CHANGELOG.md)
-- [Arbeitsregeln](AGENTS.md)
+Dokumentation: `docs/prefixless-organization-group-migration.md` (Staging-Migrations-Runbook),
+`ROADMAP.md` (offene Punkte), `CHANGELOG.md` (Historie), `AGENTS.md` (verbindliche Regeln).
