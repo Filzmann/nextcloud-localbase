@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- LB-RUNTIME-RETIREMENT: LocalBase ist aus FLZ-Produktkatalog, Installer und
+  allen Bundles entfernt (OrgSuite alleinige Suite-Infrastruktur); das Repo
+  bleibt als Test-Harness und für Compat-Stage/Staging-Mirror bestehen.
+
 - Runtime-Ersetzung abgeschlossen: Alle Fachapps (brtop, brstunden, flzcalendar,
   flzplaner, flzurlaub, flzroom, flzrecruitment, flzbqplanung, flz_akut,
   flz_organization, flz_permission_matrix, flz_data_protection, flz_dpa,
