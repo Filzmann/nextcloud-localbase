@@ -5,6 +5,30 @@ und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
 erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 `docs/architecture.md`.
 
+## LocalBase-Runtime-Ersetzung — Verbraucher migriert, Rückbau offen
+
+### LB-RUNTIME-RETIREMENT – Kategorie-B-Laufzeitapp nach vollständiger Consumer-Migration zurückbauen
+
+- Stand 28. November 2026: Kein Verbraucher mehr. Weder `lib/`, `appinfo/`,
+  `templates/` noch `js/` irgendeiner Fachapp (brtop, brstunden, flzcalendar,
+  flzplaner, flzurlaub, flzroom, flzrecruitment, flzbqplanung, flz_akut,
+  flz_organization, flz_permission_matrix, flz_data_protection, flz_dpa,
+  orgsuite) referenziert `OCA\LocalBase\`; keine `appinfo/info.xml` deklariert
+  eine Abhängigkeit auf `localbase`. Organisationsdaten liegen in
+  `flz_organization` (PublicApi V1), BR-Rollen in `flz_permission_matrix`
+  (PublicApi V1), gemeinsam benötigte PHP-Hilfen als app-lokal gebündelte
+  Kategorie-A-Bibliothek (`vendor/flz-shared`), Navigation und Admin je App
+  app-lokal.
+- Verbleibende LocalBase-Rolle: Test-Harness (PhpTestRunner, Coverage-Tools
+  unter `tests/` — nur testweise gekoppelt) und Pilot-Komponenten der eigenen
+  App. Der Katalog-Eintrag `localbase` (infrastructure, fullSuiteBundle +
+  productBundle) und der Installer-Schritt `app:enable localbase` bleiben
+  deshalb vorerst bestehen.
+- Offen: Entscheidung über den vollständigen Rückbau der Kategorie-B-App
+  (inkl. Katalog-/Installer-/Delivery-Vertrag, Staging-Compat-Stage und
+  Bundle-Zusammensetzung). Dafür braucht es eine ausdrückliche Freigabe;
+  bis dahin wird LocalBase nicht aus den Bundles entfernt.
+
 ## App-lokale Migrationsaufgabe
 
 ### LB-PREFIXLESS-GROUP-STAGING – präfixlose Organisationsgruppen auf Staging migrieren

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Runtime-Ersetzung abgeschlossen: Alle Fachapps (brtop, brstunden, flzcalendar,
+  flzplaner, flzurlaub, flzroom, flzrecruitment, flzbqplanung, flz_akut,
+  flz_organization, flz_permission_matrix, flz_data_protection, flz_dpa,
+  orgsuite) sind auf `OCA\FlzOrganization\PublicApi\V1\*`,
+  `OCA\FlzPermissionMatrix\PublicApi\V1\*` bzw. app-lokale Komponenten und
+  die gebündelte Kategorie-A-Bibliothek (`vendor/flz-shared`) umgestellt;
+  keine App referenziert mehr `OCA\LocalBase\` oder deklariert eine
+  App-Abhängigkeit auf `localbase`. LocalBase bleibt als Test-Harness und
+  Pilot-App bestehen; der Rückbau der Kategorie-B-Laufzeitapp ist als
+  `LB-RUNTIME-RETIREMENT` in `ROADMAP.md` offen.
+
 - L10N-Migration (ZM-06): sichtbare Texte über Nextcloud-l10n (deutsche Quelltexte, Kataloge `l10n/en.*` + `l10n/en_GB.*`), inkl. `tests/Ui/L10nCatalogContractTest.php` und `docs/l10n-inventory.md`.
 
 - Lokalen DDEV-Organisationsstand kontrolliert auf präfixlose Rollen-,
