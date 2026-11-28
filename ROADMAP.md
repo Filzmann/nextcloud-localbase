@@ -7,8 +7,12 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## LocalBase-Runtime-Ersetzung — Verbraucher migriert, Rückbau offen
 
-### LB-RUNTIME-RETIREMENT – Kategorie-B-Laufzeitapp nach vollständiger Consumer-Migration zurückbauen
+### LB-RUNTIME-RETIREMENT – aus Bundles entfernt; vollständiger Code-Rückbau offen
 
+- Erledigt 28. November 2026 (Freigabe Simon): LocalBase ist aus dem
+  FLZ-Produktkatalog, dem Produktbundle-Installer und allen Suite-/Produkt-
+  Bundles entfernt; OrgSuite ist alleinige Katalog- und
+  Suite-Infrastruktur. Kein Produktivbestand, daher keine Datenmigration.
 - Stand 28. November 2026: Kein Verbraucher mehr. Weder `lib/`, `appinfo/`,
   `templates/` noch `js/` irgendeiner Fachapp (brtop, brstunden, flzcalendar,
   flzplaner, flzurlaub, flzroom, flzrecruitment, flzbqplanung, flz_akut,
@@ -24,10 +28,11 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
   App. Der Katalog-Eintrag `localbase` (infrastructure, fullSuiteBundle +
   productBundle) und der Installer-Schritt `app:enable localbase` bleiben
   deshalb vorerst bestehen.
-- Offen: Entscheidung über den vollständigen Rückbau der Kategorie-B-App
-  (inkl. Katalog-/Installer-/Delivery-Vertrag, Staging-Compat-Stage und
-  Bundle-Zusammensetzung). Dafür braucht es eine ausdrückliche Freigabe;
-  bis dahin wird LocalBase nicht aus den Bundles entfernt.
+- Offen: vollständiger Code-Rückbau der Kategorie-B-App (Pilot-Komponenten,
+  eigene Katalog-Kopie unter `resources/`, Admin-Oberfläche). LocalBase bleibt
+  als Repository für Test-Harness (PhpTestRunner, Coverage-Tooling) und
+  Compat-Stage/Staging-Mirror bestehen. Dafür braucht es eine ausdrückliche
+  Freigabe.
 
 ## App-lokale Migrationsaufgabe
 
