@@ -171,3 +171,27 @@ wegwerfbaren Staging-Instanz ein sauberer Reinstall mit reproduzierbarer
 synthetischer Konfiguration dem Wiederaufbau überholter Demoidentitäten
 vorzuziehen. Ein Rückbau darf weder echte Konten löschen noch die lokale
 Schwachpasswortregel auf Staging übertragen.
+
+## Staging-Nachweis vom 28. November 2026 (Freigabe Simon, kontrollierter Lauf)
+
+Nach Abschluss des LocalBase-Rückbaus (PR nextcloud-localbase#12) wurde der
+Staging-Zielkontext (DDEV-Instanz nextcloud-dev, Nextcloud 34.0.2.1) nach diesem
+Runbook geprüft:
+
+- Preflight: `occ status` ohne offenen Upgradebedarf (localbase 0.13.0,
+  flzroom 0.13.1-rc.1 nach `occ upgrade`); die persistierte
+  Organisationsdefinition in `flz_organization` (AppConfig) ist gültig und
+  enthält keine `flz-`- oder `ad-`-Gruppen-IDs.
+- Inventur: `occ group:list --output=json` liefert 31 Gruppen, davon **0** mit
+  `flz-`- oder `ad-`-Präfix (SHA-256 der leeren sortierten Präfixliste:
+  `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`); keine
+  Nicht-Demo-Mitgliedschaft in Präfixgruppen. Die 38 registrierten synthetischen
+  `flz-demo-*`-Konten bleiben bestehen und sind prefixlosen Gruppen
+  (`ASN-A/B/C`, Rollen-/Bereichsgruppen) zugeordnet.
+- Consumer-Nachweis: Delivery-Gate nach dem Rückbau erneut RC=0
+  (28.11.2026 14:18 UTC, `br-compat-gate/work/delivery-gate.log`), inklusive
+  HTTP-/CSRF-Smokes und Paketbau aller FLZ-Produkte.
+- Contract-Phase: keine Präfixgruppen vorhanden — keine Löschung nötig. Es
+  verblieben keine unerwarteten Präfixreste in Gruppen-, Konten- und
+  Registersuche (Demo-Konten tragen das registrierte `flz-demo-*`-Namensschema,
+  sind aber keiner Präfixgruppe zugeordnet).
